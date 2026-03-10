@@ -1,0 +1,204 @@
+Enum Role {
+  SENIOR
+  HELPER
+  RELATIVE
+  ADMIN
+}
+
+Enum RequestCategory {
+  EINKAUF
+  ARZT
+  SPAZIERGANG
+  TECHNIK
+  TRANSPORT
+  HAUSHALT
+  ANDERES
+}
+
+Enum RequestStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+Enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+Enum HelperStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
+
+Table users {
+  id string [pk] 
+  name string
+  email string [unique]
+  emailVerified datetime
+  image string
+  password string
+  createdAt datetime
+  updatedAt datetime
+  role Role
+  phone string
+  bio string
+  address string
+  city string
+  plz string
+  lat float
+  lng float
+  isBanned boolean
+  ratingAvg float
+  helpCount int
+  points int
+  telegramChatId string [unique]
+  telegramCode string
+  helperStatus HelperStatus
+  employmentType string
+  institution string
+  documentNumber string
+  registrationAddress string
+}
+
+Table accounts {
+  id string [pk]
+  userId string
+  type string
+  provider string
+  providerAccountId string
+  refresh_token string
+  access_token string
+  expires_at int
+  token_type string
+  scope string
+  id_token string
+  session_state string
+
+  indexes {
+    (provider, providerAccountId) [unique]
+  }
+}
+
+Table sessions {
+  id string [pk]
+  sessionToken string [unique]
+  userId string
+  expires datetime
+}
+
+Table verification_tokens {
+  identifier string
+  token string [unique]
+  expires datetime
+
+  indexes {
+    (identifier, token) [unique]
+  }
+}
+
+Table requests {
+  id string [pk]
+  title string
+  description string
+  category RequestCategory
+  status RequestStatus
+  address string
+  city string
+  plz string
+  lat float
+  lng float
+  desiredTime string
+  createdAt datetime
+  updatedAt datetime
+  seniorId string
+}
+
+Table offers {
+  id string [pk]
+  message string
+  status OfferStatus
+  createdAt datetime
+  requestId string
+  helperId string
+
+  indexes {
+    (requestId, helperId) [unique]
+  }
+}
+
+Table chats {
+  id string [pk]
+  createdAt datetime
+  requestId string [unique]
+}
+
+Table messages {
+  id string [pk]
+  content string
+  imageUrl string
+  createdAt datetime
+  readAt datetime
+  chatId string
+  senderId string
+}
+
+Table ratings {
+  id string [pk]
+  score int
+  comment string
+  createdAt datetime
+  requestId string [unique]
+  authorId string
+  helperId string
+}
+
+Table rewards {
+  id string [pk]
+  title string
+  description string
+  pointsCost int
+  emoji string
+  category string
+  isActive boolean
+  stock int
+  imageUrl string
+}
+
+Table redemptions {
+  id string [pk]
+  createdAt datetime
+  status string
+  userId string
+  rewardId string
+}
+
+Table notifications {
+  id string [pk]
+  title string
+  body string
+  link string
+  read boolean
+  createdAt datetime
+  userId string
+}
+
+Ref: accounts.userId > users.id
+Ref: sessions.userId > users.id
+Ref: requests.seniorId > users.id
+Ref: offers.helperId > users.id
+Ref: offers.requestId > requests.id
+Ref: chats.requestId > requests.id
+Ref: messages.chatId > chats.id
+Ref: messages.senderId > users.id
+Ref: ratings.authorId > users.id
+Ref: ratings.helperId > users.id
+Ref: ratings.requestId > requests.id
+Ref: redemptions.userId > users.id
+Ref: redemptions.rewardId > rewards.id
+Ref: notifications.userId > users.id
+
+Ref: "requests"."title" < "requests"."category"

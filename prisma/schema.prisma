@@ -1,0 +1,238 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id                  String            @id @default(cuid())
+  name                String?
+  email               String?           @unique
+  emailVerified       DateTime?
+  image               String?
+  password            String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+  role                Role              @default(HELPER)
+  phone               String?
+  bio                 String?
+  address             String?
+  city                String?           @default("Kassel")
+  plz                 String?
+  lat                 Float?
+  lng                 Float?
+  isBanned            Boolean           @default(false)
+  ratingAvg           Float             @default(0)
+  helpCount           Int               @default(0)
+  points              Int               @default(0)
+  telegramChatId      String?           @unique
+  telegramCode        String?
+  preferredCategories RequestCategory[]
+  // Helper-specific verification fields
+  helperStatus          HelperStatus      @default(PENDING_REVIEW)
+  employmentType        String?           // Student | Arbeitslos | Jobcenter | Angestellt
+  institution           String?           // Uni/Schule Name
+  languages             String[]
+  documentNumber        String?
+  registrationAddress   String?
+  accounts            Account[]
+  sessions            Session[]
+  messages            Message[]
+  notifications       Notification[]
+  offers              Offer[]
+  ratingsGiven        Rating[]          @relation("RatingsGiven")
+  ratingsReceived     Rating[]          @relation("RatingsReceived")
+  redemptions         Redemption[]
+  sentRequests        Request[]         @relation("SeniorRequests")
+
+  @@map("users")
+}
+
+model Request {
+  id          String          @id @default(cuid())
+  title       String
+  description String
+  category    RequestCategory
+  status      RequestStatus   @default(OPEN)
+  address     String
+  city        String          @default("Kassel")
+  plz         String?
+  lat         Float?
+  lng         Float?
+  desiredTime String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  seniorId    String
+  chat        Chat?
+  offers      Offer[]
+  rating      Rating?
+  senior      User            @relation("SeniorRequests", fields: [seniorId], references: [id])
+
+  @@map("requests")
+}
+
+model Offer {
+  id        String      @id @default(cuid())
+  message   String?
+  status    OfferStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+  requestId String
+  helperId  String
+  helper    User        @relation(fields: [helperId], references: [id])
+  request   Request     @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, helperId])
+  @@map("offers")
+}
+
+model Chat {
+  id        String    @id @default(cuid())
+  createdAt DateTime  @default(now())
+  requestId String    @unique
+  request   Request   @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  messages  Message[]
+
+  @@map("chats")
+}
+
+model Message {
+  id        String    @id @default(cuid())
+  content   String
+  imageUrl  String?
+  createdAt DateTime  @default(now())
+  readAt    DateTime?
+  chatId    String
+  senderId  String
+  chat      Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender    User      @relation(fields: [senderId], references: [id])
+
+  @@map("messages")
+}
+
+model Rating {
+  id        String   @id @default(cuid())
+  score     Int
+  comment   String?
+  createdAt DateTime @default(now())
+  requestId String   @unique
+  authorId  String
+  helperId  String
+  author    User     @relation("RatingsGiven", fields: [authorId], references: [id])
+  helper    User     @relation("RatingsReceived", fields: [helperId], references: [id])
+  request   Request  @relation(fields: [requestId], references: [id])
+
+  @@map("ratings")
+}
+
+model Reward {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  pointsCost  Int
+  emoji       String       @default("🎁")
+  category    String       @default("general")
+  isActive    Boolean      @default(true)
+  stock       Int?
+  imageUrl    String?
+  redemptions Redemption[]
+
+  @@map("rewards")
+}
+
+model Redemption {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  status    String   @default("pending")
+  userId    String
+  rewardId  String
+  reward    Reward   @relation(fields: [rewardId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("redemptions")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+enum Role {
+  SENIOR
+  HELPER
+  RELATIVE
+  ADMIN
+}
+
+enum RequestCategory {
+  EINKAUF
+  ARZT
+  SPAZIERGANG
+  TECHNIK
+  TRANSPORT
+  HAUSHALT
+  ANDERES
+}
+
+enum RequestStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+enum HelperStatus {
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
+}
