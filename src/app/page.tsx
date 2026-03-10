@@ -1,7 +1,6 @@
-export default function Home() {
-	return (
-		<main>
-			<h1>Oma Netz</h1>
-		</main>
-	)
+// Redirect root to actual landing - landing is served from (marketing)/page.tsx
+import { redirect } from 'next/navigation';
+
+export default function RootPage() {
+  redirect('/landing');
 }
