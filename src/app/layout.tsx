@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 	],
 	authors: [{ name: 'OMA-NETZ Kassel' }],
 	creator: 'OMA-NETZ Kassel',
-	manifest: '/manifest.json',
+	
 	openGraph: {
 		type: 'website',
 		locale: 'de_DE',
