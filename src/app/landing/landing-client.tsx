@@ -37,7 +37,6 @@ import {
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 
-/* ─── Animated counter ───────────────────────────────────────────────────── */
 function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
 	const [val, setVal] = useState(0)
 	useEffect(() => {
@@ -60,7 +59,6 @@ function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
 	)
 }
 
-/* ─── Fade-up on scroll ──────────────────────────────────────────────────── */
 const FadeUp = ({
 	children,
 	delay = 0,
@@ -81,7 +79,7 @@ const FadeUp = ({
 	</motion.div>
 )
 
-/* ─── НОВАЯ Journey Timeline: пошаговая история с картинками ────────────── */
+
 function JourneyTimeline() {
 	const [active, setActive] = useState(0)
 	const [isPaused, setIsPaused] = useState(false)
@@ -254,86 +252,86 @@ function JourneyTimeline() {
 const STEPS: { icon: LucideIcon; title: string; desc: string; tag: string }[] = [
 	{
 		icon: UserPlus,
-		title: 'Ома Роза находит сайт',
-		desc: 'Она ищет помощь в интернете и попадает на OMA-NETZ.',
+		title: 'Oma Rosa findet die Website',
+		desc: 'Sie sucht im Internet nach Hilfe und stößt auf OMA-NETZ.',
 		tag: '1/14',
 	},
 	{
 		icon: UserRoundPlus,
-		title: 'Регистрация Омы Розы',
-		desc: 'Заполняет имя, адрес и тип помощи (заменить лампочку).',
+		title: 'Registrierung von Oma Rosa',
+		desc: 'Sie gibt Namen, Adresse und die Art der Hilfe ein (Glühbirne wechseln).',
 		tag: '2/14',
 	},
 	{
 		icon: FilePlus,
-		title: 'Размещение заявки',
-		desc: 'Ома Роза создаёт заявку с описанием задачи.',
+		title: 'Anfrage erstellen',
+		desc: 'Oma Rosa erstellt eine Anfrage mit Beschreibung der Aufgabe.',
 		tag: '3/14',
 	},
 	{
 		icon: UserPlus,
-		title: 'Макс регистрируется',
-		desc: 'Студент Макс заполняет анкету и подтверждает документы.',
+		title: 'Max registriert sich',
+		desc: 'Student Max füllt sein Profil aus und bestätigt seine Dokumente.',
 		tag: '4/14',
 	},
 	{
 		icon: ClipboardList,
-		title: 'Админ проверяет',
-		desc: 'Администратор изучает заявку Макса и подтверждает регистрацию.',
+		title: 'Admin prüft',
+		desc: 'Der Administrator prüft die Anfrage von Max und bestätigt die Registrierung.',
 		tag: '5/14',
 	},
 	{
 		icon: MapPin,
-		title: 'Макс видит заявку на карте',
-		desc: 'В личном кабинете Макса появляется заявка Омы Розы.',
+		title: 'Max sieht die Anfrage auf der Karte',
+		desc: 'In Max\'s Dashboard erscheint die Anfrage von Oma Rosa.',
 		tag: '6/14',
 	},
 	{
 		icon: ThumbsUp,
-		title: 'Макс отзывается',
-		desc: 'Макс нажимает «Помогу» и оставляет короткое сообщение.',
+		title: 'Max meldet sich',
+		desc: 'Max klickt auf «Ich helfe» und hinterlässt eine kurze Nachricht.',
 		tag: '7/14',
 	},
 	{
 		icon: Bell,
-		title: 'Ома Роза получает запрос',
-		desc: 'Ома видит уведомление и подтверждает кандидатуру Макса.',
+		title: 'Oma Rosa erhält die Anfrage',
+		desc: 'Oma sieht die Benachrichtigung und bestätigt Max als Helfer.',
 		tag: '8/14',
 	},
 	{
 		icon: MessageSquareText,
-		title: 'Согласование даты',
-		desc: 'Чат: договариваются, когда Макс приедет.',
+		title: 'Termin vereinbaren',
+		desc: 'Im Chat vereinbaren sie, wann Max vorbeikommt.',
 		tag: '9/14',
 	},
 	{
 		icon: Home,
-		title: 'Макс приезжает',
-		desc: 'Макс меняет лампочку в люстре.',
+		title: 'Max kommt vorbei',
+		desc: 'Max wechselt die Glühbirne im Kronleuchter.',
 		tag: '10/14',
 	},
 	{
 		icon: Star,
-		title: 'Ома Роза оценивает',
-		desc: 'В кабинете Ома ставит 5 звёзд и пишет отзыв.',
+		title: 'Oma Rosa bewertet',
+		desc: 'Oma vergibt 5 Sterne und schreibt eine Bewertung.',
 		tag: '11/14',
 	},
 	{
 		icon: Coins,
-		title: 'Макс получает баллы',
-		desc: 'Макс видит начисленные баллы и звёзды.',
+		title: 'Max erhält Punkte',
+		desc: 'Max sieht die gutgeschriebenen Punkte und Sterne.',
 		tag: '12/14',
 	},
 	{
 		icon: Ticket,
-		title: 'Обмен на кино',
-		desc: 'Макс обменивает баллы на билет в кино.',
+		title: 'Umtausch gegen Kino',
+		desc: 'Max tauscht seine Punkte gegen eine Kinokarte ein.',
 		tag: '13/14',
 	},
 	{
 		icon: Heart,
-		title: 'Кино с девушкой',
-		desc: 'Макс идёт в кино со своей девушкой. Все довольны!',
+		title: 'Kino mit der Freundin',
+		desc: 'Max geht mit seiner Freundin ins Kino. Alle sind zufrieden!',
 		tag: '14/14',
 	},
 ]
