@@ -27,10 +27,12 @@ export async function proxy(request: NextRequest) {
 		return NextResponse.redirect(url)
 	}
 
-	if (isAuthRoute && session) {
-		return NextResponse.redirect(new URL('/dashboard', request.url))
-	}
-
+	//if (isAuthRoute && session) {
+	//	return NextResponse.redirect(new URL('/dashboard', request.url))
+	//}
+if (isAuthRoute) {
+	return NextResponse.next()
+}
 	// Admin-only guard
 	if (pathname.startsWith('/admin') && session?.user.role !== 'ADMIN') {
 		return NextResponse.redirect(new URL('/dashboard', request.url))
@@ -38,7 +40,7 @@ export async function proxy(request: NextRequest) {
 
 	// Pending/rejected helper guard — block access to restricted pages
 	if (
-		session?.user.role === 'HELPER' &&
+		session?.user?.role === 'HELPER' &&
 		session?.user.helperStatus !== 'APPROVED'
 	) {
 		const helperLockedRoutes = ['/requests', '/chat', '/map']
