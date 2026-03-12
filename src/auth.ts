@@ -59,13 +59,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 					user as { helperStatus?: string | null }
 				).helperStatus
 			}
-			// Refresh helperStatus from DB when not yet approved (so admin changes take effect instantly)
+			// Refresh isBanned + helperStatus from DB so admin changes take effect on next request
+			const fresh = await prisma.user.findUnique({
+				where: { id: token.id as string },
+				select: { isBanned: true, helperStatus: true },
+			})
+			if (!fresh || fresh.isBanned) return null // invalidate token immediately
 			if (token.role === 'HELPER' && token.helperStatus !== 'APPROVED') {
-				const fresh = await prisma.user.findUnique({
-					where: { id: token.id as string },
-					select: { helperStatus: true },
-				})
-				if (fresh) token.helperStatus = fresh.helperStatus
+				token.helperStatus = fresh.helperStatus
 			}
 			return token
 		},
