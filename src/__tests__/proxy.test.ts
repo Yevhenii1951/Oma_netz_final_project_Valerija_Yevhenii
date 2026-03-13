@@ -2,13 +2,13 @@ import { describe, it, expect, vi } from 'vitest'
 import { proxy } from '@/proxy'
 import { NextRequest } from 'next/server'
 
-// Мокаем auth() из @/auth
+// Mock auth() from @/auth
 vi.mock('@/auth', () => ({
   auth: vi.fn(),
 }))
 
 describe('Middleware (proxy.ts)', () => {
-  it('должен редиректить на /login без сессии', async () => {
+  it('should redirect to /login without session', async () => {
     const { auth } = await import('@/auth')
     vi.mocked(auth).mockResolvedValue(null)
 
@@ -18,12 +18,12 @@ describe('Middleware (proxy.ts)', () => {
 
     const response = await proxy(request)
 
-    // Проверяем редирект
+    // Check redirect
     expect(response.status).toBe(307)
     expect(response.headers.get('location')).toContain('/login')
   })
 
-  it('должен блокировать HELPER с PENDING статусом от /requests', async () => {
+  it('should block HELPER with PENDING status from /requests', async () => {
     const { auth } = await import('@/auth')
     vi.mocked(auth).mockResolvedValue({
       user: {
@@ -40,7 +40,7 @@ describe('Middleware (proxy.ts)', () => {
 
     const response = await proxy(request)
 
-    // Проверяем редирект на dashboard
+    // Check redirect to dashboard
     expect(response.status).toBe(307)
     expect(response.headers.get('location')).toContain('/dashboard')
   })

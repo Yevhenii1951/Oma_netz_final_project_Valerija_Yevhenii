@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { POST } from '@/app/api/auth/register/route'
 import { prisma } from '@/lib/prisma'
 
-describe('Регистрация', () => {
+describe('Registration', () => {
   beforeEach(async () => {
-    // Очищаем базу перед каждым тестом (сначала связанные таблицы)
+    // Clean up database before each test (related tables first)
     await prisma.notification.deleteMany()
     await prisma.redemption.deleteMany()
     await prisma.rating.deleteMany()
@@ -17,7 +17,7 @@ describe('Регистрация', () => {
     await prisma.user.deleteMany()
   })
 
-  it('должен успешно зарегистрировать SENIOR', async () => {
+  it('should successfully register a SENIOR user', async () => {
     const request = new Request('http://localhost:3000/api/auth/register', {
       method: 'POST',
       body: JSON.stringify({
@@ -38,8 +38,8 @@ describe('Регистрация', () => {
     expect(data.message).toBe('Registrierung erfolgreich!')
   })
 
-  it('должен вернуть 409 для существующего email', async () => {
-    // Создаём пользователя
+  it('should return 409 for existing email', async () => {
+    // Create existing user
     await prisma.user.create({
       data: {
         email: 'existing@test.com',
@@ -49,7 +49,7 @@ describe('Регистрация', () => {
       },
     })
 
-    // Пробуем зарегистрироваться с тем же email
+    // Try to register with the same email
     const request = new Request('http://localhost:3000/api/auth/register', {
       method: 'POST',
       body: JSON.stringify({
@@ -62,7 +62,7 @@ describe('Регистрация', () => {
 
     const response = await POST(request)
 
-    // Проверяем что получили ошибку 409
+    // Check that we get 409 error
     expect(response.status).toBe(409)
   })
 })

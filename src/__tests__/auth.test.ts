@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { prisma } from '@/lib/prisma'
 import { hash } from 'bcryptjs'
 
-describe('Аутентификация', () => {
+describe('Authentication', () => {
   beforeEach(async () => {
-    // Очищаем базу перед каждым тестом (сначала связанные таблицы)
+    // Clean up database before each test (related tables first)
     await prisma.notification.deleteMany()
     await prisma.redemption.deleteMany()
     await prisma.rating.deleteMany()
@@ -17,8 +17,8 @@ describe('Аутентификация', () => {
     await prisma.user.deleteMany()
   })
 
-  it('должен успешно авторизовать с правильным паролем', async () => {
-    // Создаём пользователя с хешированным паролем
+  it('should successfully authenticate with correct password', async () => {
+    // Create user with hashed password
     const password = 'password123'
     const hashedPassword = await hash(password, 12)
     
@@ -31,14 +31,14 @@ describe('Аутентификация', () => {
       },
     })
     
-    // Проверяем что пользователь существует в БД
+    // Check that user exists in database
     expect(user).toBeTruthy()
     expect(user.email).toBe('test@example.com')
     expect(user.role).toBe('HELPER')
   })
 
-  it('должен отказать при неправильном пароле', async () => {
-    // Создаём пользователя
+  it('should reject incorrect password', async () => {
+    // Create user
     const password = 'password123'
     const hashedPassword = await hash(password, 12)
     
@@ -51,11 +51,11 @@ describe('Аутентификация', () => {
       },
     })
 
-    // Проверяем что bcrypt.compare вернёт false для неправильного пароля
+    // Check that bcrypt.compare returns false for wrong password
     const { compare } = await import('bcryptjs')
     const isValid = await compare('wrong_password', hashedPassword)
     
-    // Пароль не должен совпасть
+    // Password should not match
     expect(isValid).toBe(false)
   })
 })
