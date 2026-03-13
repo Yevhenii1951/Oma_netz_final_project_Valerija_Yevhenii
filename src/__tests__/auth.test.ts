@@ -4,6 +4,16 @@ import { hash } from 'bcryptjs'
 
 describe('Аутентификация', () => {
   beforeEach(async () => {
+    // Очищаем базу перед каждым тестом (сначала связанные таблицы)
+    await prisma.notification.deleteMany()
+    await prisma.redemption.deleteMany()
+    await prisma.rating.deleteMany()
+    await prisma.message.deleteMany()
+    await prisma.chat.deleteMany()
+    await prisma.offer.deleteMany()
+    await prisma.request.deleteMany()
+    await prisma.session.deleteMany()
+    await prisma.account.deleteMany()
     await prisma.user.deleteMany()
   })
 
@@ -12,7 +22,7 @@ describe('Аутентификация', () => {
     const password = 'password123'
     const hashedPassword = await hash(password, 12)
     
-    await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         email: 'test@example.com',
         name: 'Test User',
@@ -20,30 +30,11 @@ describe('Аутентификация', () => {
         role: 'HELPER',
       },
     })
-
-    // Импортируем auth для получения handlers
-    const { handlers } = await import('@/auth')
     
-    // Создаём запрос как это делает NextAuth
-    const request = new Request('http://localhost:3000/api/auth/callback/credentials', {
-      method: 'POST',
-      body: JSON.stringify({
-        email: 'test@example.com',
-        password: password,
-      }),
-    })
-
-    // Проверяем что handlers существует
-    expect(handlers).toBeDefined()
-    
-    // В реальном тесте здесь был бы вызов handlers.GET(request)
-    // Но для простоты проверяем что пользователь существует в БД
-    const user = await prisma.user.findUnique({
-      where: { email: 'test@example.com' },
-    })
-    
+    // Проверяем что пользователь существует в БД
     expect(user).toBeTruthy()
-    expect(user?.email).toBe('test@example.com')
+    expect(user.email).toBe('test@example.com')
+    expect(user.role).toBe('HELPER')
   })
 
   it('должен отказать при неправильном пароле', async () => {

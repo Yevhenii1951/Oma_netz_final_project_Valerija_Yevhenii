@@ -4,7 +4,16 @@ import { prisma } from '@/lib/prisma'
 
 describe('Регистрация', () => {
   beforeEach(async () => {
-    // Очищаем базу перед каждым тестом
+    // Очищаем базу перед каждым тестом (сначала связанные таблицы)
+    await prisma.notification.deleteMany()
+    await prisma.redemption.deleteMany()
+    await prisma.rating.deleteMany()
+    await prisma.message.deleteMany()
+    await prisma.chat.deleteMany()
+    await prisma.offer.deleteMany()
+    await prisma.request.deleteMany()
+    await prisma.session.deleteMany()
+    await prisma.account.deleteMany()
     await prisma.user.deleteMany()
   })
 
