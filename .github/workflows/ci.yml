@@ -8,6 +8,23 @@ on:
 jobs:
   quality-check:
     runs-on: ubuntu-latest
+
+    # PostgreSQL сервис для тестов
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: oma_netz_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,6 +39,14 @@ jobs:
 
       - name: Run ESLint
         run: npm run lint
+
+      # 🆕 НОВЫЙ ШАГ — ТЕСТЫ
+      - name: Run Tests
+        run: npm run test:run
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/oma_netz_test
+          NEXTAUTH_SECRET: test_secret_for_testing_only_32_chars
+          NEXTAUTH_URL: http://localhost:3000
 
       - name: Build
         run: npm run build
