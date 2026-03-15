@@ -213,7 +213,7 @@ function JourneyTimeline() {
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 1.2, opacity: 0 }}
 							transition={{ duration: 0.6, ease: 'easeOut' }}
-							className='w-48 h-48 mx-auto mb-4 flex items-center justify-center'
+							className='w-[280px] h-[280px] mx-auto mb-4 flex items-center justify-center'
 						>
 							<img
 								src={carusselImages[active % carusselImages.length]}
