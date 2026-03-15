@@ -96,20 +96,20 @@ function JourneyTimeline() {
 	// Картинки из папки /carussel (используются разные для каждого шага, но могут повторяться)
 	const carusselImages = useMemo(
 		() => [
-			'/carussel/Volunteering-pana.svg',
-			'/carussel/Messaging fun-rafiki.svg',
-			'/carussel/Location tracking-pana.svg',
-			'/carussel/Video call-pana.svg',
-			'/carussel/Feedback-cuate.svg',
-			'/carussel/Product quality-pana.svg',
-			'/carussel/Thinking face-pana.svg',
-			'/carussel/Volunteering-pana.svg',
-			'/carussel/Messaging fun-rafiki.svg',
-			'/carussel/Location tracking-pana.svg',
-			'/carussel/Video call-pana.svg',
-			'/carussel/Feedback-cuate.svg',
-			'/carussel/Product quality-pana.svg',
-			'/carussel/Thinking face-pana.svg',
+			'/carussel/frame_01.svg',
+			'/carussel/frame_02.svg',
+			'/carussel/frame_03.svg',
+			'/carussel/frame_04.svg',
+			'/carussel/frame_05.svg',
+			'/carussel/frame_06.svg',
+			'/carussel/frame_07.svg',
+			'/carussel/frame_08.svg',
+			'/carussel/frame_09.svg',
+			'/carussel/frame_10.svg',
+			'/carussel/frame_11.svg',
+			'/carussel/frame_12.svg',
+			'/carussel/frame_14.svg',
+			'/carussel/frame_15.svg',
 		],
 		[],
 	)
@@ -213,7 +213,7 @@ function JourneyTimeline() {
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 1.2, opacity: 0 }}
 							transition={{ duration: 0.6, ease: 'easeOut' }}
-							className='w-48 h-48 mx-auto mb-4 flex items-center justify-center'
+							className='w-72 h-72 mx-auto mb-4 flex items-center justify-center'
 						>
 							<img
 								src={carusselImages[active % carusselImages.length]}

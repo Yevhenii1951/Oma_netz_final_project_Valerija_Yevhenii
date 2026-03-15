@@ -1,3 +1,15 @@
 {
-	"prisma.pinToPrisma6": true
+	"prisma.pinToPrisma6": true,
+	"sqltools.connections": [
+		{
+			"ssh": "Disabled",
+			"previewLimit": 50,
+			"server": "localhost",
+			"port": 5433,
+			"driver": "PostgreSQL",
+			"name": "oma-netz",
+			"database": "oma_netz",
+			"username": "oma_user"
+		}
+	]
 }
