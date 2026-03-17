@@ -114,7 +114,7 @@ function JourneyTimeline() {
 	)
 
 	// Индикаторы прогресса (кружочки)
-	const progressIndicators = useMemo(() => STEPS.map((_, i) => (
+	const progressIndicators = STEPS.map((_, i) => (
 		<button
 			key={i}
 			onClick={() => setActive(i)}
@@ -127,7 +127,7 @@ function JourneyTimeline() {
 			}`}
 			aria-label={`Перейти к шагу ${i + 1}`}
 		/>
-	)), [active])
+	))
 
 	return (
 		<div className='flex flex-col items-center gap-8 py-8 w-full'>
