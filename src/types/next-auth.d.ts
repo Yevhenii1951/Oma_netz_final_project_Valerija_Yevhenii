@@ -6,6 +6,7 @@ declare module 'next-auth' {
 		user: {
 			id: string
 			role: Role
+			isBanned: boolean
 			helperStatus?: string | null
 		} & DefaultSession['user']
 	}
@@ -15,6 +16,7 @@ declare module 'next-auth/jwt' {
 	interface JWT {
 		id?: string
 		role?: Role
+		isBanned?: boolean
 		helperStatus?: string | null
 	}
 }

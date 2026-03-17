@@ -17,6 +17,15 @@ const authRoutes = ['/login', '/register']
 export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl
 	const session = await auth()
+	const isBannedPage = pathname.startsWith('/banned')
+
+	if (session?.user.isBanned && !isBannedPage) {
+		return NextResponse.redirect(new URL('/banned', request.url))
+	}
+
+	if (isBannedPage && session && !session.user.isBanned) {
+		return NextResponse.redirect(new URL('/dashboard', request.url))
+	}
 
 	const isProtected = protectedRoutes.some(r => pathname.startsWith(r))
 	const isAuthRoute = authRoutes.some(r => pathname.startsWith(r))

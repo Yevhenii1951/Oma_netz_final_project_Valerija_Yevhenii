@@ -89,7 +89,6 @@ export const ROLE_LABELS: Record<Role, string> = {
 	ADMIN: 'Administrator',
 }
 
-
 // ─── USER ────────────────────────────────────────────────────────────────────
 
 export interface User {
@@ -165,7 +164,6 @@ export interface Message {
 	sender?: User
 }
 
-
 // ─── REWARD ──────────────────────────────────────────────────────────────────
 
 export interface Reward {
@@ -191,6 +189,3 @@ export interface Notification {
 	createdAt: Date
 	userId: string
 }
-
-
-

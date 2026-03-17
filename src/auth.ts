@@ -44,6 +44,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 					name: user.name,
 					image: user.image,
 					role: user.role,
+					isBanned: user.isBanned,
 					helperStatus: user.helperStatus,
 				}
 			},
@@ -55,16 +56,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 			if (user) {
 				token.id = user.id
 				token.role = (user as { role?: Role }).role
+				token.isBanned = (user as { isBanned?: boolean }).isBanned
 				token.helperStatus = (
 					user as { helperStatus?: string | null }
 				).helperStatus
 			}
-			// Refresh isBanned + helperStatus from DB so admin changes take effect on next request
+
 			const fresh = await prisma.user.findUnique({
 				where: { id: token.id as string },
 				select: { isBanned: true, helperStatus: true },
 			})
-			if (!fresh || fresh.isBanned) return null // invalidate token immediately
+			if (!fresh) return null
+			token.isBanned = fresh.isBanned
 			if (token.role === 'HELPER' && token.helperStatus !== 'APPROVED') {
 				token.helperStatus = fresh.helperStatus
 			}
@@ -74,6 +77,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 			if (token && session.user) {
 				session.user.id = token.id as string
 				session.user.role = token.role as Role
+				session.user.isBanned = Boolean(token.isBanned)
 				session.user.helperStatus = token.helperStatus as
 					| string
 					| null
