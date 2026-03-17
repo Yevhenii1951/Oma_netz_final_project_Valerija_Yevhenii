@@ -12,6 +12,7 @@ import {
 	ClipboardList,
 	Coins,
 	FilePlus,
+	HandHelping,
 	Handshake,
 	Heart,
 	Home,
@@ -32,7 +33,6 @@ import {
 	UserPlus,
 	UserRoundPlus,
 	Users,
-	HandHelping,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
@@ -79,7 +79,6 @@ const FadeUp = ({
 	</motion.div>
 )
 
-
 function JourneyTimeline() {
 	const [active, setActive] = useState(0)
 	const [isPaused, setIsPaused] = useState(false)
@@ -96,26 +95,26 @@ function JourneyTimeline() {
 	// Картинки из папки /carussel (используются разные для каждого шага, но могут повторяться)
 	const carusselImages = useMemo(
 		() => [
-			'/carussel/Volunteering-pana.svg',
-			'/carussel/Messaging fun-rafiki.svg',
-			'/carussel/Location tracking-pana.svg',
-			'/carussel/Video call-pana.svg',
-			'/carussel/Feedback-cuate.svg',
-			'/carussel/Product quality-pana.svg',
-			'/carussel/Thinking face-pana.svg',
-			'/carussel/Volunteering-pana.svg',
-			'/carussel/Messaging fun-rafiki.svg',
-			'/carussel/Location tracking-pana.svg',
-			'/carussel/Video call-pana.svg',
-			'/carussel/Feedback-cuate.svg',
-			'/carussel/Product quality-pana.svg',
-			'/carussel/Thinking face-pana.svg',
+			'/carussel/oma1.png',
+			'/carussel/oma2.png',
+			'/carussel/oma3.png',
+			'/carussel/oma4.png',
+			'/carussel/oma5.png',
+			'/carussel/oma6.png',
+			'/carussel/oma7.png',
+			'/carussel/oma8.png',
+			'/carussel/oma9.png',
+			'/carussel/oma11.png',
+			'/carussel/oma12.png',
+			'/carussel/oma13.png',
+			'/carussel/oma14.png',
+			'/carussel/oma15.png',
 		],
 		[],
 	)
 
 	// Индикаторы прогресса (кружочки)
-	const progressIndicators = STEPS.map((_, i) => (
+	const progressIndicators = useMemo(() => STEPS.map((_, i) => (
 		<button
 			key={i}
 			onClick={() => setActive(i)}
@@ -128,7 +127,7 @@ function JourneyTimeline() {
 			}`}
 			aria-label={`Перейти к шагу ${i + 1}`}
 		/>
-	))
+	)), [active])
 
 	return (
 		<div className='flex flex-col items-center gap-8 py-8 w-full'>
@@ -147,17 +146,6 @@ function JourneyTimeline() {
 							onMouseEnter={() => setIsPaused(true)}
 							onMouseLeave={() => setIsPaused(false)}
 						>
-							{/* Линия между иконками */}
-							{i < STEPS.length - 1 && (
-								<div className='absolute left-1/2 top-1/2 w-12 h-0.5 bg-[#e8d5be] -z-10'>
-									<motion.div
-										className='h-full bg-gradient-to-r from-[#8b5e3c] to-[#d97706]'
-										initial={{ width: 0 }}
-										animate={{ width: isPast || isActive ? '100%' : '0%' }}
-										transition={{ duration: 0.5, delay: i * 0.05 }}
-									/>
-								</div>
-							)}
 							{/* Кружок с иконкой */}
 							<div
 								className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
@@ -172,15 +160,6 @@ function JourneyTimeline() {
 									className={`w-5 h-5 ${isActive ? 'text-white' : 'text-[#8b5e3c]'}`}
 								/>
 							</div>
-							{/* Бегущая точка под активным шагом */}
-							{isActive && (
-								<motion.div
-									initial={{ scale: 0, opacity: 0 }}
-									animate={{ scale: 1, opacity: 1 }}
-									exit={{ scale: 0, opacity: 0 }}
-									className='absolute -bottom-2 w-2 h-2 rounded-full bg-[#d97706]'
-								/>
-							)}
 						</motion.button>
 					)
 				})}
@@ -213,12 +192,12 @@ function JourneyTimeline() {
 							animate={{ scale: 1, opacity: 1 }}
 							exit={{ scale: 1.2, opacity: 0 }}
 							transition={{ duration: 0.6, ease: 'easeOut' }}
-							className='w-48 h-48 mx-auto mb-4 flex items-center justify-center'
+							className='w-90 mx-auto mb-4 flex items-center justify-center max-w-2xl'
 						>
 							<img
 								src={carusselImages[active % carusselImages.length]}
 								alt=''
-								className='w-full h-full object-contain drop-shadow-md'
+								className='w-full h-auto drop-shadow-md'
 							/>
 						</motion.div>
 
@@ -249,92 +228,93 @@ function JourneyTimeline() {
 }
 
 /* ─── НОВЫЙ массив STEPS с 14 шагами (полная история) ────────────────────── */
-const STEPS: { icon: LucideIcon; title: string; desc: string; tag: string }[] = [
-	{
-		icon: UserPlus,
-		title: 'Oma Rosa findet die Website',
-		desc: 'Sie sucht im Internet nach Hilfe und stößt auf OMA-NETZ.',
-		tag: '1/14',
-	},
-	{
-		icon: UserRoundPlus,
-		title: 'Registrierung von Oma Rosa',
-		desc: 'Sie gibt Namen, Adresse und die Art der Hilfe ein (Glühbirne wechseln).',
-		tag: '2/14',
-	},
-	{
-		icon: FilePlus,
-		title: 'Anfrage erstellen',
-		desc: 'Oma Rosa erstellt eine Anfrage mit Beschreibung der Aufgabe.',
-		tag: '3/14',
-	},
-	{
-		icon: UserPlus,
-		title: 'Max registriert sich',
-		desc: 'Student Max füllt sein Profil aus und bestätigt seine Dokumente.',
-		tag: '4/14',
-	},
-	{
-		icon: ClipboardList,
-		title: 'Admin prüft',
-		desc: 'Der Administrator prüft die Anfrage von Max und bestätigt die Registrierung.',
-		tag: '5/14',
-	},
-	{
-		icon: MapPin,
-		title: 'Max sieht die Anfrage auf der Karte',
-		desc: 'In Max\'s Dashboard erscheint die Anfrage von Oma Rosa.',
-		tag: '6/14',
-	},
-	{
-		icon: ThumbsUp,
-		title: 'Max meldet sich',
-		desc: 'Max klickt auf «Ich helfe» und hinterlässt eine kurze Nachricht.',
-		tag: '7/14',
-	},
-	{
-		icon: Bell,
-		title: 'Oma Rosa erhält die Anfrage',
-		desc: 'Oma sieht die Benachrichtigung und bestätigt Max als Helfer.',
-		tag: '8/14',
-	},
-	{
-		icon: MessageSquareText,
-		title: 'Termin vereinbaren',
-		desc: 'Im Chat vereinbaren sie, wann Max vorbeikommt.',
-		tag: '9/14',
-	},
-	{
-		icon: Home,
-		title: 'Max kommt vorbei',
-		desc: 'Max wechselt die Glühbirne im Kronleuchter.',
-		tag: '10/14',
-	},
-	{
-		icon: Star,
-		title: 'Oma Rosa bewertet',
-		desc: 'Oma vergibt 5 Sterne und schreibt eine Bewertung.',
-		tag: '11/14',
-	},
-	{
-		icon: Coins,
-		title: 'Max erhält Punkte',
-		desc: 'Max sieht die gutgeschriebenen Punkte und Sterne.',
-		tag: '12/14',
-	},
-	{
-		icon: Ticket,
-		title: 'Umtausch gegen Kino',
-		desc: 'Max tauscht seine Punkte gegen eine Kinokarte ein.',
-		tag: '13/14',
-	},
-	{
-		icon: Heart,
-		title: 'Kino mit der Freundin',
-		desc: 'Max geht mit seiner Freundin ins Kino. Alle sind zufrieden!',
-		tag: '14/14',
-	},
-]
+const STEPS: { icon: LucideIcon; title: string; desc: string; tag: string }[] =
+	[
+		{
+			icon: UserPlus,
+			title: 'Oma Rosa findet die Website',
+			desc: 'Sie sucht im Internet nach Hilfe und stößt auf OMA-NETZ.',
+			tag: '1/14',
+		},
+		{
+			icon: UserRoundPlus,
+			title: 'Registrierung von Oma Rosa',
+			desc: 'Sie gibt Namen, Adresse und die Art der Hilfe ein (Glühbirne wechseln).',
+			tag: '2/14',
+		},
+		{
+			icon: FilePlus,
+			title: 'Anfrage erstellen',
+			desc: 'Oma Rosa erstellt eine Anfrage mit Beschreibung der Aufgabe.',
+			tag: '3/14',
+		},
+		{
+			icon: UserPlus,
+			title: 'Max registriert sich',
+			desc: 'Student Max füllt sein Profil aus und bestätigt seine Dokumente.',
+			tag: '4/14',
+		},
+		{
+			icon: ClipboardList,
+			title: 'Admin prüft',
+			desc: 'Der Administrator prüft die Anfrage von Max und bestätigt die Registrierung.',
+			tag: '5/14',
+		},
+		{
+			icon: MapPin,
+			title: 'Max sieht die Anfrage auf der Karte',
+			desc: "In Max's Dashboard erscheint die Anfrage von Oma Rosa.",
+			tag: '6/14',
+		},
+		{
+			icon: ThumbsUp,
+			title: 'Max meldet sich',
+			desc: 'Max klickt auf «Ich helfe» und hinterlässt eine kurze Nachricht.',
+			tag: '7/14',
+		},
+		{
+			icon: Bell,
+			title: 'Oma Rosa erhält die Anfrage',
+			desc: 'Oma sieht die Benachrichtigung und bestätigt Max als Helfer.',
+			tag: '8/14',
+		},
+		{
+			icon: MessageSquareText,
+			title: 'Termin vereinbaren',
+			desc: 'Im Chat vereinbaren sie, wann Max vorbeikommt.',
+			tag: '9/14',
+		},
+		{
+			icon: Home,
+			title: 'Max kommt vorbei',
+			desc: 'Max wechselt die Glühbirne im Kronleuchter.',
+			tag: '10/14',
+		},
+		{
+			icon: Star,
+			title: 'Oma Rosa bewertet',
+			desc: 'Oma vergibt 5 Sterne und schreibt eine Bewertung.',
+			tag: '11/14',
+		},
+		{
+			icon: Coins,
+			title: 'Max erhält Punkte',
+			desc: 'Max sieht die gutgeschriebenen Punkte und Sterne.',
+			tag: '12/14',
+		},
+		{
+			icon: Ticket,
+			title: 'Umtausch gegen Kino',
+			desc: 'Max tauscht seine Punkte gegen eine Kinokarte ein.',
+			tag: '13/14',
+		},
+		{
+			icon: Heart,
+			title: 'Kino mit der Freundin',
+			desc: 'Max geht mit seiner Freundin ins Kino. Alle sind zufrieden!',
+			tag: '14/14',
+		},
+	]
 
 /* ════════════════════════════════════════════════════════════════════════════ */
 
@@ -494,13 +474,14 @@ export default function LandingClient() {
 						className='flex flex-col sm:flex-row items-center justify-center gap-3 mb-6'
 					>
 						<Link
-							href='/register?role=SENIOR'
+							href='/dashboard'
 							className='btn-primary btn-glow text-base px-8 py-3.5 w-full sm:w-auto'
 						>
-							<HandHelping size={18} className='inline mr-1' /> Ich brauche Hilfe <ArrowRight size={16} />
+							<HandHelping size={18} className='inline mr-1' /> Ich brauche
+							Hilfe <ArrowRight size={16} />
 						</Link>
 						<Link
-							href='/register?role=HELPER'
+							href='/dashboard'
 							className='btn-secondary text-base px-8 py-3.5 w-full sm:w-auto'
 						>
 							<Handshake size={18} className='inline mr-1' /> Ich möchte helfen
@@ -623,9 +604,7 @@ export default function LandingClient() {
 									transition={{ delay: i * 0.08, duration: 0.4 }}
 									className='flex items-center gap-3'
 								>
-									<RewardIcon
-										className='w-5 h-5 text-[#8b5e3c] shrink-0'
-									/>
+									<RewardIcon className='w-5 h-5 text-[#8b5e3c] shrink-0' />
 									<span className='text-[#3d2b1f] font-medium text-sm'>
 										{text}
 									</span>
@@ -668,9 +647,7 @@ export default function LandingClient() {
 										transition={{ delay: i * 0.1, duration: 0.45 }}
 										className='bg-[#ffffff] rounded-2xl p-4 flex items-center gap-4 shadow-[0_2px_12px_rgba(61,43,31,0.08)] border border-[#ede3d4]'
 									>
-										<PointIcon
-											className='w-7 h-7 text-[#8b5e3c] shrink-0'
-										/>
+										<PointIcon className='w-7 h-7 text-[#8b5e3c] shrink-0' />
 										<div>
 											<p className='font-bold text-amber-600 text-lg leading-none'>
 												{points} Punkte
@@ -738,7 +715,7 @@ export default function LandingClient() {
 							>
 								<Icon size={18} className='text-[#8b5e3c]' />
 							</div>
-						))}  
+						))}
 					</div>
 					<div>
 						<div className='flex justify-center md:justify-start gap-0.5 mb-1'>
