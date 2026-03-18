@@ -11,6 +11,7 @@ const registerSchema = z.object({
 	role: z.enum(['SENIOR', 'HELPER', 'RELATIVE']),
 	phone: z.string().optional(),
 	plz: z.string().optional(),
+	// Helper-specific
 	employmentType: z.string().optional(),
 	institution: z.string().optional(),
 	languages: z.array(z.string()).optional(),
@@ -34,8 +35,10 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
+		// Hash password
 		const hashedPassword = await bcrypt.hash(data.password, 12)
 
+		// Create user
 		const user = await prisma.user.create({
 			data: {
 				name: data.name,
@@ -45,6 +48,7 @@ export async function POST(req: NextRequest) {
 				phone: data.phone,
 				plz: data.plz,
 				city: 'Kassel',
+				// Helper-specific — stored even for non-helpers (nullable), helperStatus defaults to PENDING_REVIEW
 				employmentType: data.employmentType,
 				institution: data.institution,
 				languages: data.languages ?? [],
@@ -60,6 +64,7 @@ export async function POST(req: NextRequest) {
 			},
 		})
 
+		// Notify all admins about new registration
 		const admins = await prisma.user.findMany({
 			where: { role: 'ADMIN' },
 			select: { id: true },
