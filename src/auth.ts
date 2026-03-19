@@ -61,7 +61,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 					user as { helperStatus?: string | null }
 				).helperStatus
 			}
-
+			// Refresh isBanned + helperStatus from DB so admin changes take effect on next request
 			const fresh = await prisma.user.findUnique({
 				where: { id: token.id as string },
 				select: { isBanned: true, helperStatus: true },
