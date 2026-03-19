@@ -2,7 +2,17 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
-import { CheckCircle, Eye, EyeOff, Handshake, Heart, Loader2, Search, User, X } from 'lucide-react'
+import {
+	CheckCircle,
+	Eye,
+	EyeOff,
+	Handshake,
+	Heart,
+	Loader2,
+	Search,
+	User,
+	X,
+} from 'lucide-react'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -194,7 +204,10 @@ function RegisterForm() {
 											onClick={() => setRole(value)}
 											className={`w-full flex items-start gap-3 p-4 rounded-2xl border-2 text-left transition-all ${role === value ? 'border-[#8b5e3c] bg-[#f5ede0]' : 'border-[#ddd0be] bg-[#ffffff] hover:border-[#c8956c]'}`}
 										>
-											<RoleIcon size={24} className='text-[#8b5e3c] shrink-0 mt-0.5' />
+											<RoleIcon
+												size={24}
+												className='text-[#8b5e3c] shrink-0 mt-0.5'
+											/>
 											<div className='flex-1'>
 												<p className='font-semibold text-[#3d2b1f] text-sm'>
 													{label}
@@ -336,7 +349,7 @@ function RegisterForm() {
 										<button
 											type='submit'
 											disabled={loading}
-											className='btn-primary flex-[2] justify-center py-3 disabled:opacity-70'
+											className='btn-primary flex-2 justify-center py-3 disabled:opacity-70'
 										>
 											{loading ? (
 												<>
@@ -369,8 +382,9 @@ function RegisterForm() {
 								)}
 
 								<div className='mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800'>
-									<Search size={12} className='inline mr-1' /> Diese Angaben werden vom Admin geprüft. Nach Freigabe
-									kannst du Anfragen annehmen.
+									<Search size={12} className='inline mr-1' /> Diese Angaben
+									werden vom Admin geprüft. Nach Freigabe kannst du Anfragen
+									annehmen.
 								</div>
 
 								<form onSubmit={handleSubmit} className='space-y-4'>
@@ -522,7 +536,7 @@ function RegisterForm() {
 										<button
 											type='submit'
 											disabled={loading}
-											className='btn-primary flex-[2] justify-center py-3 disabled:opacity-70'
+											className='btn-primary flex-2 justify-center py-3 disabled:opacity-70'
 										>
 											{loading ? (
 												<>
