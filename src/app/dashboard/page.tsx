@@ -10,7 +10,7 @@ import {
 	StatusBadge,
 } from '@/components/shell'
 import { prisma } from '@/lib/prisma'
-//import { getRoleUiTokens } from '@/lib/role-ui'
+import { getRoleUiTokens } from '@/lib/role-ui'
 import { formatDate, formatRelativeTime } from '@/lib/utils'
 import {
 	ArrowRight,
@@ -461,26 +461,24 @@ export default async function DashboardPage() {
 						) : (
 							<div className='space-y-3'>
 								{openRequests.map(req => {
-									// const srole = req.senior.role
-									// const {
-									// 	cardAccent,
-									// 	iconBg,
-									// 	rolePill,
-									// 	roleLabel,
-									// 	descBorder,
-									// } = getRoleUiTokens(srole)
+									const srole = req.senior.role
+									const {
+										cardAccent,
+										iconBg,
+										rolePill,
+										roleLabel,
+										descBorder,
+									} = getRoleUiTokens(srole)
 									const CategoryIcon = getCategoryIcon(req.category)
 									return (
 										<Link
 											key={req.id}
 											href={`/requests/${req.id}`}
-											// className={`card p-4 card-hover block ${cardAccent}`}
-											className='card p-4 card-hover block'
+											className={`card p-4 card-hover block ${cardAccent}`}
 										>
 											<div className='flex items-start gap-3'>
 												<div
-													// className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}
-													className='w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-[#f5ede0]'
+													className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}
 												>
 													<CategoryIcon className='w-5 h-5' />
 												</div>
@@ -491,11 +489,9 @@ export default async function DashboardPage() {
 														</p>
 														<div className='flex items-center gap-1.5 shrink-0'>
 															<span
-																	// className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${rolePill}`}
-																	className='text-[10px] font-medium px-2 py-0.5 rounded-full bg-[#f5ede0] text-[#8b5e3c]'
+																className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${rolePill}`}
 															>
-																	{/* {roleLabel} */}
-																	{req.senior.role}
+																{roleLabel}
 															</span>
 															<CategoryBadge
 																category={req.category as string}
@@ -505,8 +501,7 @@ export default async function DashboardPage() {
 
 													{req.description && (
 														<div
-															// className={`mt-2 pl-2.5 border-l-2 ${descBorder}`}
-															className='mt-2 pl-2.5 border-l-2 border-[#e8d5be]'
+															className={`mt-2 pl-2.5 border-l-2 ${descBorder}`}
 														>
 															<p className='text-xs text-[#7a6050] italic line-clamp-2 leading-relaxed'>
 																{req.description}
@@ -537,7 +532,7 @@ export default async function DashboardPage() {
 			</div>
 
 			{/* Floating AI Assistant */}
-			{/* <AiAssistantButton /> */}
+			<AiAssistantButton />
 		</PageShell>
 	)
 }
