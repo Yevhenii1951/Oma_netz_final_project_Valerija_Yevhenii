@@ -35,7 +35,24 @@ import {
 	Users,
 } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
+
+const CAROUSEL_IMAGES = [
+	'/carussel/oma1.png',
+	'/carussel/oma2.png',
+	'/carussel/oma3.png',
+	'/carussel/oma4.png',
+	'/carussel/oma5.png',
+	'/carussel/oma6.png',
+	'/carussel/oma7.png',
+	'/carussel/oma8.png',
+	'/carussel/oma9.png',
+	'/carussel/oma11.png',
+	'/carussel/oma12.png',
+	'/carussel/oma13.png',
+	'/carussel/oma14.png',
+	'/carussel/oma15.png',
+]
 
 function Counter({ to, suffix = '' }: { to: number; suffix?: string }) {
 	const [val, setVal] = useState(0)
@@ -83,7 +100,6 @@ function JourneyTimeline() {
 	const [active, setActive] = useState(0)
 	const [isPaused, setIsPaused] = useState(false)
 
-	// Автоматическое переключение каждые 5 секунд, если не наведена мышь
 	useEffect(() => {
 		if (isPaused) return
 		const id = setInterval(() => {
@@ -92,28 +108,22 @@ function JourneyTimeline() {
 		return () => clearInterval(id)
 	}, [isPaused])
 
-	// Картинки из папки /carussel (используются разные для каждого шага, но могут повторяться)
-	const carusselImages = useMemo(
-		() => [
-			'/carussel/oma1.png',
-			'/carussel/oma2.png',
-			'/carussel/oma3.png',
-			'/carussel/oma4.png',
-			'/carussel/oma5.png',
-			'/carussel/oma6.png',
-			'/carussel/oma7.png',
-			'/carussel/oma8.png',
-			'/carussel/oma9.png',
-			'/carussel/oma11.png',
-			'/carussel/oma12.png',
-			'/carussel/oma13.png',
-			'/carussel/oma14.png',
-			'/carussel/oma15.png',
-		],
-		[],
-	)
+	useEffect(() => {
+		const preloaded: HTMLImageElement[] = []
 
-	// Индикаторы прогресса (кружочки)
+		for (const src of CAROUSEL_IMAGES) {
+			const image = new Image()
+			image.src = src
+			preloaded.push(image)
+		}
+
+		return () => {
+			for (const image of preloaded) {
+				image.src = ''
+			}
+		}
+	}, [])
+
 	const progressIndicators = STEPS.map((_, i) => (
 		<button
 			key={i}
@@ -131,7 +141,6 @@ function JourneyTimeline() {
 
 	return (
 		<div className='flex flex-col items-center gap-8 py-8 w-full'>
-			{/* Горизонтальная цепочка иконок (упрощённая, без сложной анимации) */}
 			<div className='hidden md:flex items-center justify-center gap-2 w-full max-w-5xl px-4'>
 				{STEPS.map((step, i) => {
 					const isActive = i === active
@@ -140,17 +149,17 @@ function JourneyTimeline() {
 						<motion.button
 							key={i}
 							onClick={() => setActive(i)}
+							aria-label={`Перейти к шагу ${i + 1}`}
 							className='relative flex items-center justify-center'
 							whileHover={{ scale: 1.1 }}
 							whileTap={{ scale: 0.95 }}
 							onMouseEnter={() => setIsPaused(true)}
 							onMouseLeave={() => setIsPaused(false)}
 						>
-							{/* Кружок с иконкой */}
 							<div
 								className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
 									isActive
-										? 'bg-gradient-to-br from-[#8b5e3c] to-[#d97706] shadow-lg shadow-[#8b5e3c]/30 scale-110'
+										? 'bg-linear-to-br from-[#8b5e3c] to-[#d97706] shadow-lg shadow-[#8b5e3c]/30 scale-110'
 										: isPast
 											? 'bg-[#8b5e3c]/20'
 											: 'bg-[#e8d5be]'
@@ -165,158 +174,122 @@ function JourneyTimeline() {
 				})}
 			</div>
 
-			{/* Мобильная версия: упрощённые индикаторы (без иконок) */}
 			<div className='md:hidden flex justify-center gap-2 mb-4'>
 				{progressIndicators}
 			</div>
 
-			{/* Основной блок с картинкой и описанием */}
 			<div
 				className='w-full max-w-xl px-4'
 				onMouseEnter={() => setIsPaused(true)}
 				onMouseLeave={() => setIsPaused(false)}
 			>
-				<AnimatePresence mode='wait'>
-					<motion.div
-						key={active}
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						exit={{ opacity: 0, y: -20 }}
-						transition={{ duration: 0.5, ease: 'easeInOut' }}
-						className='bg-white rounded-3xl p-6 shadow-xl border border-[#e8d5be] text-center'
-					>
-						{/* Картинка с эффектом увеличения */}
-						<motion.div
-							key={`img-${active}`}
-							initial={{ scale: 0.8, opacity: 0 }}
-							animate={{ scale: 1, opacity: 1 }}
-							exit={{ scale: 1.2, opacity: 0 }}
-							transition={{ duration: 0.6, ease: 'easeOut' }}
-							className='w-90 mx-auto mb-4 flex items-center justify-center max-w-2xl'
-						>
-							<img
-								src={carusselImages[active % carusselImages.length]}
-								alt=''
-								className='w-full h-auto drop-shadow-md'
-							/>
-						</motion.div>
-
-						{/* Тэг (номер шага) */}
-						<span className='inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 bg-[#8b5e3c]/10 text-[#8b5e3c]'>
-							{STEPS[active].tag}
-						</span>
-
-						{/* Заголовок */}
-						<h3 className='heading-serif text-xl md:text-2xl font-bold text-[#3d2b1f] mb-2'>
-							{STEPS[active].title}
-						</h3>
-
-						{/* Описание */}
-						<p className='text-[#7a6050] leading-relaxed text-sm'>
-							{STEPS[active].desc}
-						</p>
-
-						{/* Индикаторы прогресса (для десктопа, чтобы не терять навигацию) */}
-						<div className='mt-6 flex items-center justify-center gap-2'>
-							{progressIndicators}
+				<div className='bg-white rounded-3xl p-6 shadow-xl border border-[#e8d5be] text-center'>
+					<div className='mx-auto mb-4 max-w-2xl'>
+						<div className='relative w-full aspect-4/3 overflow-hidden rounded-2xl'>
+							<AnimatePresence initial={false} mode='sync'>
+								<motion.img
+									key={CAROUSEL_IMAGES[active % CAROUSEL_IMAGES.length]}
+									src={CAROUSEL_IMAGES[active % CAROUSEL_IMAGES.length]}
+									alt=''
+									className='absolute inset-0 w-full h-full object-contain drop-shadow-md'
+									initial={{ opacity: 0, scale: 1.02 }}
+									animate={{ opacity: 1, scale: 1 }}
+									exit={{ opacity: 0, scale: 0.985 }}
+									transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+								/>
+							</AnimatePresence>
 						</div>
-					</motion.div>
-				</AnimatePresence>
+					</div>
+
+					<span className='inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 bg-[#8b5e3c]/10 text-[#8b5e3c]'>
+						Schritt {active + 1}
+					</span>
+
+					<h3 className='heading-serif text-xl md:text-2xl font-bold text-[#3d2b1f] mb-2'>
+						{STEPS[active].title}
+					</h3>
+
+					<p className='text-[#7a6050] leading-relaxed text-sm'>
+						{STEPS[active].desc}
+					</p>
+				</div>
 			</div>
 		</div>
 	)
 }
 
-/* ─── НОВЫЙ массив STEPS с 14 шагами (полная история) ────────────────────── */
-const STEPS: { icon: LucideIcon; title: string; desc: string; tag: string }[] =
-	[
-		{
-			icon: UserPlus,
-			title: 'Oma Rosa findet die Website',
-			desc: 'Sie sucht im Internet nach Hilfe und stößt auf OMA-NETZ.',
-			tag: '1/14',
-		},
-		{
-			icon: UserRoundPlus,
-			title: 'Registrierung von Oma Rosa',
-			desc: 'Sie gibt Namen, Adresse und die Art der Hilfe ein (Glühbirne wechseln).',
-			tag: '2/14',
-		},
-		{
-			icon: FilePlus,
-			title: 'Anfrage erstellen',
-			desc: 'Oma Rosa erstellt eine Anfrage mit Beschreibung der Aufgabe.',
-			tag: '3/14',
-		},
-		{
-			icon: UserPlus,
-			title: 'Max registriert sich',
-			desc: 'Student Max füllt sein Profil aus und bestätigt seine Dokumente.',
-			tag: '4/14',
-		},
-		{
-			icon: ClipboardList,
-			title: 'Admin prüft',
-			desc: 'Der Administrator prüft die Anfrage von Max und bestätigt die Registrierung.',
-			tag: '5/14',
-		},
-		{
-			icon: MapPin,
-			title: 'Max sieht die Anfrage auf der Karte',
-			desc: "In Max's Dashboard erscheint die Anfrage von Oma Rosa.",
-			tag: '6/14',
-		},
-		{
-			icon: ThumbsUp,
-			title: 'Max meldet sich',
-			desc: 'Max klickt auf «Ich helfe» und hinterlässt eine kurze Nachricht.',
-			tag: '7/14',
-		},
-		{
-			icon: Bell,
-			title: 'Oma Rosa erhält die Anfrage',
-			desc: 'Oma sieht die Benachrichtigung und bestätigt Max als Helfer.',
-			tag: '8/14',
-		},
-		{
-			icon: MessageSquareText,
-			title: 'Termin vereinbaren',
-			desc: 'Im Chat vereinbaren sie, wann Max vorbeikommt.',
-			tag: '9/14',
-		},
-		{
-			icon: Home,
-			title: 'Max kommt vorbei',
-			desc: 'Max wechselt die Glühbirne im Kronleuchter.',
-			tag: '10/14',
-		},
-		{
-			icon: Star,
-			title: 'Oma Rosa bewertet',
-			desc: 'Oma vergibt 5 Sterne und schreibt eine Bewertung.',
-			tag: '11/14',
-		},
-		{
-			icon: Coins,
-			title: 'Max erhält Punkte',
-			desc: 'Max sieht die gutgeschriebenen Punkte und Sterne.',
-			tag: '12/14',
-		},
-		{
-			icon: Ticket,
-			title: 'Umtausch gegen Kino',
-			desc: 'Max tauscht seine Punkte gegen eine Kinokarte ein.',
-			tag: '13/14',
-		},
-		{
-			icon: Heart,
-			title: 'Kino mit der Freundin',
-			desc: 'Max geht mit seiner Freundin ins Kino. Alle sind zufrieden!',
-			tag: '14/14',
-		},
-	]
-
-/* ════════════════════════════════════════════════════════════════════════════ */
+const STEPS: { icon: LucideIcon; title: string; desc: string }[] = [
+	{
+		icon: UserPlus,
+		title: 'Oma Rosa findet die Website',
+		desc: 'Sie sucht im Internet nach Hilfe und stößt auf OMA-NETZ.',
+	},
+	{
+		icon: UserRoundPlus,
+		title: 'Registrierung von Oma Rosa',
+		desc: 'Sie gibt Namen, Adresse und die Art der Hilfe ein (Glühbirne wechseln).',
+	},
+	{
+		icon: FilePlus,
+		title: 'Anfrage erstellen',
+		desc: 'Oma Rosa erstellt eine Anfrage mit Beschreibung der Aufgabe.',
+	},
+	{
+		icon: UserPlus,
+		title: 'Max registriert sich',
+		desc: 'Student Max füllt sein Profil aus und bestätigt seine Dokumente.',
+	},
+	{
+		icon: ClipboardList,
+		title: 'Admin prüft',
+		desc: 'Der Administrator prüft die Anfrage von Max und bestätigt die Registrierung.',
+	},
+	{
+		icon: MapPin,
+		title: 'Max sieht die Anfrage auf der Karte',
+		desc: "In Max's Dashboard erscheint die Anfrage von Oma Rosa.",
+	},
+	{
+		icon: ThumbsUp,
+		title: 'Max meldet sich',
+		desc: 'Max klickt auf «Ich helfe» und hinterlässt eine kurze Nachricht.',
+	},
+	{
+		icon: Bell,
+		title: 'Oma Rosa erhält die Anfrage',
+		desc: 'Oma sieht die Benachrichtigung und bestätigt Max als Helfer.',
+	},
+	{
+		icon: MessageSquareText,
+		title: 'Termin vereinbaren',
+		desc: 'Im Chat vereinbaren sie, wann Max vorbeikommt.',
+	},
+	{
+		icon: Home,
+		title: 'Max kommt vorbei',
+		desc: 'Max wechselt die Glühbirne im Kronleuchter.',
+	},
+	{
+		icon: Star,
+		title: 'Oma Rosa bewertet',
+		desc: 'Oma vergibt 5 Sterne und schreibt eine Bewertung.',
+	},
+	{
+		icon: Coins,
+		title: 'Max erhält Punkte',
+		desc: 'Max sieht die gutgeschriebenen Punkte und Sterne.',
+	},
+	{
+		icon: Ticket,
+		title: 'Umtausch gegen Kino',
+		desc: 'Max tauscht seine Punkte gegen eine Kinokarte ein.',
+	},
+	{
+		icon: Heart,
+		title: 'Kino mit der Freundin',
+		desc: 'Max geht mit seiner Freundin ins Kino. Alle sind zufrieden!',
+	},
+]
 
 export default function LandingClient() {
 	const stats = [
@@ -361,10 +334,8 @@ export default function LandingClient() {
 
 	return (
 		<div className='min-h-screen bg-[#f5ede0]'>
-			{/* ── NAV ─────────────────────────────────────────────────────── */}
 			<nav className='sticky top-0 z-50 bg-[#ffffff]/90 backdrop-blur-xl border-b border-[#ddd0be]/80 shadow-[0_1px_8px_rgba(61,43,31,0.06)]'>
 				<div className='max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4'>
-					{/* LOGO */}
 					<motion.div
 						initial={{ opacity: 0, x: -12 }}
 						animate={{ opacity: 1, x: 0 }}
@@ -386,7 +357,6 @@ export default function LandingClient() {
 						</a>
 					</motion.div>
 
-					{/* CENTER NAV LINKS — hidden on mobile */}
 					<motion.div
 						initial={{ opacity: 0, y: -8 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -412,7 +382,6 @@ export default function LandingClient() {
 						))}
 					</motion.div>
 
-					{/* AUTH BUTTONS */}
 					<motion.div
 						initial={{ opacity: 0, x: 12 }}
 						animate={{ opacity: 1, x: 0 }}
@@ -432,11 +401,9 @@ export default function LandingClient() {
 				</div>
 			</nav>
 
-			{/* ── HERO with animated background paths ─────────────────────── */}
 			<div id='hero' />
 			<BackgroundPaths>
 				<section className='max-w-6xl mx-auto px-4 pt-24 pb-20 text-center relative z-10'>
-					{/* headline — Playfair Display serif */}
 					<motion.h1
 						initial={{ opacity: 0, y: 32 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -446,7 +413,6 @@ export default function LandingClient() {
 						Füreinander da sein
 					</motion.h1>
 
-					{/* shimmer animated subtitle */}
 					<motion.p
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -466,7 +432,6 @@ export default function LandingClient() {
 						alltägliche Aufgaben — kostenlos, unkompliziert und mit Herz.
 					</motion.p>
 
-					{/* CTA buttons */}
 					<motion.div
 						initial={{ opacity: 0, y: 16 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -499,7 +464,6 @@ export default function LandingClient() {
 				</section>
 			</BackgroundPaths>
 
-			{/* ── STATS with animated counters ────────────────────────────── */}
 			<section className='bg-[#ffffff] border-y border-[#ddd0be] py-12 shadow-[inset_0_1px_0_rgba(61,43,31,0.05)]'>
 				<div className='max-w-4xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center'>
 					{stats.map(({ value, suffix, label }, i) => (
@@ -513,7 +477,6 @@ export default function LandingClient() {
 				</div>
 			</section>
 
-			{/* ── JOURNEY (ПОЛНОСТЬЮ ОБНОВЛЕНО) ────────────────────────────── */}
 			<section id='journey' className='max-w-6xl mx-auto px-4 py-16'>
 				<FadeUp className='text-center mb-10'>
 					<h2 className='heading-serif text-4xl font-bold text-[#3d2b1f] mb-3'>
@@ -526,7 +489,6 @@ export default function LandingClient() {
 				<JourneyTimeline />
 			</section>
 
-			{/* ── CATEGORIES ──────────────────────────────────────────────── */}
 			<section
 				id='categories'
 				className='bg-[#ffffff] border-y border-[#ddd0be] py-20'
@@ -563,7 +525,6 @@ export default function LandingClient() {
 				</div>
 			</section>
 
-			{/* ── FOR VOLUNTEERS ──────────────────────────────────────────── */}
 			<section id='helpers' className='max-w-5xl mx-auto px-4 py-20'>
 				<div className='grid md:grid-cols-2 gap-12 items-center'>
 					<FadeUp>
@@ -662,7 +623,6 @@ export default function LandingClient() {
 				</div>
 			</section>
 
-			{/* ── TRUST ────────────────────────────────────────────────────── */}
 			<section
 				id='trust'
 				className='relative overflow-hidden bg-linear-to-br from-[#8b5e3c] via-[#7a5035] to-[#6b4226] py-20 text-center text-[#ffffff]'
@@ -704,7 +664,6 @@ export default function LandingClient() {
 				</div>
 			</section>
 
-			{/* ── TESTIMONIAL ──────────────────────────────────────────────── */}
 			<section className='bg-[#fdf8f2] border-y border-[#ddd0be] py-10'>
 				<div className='max-w-4xl mx-auto px-4 flex flex-col md:flex-row items-center gap-6 text-center md:text-left'>
 					<div className='flex -space-x-3 shrink-0 justify-center'>
@@ -738,7 +697,6 @@ export default function LandingClient() {
 				</div>
 			</section>
 
-			{/* ── CTA ─────────────────────────────────────────────────────── */}
 			<section className='bg-[#f5ede0] py-24'>
 				<div className='max-w-3xl mx-auto px-4 text-center'>
 					<FadeUp>
@@ -773,7 +731,6 @@ export default function LandingClient() {
 				</div>
 			</section>
 
-			{/* ── FOOTER ───────────────────────────────────────────────────── */}
 			<footer className='border-t border-[#ddd0be] bg-[#ffffff] py-8'>
 				<div className='max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4'>
 					<div className='flex items-center gap-2'>
