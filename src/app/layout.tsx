@@ -64,7 +64,8 @@ export default function RootLayout({
 		>
 			<body className='antialiased'>
 				<Providers>
-					<Toaster>{children}</Toaster>
+					{children}
+					<Toaster />
 				</Providers>
 			</body>
 		</html>

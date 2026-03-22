@@ -1,7 +1,7 @@
 'use client'
 
 import { Avatar, CategoryBadge, StatusBadge } from '@/components/shell'
-import { useToast } from '@/components/ui/toaster'
+import { toast } from 'sonner'
 import { cn, formatDate } from '@/lib/utils'
 import {
 	AlertTriangle,
@@ -111,7 +111,6 @@ export default function AdminClient({
 	initialTab = 'stats',
 }: Props) {
 	const router = useRouter()
-	const { toast } = useToast()
 	const [activeTab, setActiveTab] = useState<Tab>(initialTab)
 	const [loadingId, setLoadingId] = useState<string | null>(null)
 	const [banLoadingId, setBanLoadingId] = useState<string | null>(null)
@@ -129,19 +128,17 @@ export default function AdminClient({
 				body: JSON.stringify({ action }),
 			})
 			if (res.ok) {
-				toast({
-					title:
-						action === 'APPROVE'
-							? '✅ Helfer freigegeben'
-							: '❌ Helfer abgelehnt',
-					variant: action === 'APPROVE' ? 'success' : 'default',
-				})
+				if (action === 'APPROVE') {
+					toast.success('✅ Helfer freigegeben')
+				} else {
+					toast.error('❌ Helfer abgelehnt')
+				}
 			} else {
-				toast({ title: 'Fehler beim Verarbeiten', variant: 'error' })
+				toast.error('Fehler beim Verarbeiten')
 			}
 			router.refresh()
 		} catch {
-			toast({ title: 'Netzwerkfehler', variant: 'error' })
+			toast.error('Netzwerkfehler')
 		} finally {
 			setLoadingId(null)
 		}
@@ -160,22 +157,18 @@ export default function AdminClient({
 				body: JSON.stringify({ action: isCurrentlyBanned ? 'UNBAN' : 'BAN' }),
 			})
 			if (res.ok) {
-				toast({
-					title: isCurrentlyBanned
-						? `✅ ${userLabel} entsperrt`
-						: `⛔ ${userLabel} gesperrt`,
-					variant: isCurrentlyBanned ? 'success' : 'default',
-				})
+				if (isCurrentlyBanned) {
+					toast.success(`✅ ${userLabel} entsperrt`)
+				} else {
+					toast.error(`⛔ ${userLabel} gesperrt`)
+				}
 				router.refresh()
 			} else {
 				const json = await res.json().catch(() => null)
-				toast({
-					title: json?.error ?? 'Fehler beim Sperren/Entsperren',
-					variant: 'error',
-				})
+				toast.error(json?.error ?? 'Fehler beim Sperren/Entsperren')
 			}
 		} catch {
-			toast({ title: 'Netzwerkfehler', variant: 'error' })
+			toast.error('Netzwerkfehler')
 		} finally {
 			setBanLoadingId(null)
 		}
@@ -193,19 +186,13 @@ export default function AdminClient({
 			const json = await res.json().catch(() => null)
 
 			if (res.ok) {
-				toast({
-					title: json?.message ?? 'Nutzer wurde gelöscht.',
-					variant: 'success',
-				})
+				toast.success(json?.message ?? 'Nutzer wurde gelöscht.')
 				router.refresh()
 			} else {
-				toast({
-					title: json?.error ?? 'Fehler beim Löschen',
-					variant: 'error',
-				})
+				toast.error(json?.error ?? 'Fehler beim Löschen')
 			}
 		} catch {
-			toast({ title: 'Netzwerkfehler', variant: 'error' })
+			toast.error('Netzwerkfehler')
 		} finally {
 			setDeleteLoadingId(null)
 		}
@@ -722,12 +709,9 @@ export default function AdminClient({
 															x.id === r.id ? { ...x, status: 'fulfilled' } : x,
 														),
 													)
-													toast({
-														title: '✅ Als erledigt markiert',
-														variant: 'success',
-													})
+													toast.success('✅ Als erledigt markiert')
 												} else {
-													toast({ title: 'Fehler', variant: 'error' })
+													toast.error('Fehler')
 												}
 											} finally {
 												setFulfilling(null)
