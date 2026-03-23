@@ -7,7 +7,14 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
 	adapter: PrismaAdapter(prisma),
-	session: { strategy: 'jwt' },
+	session: {
+		strategy: 'jwt',
+		// 60-minute session window; expiry is extended on active authenticated requests
+		maxAge: 60 * 60,
+	},
+	jwt: {
+		maxAge: 60 * 60,
+	},
 
 	pages: {
 		signIn: '/login',
