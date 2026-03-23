@@ -68,7 +68,7 @@ export function RequestFilters({
 				>
 					Alle Kategorien
 				</button>
-				{categories.map(({ value, label, icon }) => (
+				{categories.map(({ value, label, icon: Icon }) => (
 					<button
 						key={value}
 						onClick={() =>
@@ -81,7 +81,7 @@ export function RequestFilters({
 								: 'bg-[#ffffff] text-[#7a6050] border-[#ddd0be] hover:border-[#c8956c]',
 						)}
 					>
-						<icon className='w-4 h-4 shrink-0' />
+						<Icon className='w-4 h-4 shrink-0' />
 						{label}
 					</button>
 				))}
