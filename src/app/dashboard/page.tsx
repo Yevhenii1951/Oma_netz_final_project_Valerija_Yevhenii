@@ -295,7 +295,7 @@ export default async function DashboardPage() {
 				</div>
 
 				{/* ─── STATS ROW (senior/relative — right under name) ─── */}
-				{!isHelper && role !== 'ADMIN' && (
+				{!isHelper && (
 					<div className='grid grid-cols-3 gap-3 mb-6'>
 						<StatCard
 							label='Meine Anfragen'
