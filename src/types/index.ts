@@ -3,17 +3,6 @@
  * OMA-NETZ Kassel
  */
 
-import {
-	Car,
-	Cross,
-	type LucideIcon,
-	Footprints,
-	Heart,
-	House,
-	Laptop,
-	ShoppingCart,
-} from 'lucide-react'
-
 // ─── ENUMS ───────────────────────────────────────────────────────────────────
 
 export type Role = 'SENIOR' | 'HELPER' | 'RELATIVE' | 'ADMIN'
@@ -36,7 +25,7 @@ export type OfferStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED'
 export interface CategoryMeta {
 	value: RequestCategory
 	label: string
-	icon: LucideIcon
+	icon: string
 	color: string
 	bg: string
 }
@@ -45,49 +34,49 @@ export const CATEGORIES: CategoryMeta[] = [
 	{
 		value: 'EINKAUF',
 		label: 'Einkaufen',
-		icon: ShoppingCart,
+		icon: 'ph:shopping-cart-bold',
 		color: 'text-emerald-700',
 		bg: 'bg-emerald-50',
 	},
 	{
 		value: 'ARZT',
 		label: 'Arzttermin',
-		icon: Cross,
+		icon: 'ph:first-aid-bold',
 		color: 'text-rose-700',
 		bg: 'bg-rose-50',
 	},
 	{
 		value: 'SPAZIERGANG',
 		label: 'Spaziergang',
-		icon: Footprints,
+		icon: 'ph:person-simple-walk-bold',
 		color: 'text-sky-700',
 		bg: 'bg-sky-50',
 	},
 	{
 		value: 'TECHNIK',
 		label: 'Technik',
-		icon: Laptop,
+		icon: 'ph:laptop-bold',
 		color: 'text-violet-700',
 		bg: 'bg-violet-50',
 	},
 	{
 		value: 'TRANSPORT',
 		label: 'Transport',
-		icon: Car,
+		icon: 'ph:car-bold',
 		color: 'text-amber-700',
 		bg: 'bg-amber-50',
 	},
 	{
 		value: 'HAUSHALT',
 		label: 'Haushalt',
-		icon: House,
+		icon: 'ph:house-bold',
 		color: 'text-[#6b4226]',
 		bg: 'bg-[#e8d5be]',
 	},
 	{
 		value: 'ANDERES',
 		label: 'Anderes',
-		icon: Heart,
+		icon: 'ph:heart-bold',
 		color: 'text-slate-700',
 		bg: 'bg-slate-50',
 	},

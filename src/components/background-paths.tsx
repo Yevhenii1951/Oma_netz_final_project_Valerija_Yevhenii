@@ -20,8 +20,9 @@ interface PathData {
 	width: number
 }
 
-const generateUniqueId = (prefix: string) =>
-	`${prefix}-${Math.random().toString(36).substr(2, 9)}`
+function fmt(n: number): string {
+	return n.toFixed(3)
+}
 
 function generateAestheticPath(
 	index: number,
@@ -58,14 +59,14 @@ function generateAestheticPath(
 	}
 
 	const pathCommands = points.map((point: Point, i: number) => {
-		if (i === 0) return `M ${point.x} ${point.y}`
+		if (i === 0) return `M ${fmt(point.x)} ${fmt(point.y)}`
 		const prevPoint = points[i - 1]
 		const tension = 0.4
 		const cp1x = prevPoint.x + (point.x - prevPoint.x) * tension
 		const cp1y = prevPoint.y
 		const cp2x = prevPoint.x + (point.x - prevPoint.x) * (1 - tension)
 		const cp2y = point.y
-		return `C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${point.x} ${point.y}`
+		return `C ${fmt(cp1x)} ${fmt(cp1y)}, ${fmt(cp2x)} ${fmt(cp2y)}, ${fmt(point.x)} ${fmt(point.y)}`
 	})
 
 	return pathCommands.join(' ')
@@ -79,7 +80,7 @@ const FloatingPaths = memo(function FloatingPaths({
 	const primaryPaths: PathData[] = useMemo(
 		() =>
 			Array.from({ length: 12 }, (_, i) => ({
-				id: generateUniqueId('primary'),
+				id: `primary-${i}`,
 				d: generateAestheticPath(i, position, 'primary'),
 				opacity: 0.12 + i * 0.015,
 				width: 3.5 + i * 0.25,
@@ -90,7 +91,7 @@ const FloatingPaths = memo(function FloatingPaths({
 	const secondaryPaths: PathData[] = useMemo(
 		() =>
 			Array.from({ length: 15 }, (_, i) => ({
-				id: generateUniqueId('secondary'),
+				id: `secondary-${i}`,
 				d: generateAestheticPath(i, position, 'secondary'),
 				opacity: 0.08 + i * 0.012,
 				width: 2.5 + i * 0.2,
@@ -101,7 +102,7 @@ const FloatingPaths = memo(function FloatingPaths({
 	const accentPaths: PathData[] = useMemo(
 		() =>
 			Array.from({ length: 10 }, (_, i) => ({
-				id: generateUniqueId('accent'),
+				id: `accent-${i}`,
 				d: generateAestheticPath(i, position, 'accent'),
 				opacity: 0.06 + i * 0.01,
 				width: 1.5 + i * 0.15,

@@ -61,8 +61,9 @@ export default function RootLayout({
 			lang='de'
 			className={`${inter.variable} ${playfair.variable}`}
 			data-scroll-behavior='smooth'
+			suppressHydrationWarning
 		>
-			<body className='antialiased'>
+			<body className='antialiased' suppressHydrationWarning>
 				<Providers>
 					<Toaster>{children}</Toaster>
 				</Providers>
