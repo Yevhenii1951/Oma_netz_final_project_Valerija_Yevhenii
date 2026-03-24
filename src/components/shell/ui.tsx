@@ -2,6 +2,7 @@
 
 import { cn } from '@/lib/utils'
 import { CATEGORIES } from '@/types'
+import { Icon } from '@iconify/react'
 import { ChevronRight, Star } from 'lucide-react'
 import Link from 'next/link'
 
@@ -40,7 +41,6 @@ export function CategoryBadge({
 }) {
 	const meta = CATEGORIES.find(c => c.value === category)
 	if (!meta) return null
-	const CategoryIcon = meta.icon
 	const sizeClass = size === 'xs' ? 'text-xs px-1.5 py-0.5' : ''
 	return (
 		<span
@@ -52,7 +52,7 @@ export function CategoryBadge({
 				'inline-flex items-center gap-1',
 			)}
 		>
-			<CategoryIcon className='w-3.5 h-3.5 shrink-0' />
+			<Icon icon={meta.icon} className='w-3.5 h-3.5 shrink-0' />
 			{meta.label}
 		</span>
 	)
