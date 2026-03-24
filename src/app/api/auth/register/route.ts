@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
 					userId: admin.id,
 					title: `👤 Neue Registrierung: ${user.name}`,
 					body: `${user.name} hat sich als ${roleLabel} registriert.`,
-					link: '/admin',
+					link: '/dashboard',
 					read: false,
 				})),
 			})

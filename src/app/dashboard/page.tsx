@@ -1,6 +1,7 @@
 import { auth } from '@/auth'
 import { AiAssistantButton } from '@/components/ai-assistant'
 import { AlertBanners } from '@/components/alert-banners'
+import AdminClient from '@/app/admin/admin-client'
 import {
 	CategoryBadge,
 	EmptyState,
@@ -41,6 +42,136 @@ export default async function DashboardPage() {
 
 	const userId = session.user.id
 	const role = session.user.role
+
+	if (role === 'ADMIN') {
+		const [
+			userCount,
+			requestCount,
+			offerCount,
+			ratingCount,
+			openCount,
+			doneCount,
+			pendingHelpers,
+			allHelpersRaw,
+			allRequestsRaw,
+			allSeniorsRaw,
+			allRedemptionsRaw,
+		] = await Promise.all([
+			prisma.user.count(),
+			prisma.request.count(),
+			prisma.offer.count(),
+			prisma.rating.count(),
+			prisma.request.count({ where: { status: 'OPEN' } }),
+			prisma.request.count({ where: { status: 'DONE' } }),
+			prisma.user.findMany({
+				where: { role: 'HELPER', helperStatus: 'PENDING_REVIEW' },
+				orderBy: { createdAt: 'asc' },
+				select: {
+					id: true,
+					name: true,
+					email: true,
+					employmentType: true,
+					institution: true,
+					languages: true,
+					documentNumber: true,
+					registrationAddress: true,
+					phone: true,
+					plz: true,
+					createdAt: true,
+				},
+			}),
+			prisma.user.findMany({
+				where: { role: 'HELPER' },
+				orderBy: { createdAt: 'desc' },
+				select: {
+					id: true,
+					name: true,
+					email: true,
+					isBanned: true,
+					helperStatus: true,
+					ratingAvg: true,
+					helpCount: true,
+					points: true,
+					employmentType: true,
+					languages: true,
+					createdAt: true,
+				},
+			}),
+			prisma.request.findMany({
+				orderBy: { createdAt: 'desc' },
+				select: {
+					id: true,
+					title: true,
+					category: true,
+					status: true,
+					address: true,
+					createdAt: true,
+					senior: { select: { name: true } },
+					_count: { select: { offers: true } },
+				},
+			}),
+			prisma.user.findMany({
+				where: { role: { in: ['SENIOR', 'RELATIVE'] } },
+				orderBy: { createdAt: 'desc' },
+				select: {
+					id: true,
+					name: true,
+					email: true,
+					isBanned: true,
+					role: true,
+					phone: true,
+					plz: true,
+					ratingAvg: true,
+					createdAt: true,
+					_count: { select: { sentRequests: true } },
+				},
+			}),
+			prisma.redemption.findMany({
+				orderBy: { createdAt: 'desc' },
+				select: {
+					id: true,
+					createdAt: true,
+					status: true,
+					user: { select: { name: true, email: true } },
+					reward: { select: { title: true, pointsCost: true } },
+				},
+			}),
+		])
+
+		const ser = <T extends { createdAt: Date }>(arr: T[]) =>
+			arr.map(item => ({ ...item, createdAt: item.createdAt.toISOString() }))
+
+		const initialTab = pendingHelpers.length > 0 ? 'pending' : 'stats'
+
+		return (
+			<PageShell title='Admin Panel'>
+				<AdminClient
+					key={initialTab}
+					stats={{
+						userCount,
+						requestCount,
+						offerCount,
+						ratingCount,
+						openRequests: openCount,
+						doneRequests: doneCount,
+						pendingHelpers: pendingHelpers.length,
+					}}
+					pendingHelpers={ser(pendingHelpers)}
+					allHelpers={ser(allHelpersRaw)}
+					allRequests={ser(allRequestsRaw)}
+					allSeniors={allSeniorsRaw.map(u => ({
+						...u,
+						createdAt: u.createdAt.toISOString(),
+					}))}
+					redemptions={allRedemptionsRaw.map(r => ({
+						...r,
+						createdAt: r.createdAt.toISOString(),
+					}))}
+					initialTab={initialTab}
+				/>
+			</PageShell>
+		)
+	}
 
 	// Fetch user profile
 	const user = await prisma.user.findUnique({

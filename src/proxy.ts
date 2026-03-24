@@ -9,7 +9,6 @@ const protectedRoutes = [
 	'/profile',
 	'/chat',
 	'/rewards',
-	'/admin',
 ]
 // Routes only for unauthenticated users
 const authRoutes = ['/login', '/register']
@@ -37,11 +36,6 @@ export async function proxy(request: NextRequest) {
 	}
 
 	if (isAuthRoute && session) {
-		return NextResponse.redirect(new URL('/dashboard', request.url))
-	}
-
-	// Admin-only guard
-	if (pathname.startsWith('/admin') && session?.user.role !== 'ADMIN') {
 		return NextResponse.redirect(new URL('/dashboard', request.url))
 	}
 

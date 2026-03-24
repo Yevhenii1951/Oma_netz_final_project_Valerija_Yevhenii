@@ -81,7 +81,7 @@ export async function POST(req: Request) {
 						userId: admin.id,
 						title: '🎁 Belohnung eingelöst',
 						body: `${user?.name ?? 'Ein Nutzer'} hat "${reward.title}" gegen ${reward.pointsCost} Punkte eingelöst. Bitte prüfen und veranlassen.`,
-						link: '/admin',
+						link: '/dashboard',
 					},
 				}),
 			),

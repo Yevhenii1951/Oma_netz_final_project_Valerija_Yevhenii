@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/lib/utils'
-import { Lock, LogOut, Shield } from 'lucide-react'
+import { Lock, LogOut } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -101,24 +101,6 @@ export function Sidebar() {
 						)
 					})}
 
-				{/* Admin link */}
-				{session?.user.role === 'ADMIN' && (
-					<Link
-						href='/admin'
-						className={cn(
-							'group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
-							pathname.startsWith('/admin')
-								? 'bg-[#e8d5be] text-[#6b4226]'
-								: 'text-[#7a6050] hover:bg-[#ede3d4]',
-						)}
-					>
-						<Shield
-							size={18}
-							className='transition-transform duration-200 group-hover:scale-125 group-hover:rotate-6'
-						/>
-						<span>Administration</span>
-					</Link>
-				)}
 			</nav>
 
 			{/* Bottom: user card */}

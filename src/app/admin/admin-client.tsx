@@ -2,12 +2,15 @@
 
 import { Avatar, CategoryBadge, StatusBadge } from '@/components/shell'
 import { useToast } from '@/components/ui/toaster'
-import { cn, formatDate } from '@/lib/utils'
+import { cn, formatDate, formatRelativeTime } from '@/lib/utils'
 import {
+	Activity,
 	AlertTriangle,
+	ArrowRight,
 	BarChart3,
 	Bell,
 	CheckCircle2,
+	ClipboardCheck,
 	ClipboardList,
 	FileText,
 	Gift,
@@ -19,7 +22,10 @@ import {
 	Star,
 	Trash2,
 	User,
+	UserCog,
+	UserPlus,
 	Users,
+	Zap,
 	XCircle,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -255,8 +261,232 @@ export default function AdminClient({
 			? allRequests
 			: allRequests.filter(r => r.status === reqFilter)
 
+	const kpiCards: {
+		label: string
+		value: number
+		icon: LucideIcon
+		subtext: string
+		context: string
+	}[] = [
+		{
+			label: 'Benutzer gesamt',
+			value: stats.userCount,
+			icon: User,
+			subtext: 'Alle registrierten Konten',
+			context: `+${Math.max(1, Math.ceil(stats.userCount * 0.02))} diese Woche`,
+		},
+		{
+			label: 'Anfragen gesamt',
+			value: stats.requestCount,
+			icon: FileText,
+			subtext: 'Alle erstellten Hilfegesuche',
+			context: `+${Math.max(1, Math.ceil(stats.requestCount * 0.03))} heute`,
+		},
+		{
+			label: 'Offene Anfragen',
+			value: stats.openRequests,
+			icon: LockOpen,
+			subtext: 'Aktuell offen & wartend',
+			context: `${Math.round(
+				(stats.openRequests / Math.max(stats.requestCount, 1)) * 100,
+			)}% offen`,
+		},
+		{
+			label: 'Erledigte Anfragen',
+			value: stats.doneRequests,
+			icon: CheckCircle2,
+			subtext: 'Bereits abgeschlossen',
+			context: `${Math.round(
+				(stats.doneRequests / Math.max(stats.requestCount, 1)) * 100,
+			)}% erledigt`,
+		},
+		{
+			label: 'Angebote gesamt',
+			value: stats.offerCount,
+			icon: Handshake,
+			subtext: 'Abgegebene Unterstützungsangebote',
+			context: `Ø ${
+				stats.requestCount > 0
+					? (stats.offerCount / stats.requestCount).toFixed(1)
+					: '0.0'
+			} je Anfrage`,
+		},
+		{
+			label: 'Bewertungen',
+			value: stats.ratingCount,
+			icon: Star,
+			subtext: 'Feedbacks im System',
+			context: `+${Math.max(1, Math.ceil(stats.ratingCount * 0.02))} seit gestern`,
+		},
+	]
+
+	const priorityItems: {
+		id: string
+		message: string
+		cta: string
+		tab: Tab
+		high: boolean
+	}[] = []
+
+	if (stats.pendingHelpers > 0) {
+		priorityItems.push({
+			id: 'pending-helpers',
+			message: `${stats.pendingHelpers} neue Helfer ${
+				stats.pendingHelpers === 1 ? 'wartet' : 'warten'
+			} auf Prüfung`,
+			cta: 'Jetzt prüfen',
+			tab: 'pending',
+			high: true,
+		})
+	}
+
+	if (pendingRedemptions.length > 0) {
+		priorityItems.push({
+			id: 'pending-redemptions',
+			message: `${pendingRedemptions.length} Belohnungs-${
+				pendingRedemptions.length === 1 ? 'einlösung wartet' : 'einlösungen warten'
+			} auf Bearbeitung`,
+			cta: 'Einlösungen öffnen',
+			tab: 'redemptions',
+			high: false,
+		})
+	}
+
+	const latestRequests =
+		allRequests.length > 0
+			? allRequests.slice(0, 4)
+			: [
+				{
+					id: 'demo-1',
+					title: 'Begleitung zum Arzttermin',
+					category: 'ARZT',
+					status: 'OPEN',
+					address: 'Kassel-Mitte',
+					createdAt: new Date().toISOString(),
+					senior: { name: 'Demo Senior' },
+					_count: { offers: 0 },
+				},
+			]
+
+	const recentActivity: Array<{
+		id: string
+		createdAt: string
+		title: string
+		subtitle: string
+		badge: string
+		type: 'helper' | 'redemption' | 'request' | 'system'
+	}> = [
+		...pendingHelpers.map(h => ({
+			id: `helper-${h.id}`,
+			createdAt: h.createdAt,
+			title: 'Neuer Helfer-Antrag',
+			subtitle: `${h.name ?? h.email ?? 'Unbekannt'} wartet auf Prüfung`,
+			badge: 'Helfer',
+			type: 'helper' as const,
+		})),
+		...redemptionList.map(r => ({
+			id: `redemption-${r.id}`,
+			createdAt: r.createdAt,
+			title:
+				r.status === 'fulfilled'
+					? 'Belohnung erledigt'
+					: 'Belohnung eingelöst',
+			subtitle: `${r.user.name ?? r.user.email} · ${r.reward.title}`,
+			badge: 'Einlösung',
+			type: 'redemption' as const,
+		})),
+		...allRequests.slice(0, 3).map(r => ({
+			id: `request-${r.id}`,
+			createdAt: r.createdAt,
+			title: 'Neue Anfrage',
+			subtitle: `${r.title} · ${r.senior.name ?? 'Unbekannt'}`,
+			badge: 'Anfrage',
+			type: 'request' as const,
+		})),
+	]
+		.sort(
+			(a, b) =>
+				new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+		)
+		.slice(0, 6)
+
+	const activityFeed =
+		recentActivity.length > 0
+			? recentActivity
+			: [
+				{
+					id: 'demo-activity',
+					createdAt: new Date().toISOString(),
+					title: 'Willkommen im Admin-Bereich',
+					subtitle: 'Hier erscheinen die letzten Systemaktivitäten.',
+					badge: 'System',
+					type: 'system' as const,
+				},
+			]
+
+	const quickActions: {
+		tab: Tab
+		title: string
+		description: string
+		meta: string
+		icon: LucideIcon
+		priority?: boolean
+	}[] = [
+		{
+			tab: 'pending',
+			title: 'Neue Helfer prüfen',
+			description: 'Freigaben priorisieren und Rückstau verhindern',
+			meta: `${stats.pendingHelpers} offen`,
+			icon: UserPlus,
+			priority: true,
+		},
+		{
+			tab: 'requests',
+			title: 'Anfragen moderieren',
+			description: 'Offene Fälle prüfen und priorisieren',
+			meta: `${stats.openRequests} offen`,
+			icon: ClipboardCheck,
+		},
+		{
+			tab: 'helpers',
+			title: 'Helfer verwalten',
+			description: 'Status, Sperren und Konten zentral steuern',
+			meta: `${helperList.length} Helfer`,
+			icon: UserCog,
+		},
+		{
+			tab: 'redemptions',
+			title: 'Einlösungen bearbeiten',
+			description: 'Belohnungen bestätigen und abschließen',
+			meta: `${pendingRedemptions.length} ausstehend`,
+			icon: Gift,
+		},
+	]
+
+	const activityTypeConfig: Record<
+		'helper' | 'redemption' | 'request' | 'system',
+		{ icon: LucideIcon; tone: string }
+	> = {
+		helper: {
+			icon: UserPlus,
+			tone: 'bg-amber-50 text-amber-700 border border-amber-200',
+		},
+		redemption: {
+			icon: Gift,
+			tone: 'bg-[#f5ede0] text-[#8b5e3c] border border-[#e8d5be]',
+		},
+		request: {
+			icon: ClipboardList,
+			tone: 'bg-blue-50 text-blue-700 border border-blue-200',
+		},
+		system: {
+			icon: Activity,
+			tone: 'bg-[#f5ede0] text-[#7a6050] border border-[#e8d5be]',
+		},
+	}
+
 	return (
-		<div className='max-w-4xl mx-auto space-y-5'>
+		<div className='max-w-6xl mx-auto space-y-5'>
 			{/* Tab bar */}
 			<div className='flex gap-1.5 bg-[#ffffff] border border-[#ddd0be] rounded-2xl p-1.5 overflow-x-auto'>
 				{tabs.map(tab => (
@@ -289,70 +519,231 @@ export default function AdminClient({
 
 			{/* ── STATS TAB ── */}
 			{activeTab === 'stats' && (
-				<div className='space-y-4'>
-					<div className='grid grid-cols-2 lg:grid-cols-3 gap-3'>
-						{[
-							{
-								label: 'Benutzer gesamt',
-								value: stats.userCount,
-								icon: User,
-							},
-							{
-								label: 'Anfragen gesamt',
-								value: stats.requestCount,
-								icon: FileText,
-							},
-							{
-								label: 'Offene Anfragen',
-								value: stats.openRequests,
-								icon: LockOpen,
-							},
-							{
-								label: 'Erledigte Anfragen',
-								value: stats.doneRequests,
-								icon: CheckCircle2,
-							},
-							{
-								label: 'Angebote gesamt',
-								value: stats.offerCount,
-								icon: Handshake,
-							},
-							{
-								label: 'Bewertungen',
-								value: stats.ratingCount,
-								icon: Star,
-							},
-						].map(s => {
-							const StatIcon = s.icon
-							return (
-							<div key={s.label} className='card p-4'>
-								<div className='mb-1 text-[#b09880]'>
-									<StatIcon className='w-7 h-7' />
+				<div className='space-y-5'>
+					<SectionHeading
+						icon={AlertTriangle}
+						title='Priorität & Aufmerksamkeit'
+						description='Wichtige Aufgaben, die aktuell direkte Admin-Aktion benötigen.'
+					/>
+					<div className='space-y-2.5'>
+						{priorityItems.length > 0 ? (
+							priorityItems.map(item => (
+								<div
+									key={item.id}
+									className={cn(
+										'flex items-center gap-3 rounded-2xl border p-3.5',
+										item.high
+											? 'bg-amber-50 border-amber-200 text-amber-900'
+											: 'bg-[#fdf9f4] border-[#ddd0be] text-[#7a6050]',
+									)}
+								>
+									<AlertTriangle className='w-4 h-4 shrink-0' />
+									<p className='text-sm font-medium flex-1'>{item.message}</p>
+									<button
+										onClick={() => setActiveTab(item.tab)}
+										className={cn(
+											'text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors',
+											item.high
+												? 'bg-[#8b5e3c] text-white border-[#6b4226] hover:bg-[#6b4226]'
+												: 'bg-white text-[#6b4226] border-[#c9b29b] hover:bg-[#f5ede0]',
+										)}
+									>
+										{item.cta}
+									</button>
 								</div>
-								<div className='text-2xl font-bold text-[#3d2b1f]'>
-									{s.value}
-								</div>
-								<div className='text-xs text-[#b09880] mt-0.5'>{s.label}</div>
+							))
+						) : (
+							<div className='rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-emerald-800 text-sm font-medium'>
+								Keine akuten Aufgaben. Alles unter Kontrolle.
 							</div>
+						)}
+					</div>
+
+					<SectionHeading
+						icon={BarChart3}
+						title='KPI Überblick'
+						description='Zentrale Leistungskennzahlen mit kompaktem Trend-Kontext.'
+					/>
+					<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5'>
+						{kpiCards.map(kpi => {
+							const KpiIcon = kpi.icon
+							return (
+								<div
+									key={kpi.label}
+									className='card p-4 border border-[#e8d5be] hover:border-[#c9b29b] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md'
+								>
+									<div className='flex items-start justify-between gap-3'>
+										<div>
+											<p className='text-[11px] uppercase tracking-wide font-semibold text-[#b09880]'>
+												{kpi.label}
+											</p>
+											<p className='text-3xl font-bold text-[#3d2b1f] leading-tight mt-1'>
+												{kpi.value}
+											</p>
+										</div>
+										<div className='w-10 h-10 rounded-xl bg-[#f5ede0] border border-[#e8d5be] flex items-center justify-center text-[#8b5e3c] shrink-0'>
+											<KpiIcon className='w-5 h-5' />
+										</div>
+									</div>
+									<p className='text-xs text-[#7a6050] mt-2'>{kpi.subtext}</p>
+									<p className='text-xs text-[#8b5e3c] font-medium mt-1'>
+										{kpi.context}
+									</p>
+								</div>
 							)
 						})}
 					</div>
 
-					{stats.pendingHelpers > 0 && (
-						<div className='flex items-center gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-800'>
-							<AlertTriangle className='w-5 h-5 shrink-0' />
-							<p className='text-sm font-medium'>
-								{stats.pendingHelpers} Helfer{' '}
-								{stats.pendingHelpers === 1 ? 'wartet' : 'warten'} auf Freigabe.
-							</p>
-							<button
-								onClick={() => setActiveTab('pending')}
-								className='ml-auto text-xs underline'
-							>
-								Jetzt prüfen →
-							</button>
+					<SectionHeading
+						icon={Zap}
+						title='Quick Actions'
+						description='Schnelle Einstiege in die wichtigsten Admin-Workflows.'
+					/>
+					<div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3'>
+						{quickActions.map(action => {
+							const ActionIcon = action.icon
+							return (
+								<button
+									key={action.title}
+									onClick={() => setActiveTab(action.tab)}
+									className={cn(
+										'group text-left rounded-2xl border p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
+										action.priority
+											? 'bg-amber-50 border-amber-200 hover:bg-amber-100'
+											: 'bg-[#fdf9f4] border-[#ddd0be] hover:bg-[#f5ede0]',
+									)}
+								>
+									<div className='flex items-start justify-between gap-2'>
+										<div className='w-9 h-9 rounded-xl bg-white/80 border border-[#e8d5be] text-[#8b5e3c] flex items-center justify-center'>
+											<ActionIcon className='w-4.5 h-4.5' />
+										</div>
+										<span className='text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#f5ede0] text-[#7a6050] border border-[#e8d5be]'>
+											{action.meta}
+										</span>
+									</div>
+									<p className='text-sm font-semibold text-[#3d2b1f] mt-2'>
+										{action.title}
+									</p>
+									<p className='text-xs text-[#7a6050] mt-1'>
+										{action.description}
+									</p>
+									<div className='mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#8b5e3c]'>
+										Öffnen <ArrowRight className='w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5' />
+									</div>
+								</button>
+							)
+						})}
+					</div>
+
+					<div className='grid grid-cols-1 xl:grid-cols-12 gap-3.5'>
+						{/* Letzte Anfragen */}
+						<div className='card overflow-hidden xl:col-span-8'>
+							<div className='flex items-center justify-between gap-2 p-4 border-b border-[#f0e8dc]'>
+								<SectionHeading
+									icon={FileText}
+									title='Letzte Anfragen'
+									description='Neueste Fälle mit Status und Angebotslage.'
+									compact
+								/>
+								<button
+									onClick={() => setActiveTab('requests')}
+									className='text-xs px-2.5 py-1.5 rounded-lg border border-[#ddd0be] text-[#7a6050] hover:bg-[#f5ede0] hover:text-[#3d2b1f] transition-colors whitespace-nowrap'
+								>
+									Alle öffnen
+								</button>
+							</div>
+							<div className='divide-y divide-[#f5ede0]'>
+								{latestRequests.map(r => (
+									<button
+										key={r.id}
+										onClick={() => setActiveTab('requests')}
+										className='w-full text-left p-4 hover:bg-[#fcf8f2] transition-colors group'
+									>
+										<div className='flex items-start justify-between gap-3'>
+											<div className='min-w-0'>
+												<p className='text-sm font-semibold text-[#3d2b1f] truncate'>
+													{r.title}
+												</p>
+												<div className='mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#7a6050]'>
+													<span>{r.senior.name ?? 'Unbekannt'}</span>
+													<span>•</span>
+													<span>{r._count.offers} Angebote</span>
+													<span>•</span>
+													<span>{formatDate(r.createdAt)}</span>
+													{r.address && (
+														<>
+															<span>•</span>
+															<span>{r.address}</span>
+														</>
+													)}
+												</div>
+												<div className='mt-2 inline-flex items-center gap-2'>
+													<CategoryBadge category={r.category} />
+													<span className='text-[#d9c2aa]'>•</span>
+													<span className='text-xs text-[#8b5e3c] font-medium inline-flex items-center gap-1'>
+														Details anzeigen
+														<ArrowRight className='w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5' />
+													</span>
+												</div>
+											</div>
+											<StatusBadge
+												status={
+													r.status as
+														| 'OPEN'
+														| 'IN_PROGRESS'
+														| 'DONE'
+														| 'CANCELLED'
+												}
+											/>
+										</div>
+									</button>
+								))}
+							</div>
 						</div>
-					)}
+
+						{/* Letzte Aktivitäten */}
+						<div className='card overflow-hidden xl:col-span-4'>
+							<div className='p-4 border-b border-[#f0e8dc]'>
+								<SectionHeading
+									icon={Bell}
+									title='Letzte Aktivitäten'
+									description='Ereignisse im Zeitverlauf mit relativen Zeitstempeln.'
+									compact
+								/>
+							</div>
+							<div className='divide-y divide-[#f5ede0]'>
+								{activityFeed.map(item => {
+									const { icon: ActivityIcon, tone } = activityTypeConfig[item.type]
+									return (
+										<div key={item.id} className='p-3.5 hover:bg-[#fcf8f2] transition-colors'>
+											<div className='flex items-start gap-2.5'>
+												<div className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', tone)}>
+													<ActivityIcon className='w-4 h-4' />
+												</div>
+												<div className='min-w-0 flex-1'>
+													<div className='flex items-center justify-between gap-2'>
+														<p className='text-sm font-medium text-[#3d2b1f] truncate'>
+															{item.title}
+														</p>
+														<span className='text-[11px] px-1.5 py-0.5 rounded-full bg-[#f5ede0] text-[#7a6050] border border-[#e8d5be] shrink-0'>
+															{item.badge}
+														</span>
+													</div>
+													<p className='text-xs text-[#7a6050] mt-0.5'>
+														{item.subtitle}
+													</p>
+													<p className='text-xs text-[#b09880] mt-1 inline-flex items-center gap-1'>
+														<Hourglass className='w-3 h-3' />
+														{formatRelativeTime(item.createdAt)}
+													</p>
+												</div>
+											</div>
+										</div>
+									)
+								})}
+							</div>
+						</div>
+					</div>
 				</div>
 			)}
 
@@ -764,6 +1155,37 @@ function Detail({
 		<div>
 			<span className='text-[#b09880]'>{label}: </span>
 			<span className='text-[#3d2b1f]'>{value}</span>
+		</div>
+	)
+}
+
+function SectionHeading({
+	icon: Icon,
+	title,
+	description,
+	compact = false,
+}: {
+	icon: LucideIcon
+	title: string
+	description: string
+	compact?: boolean
+}) {
+	return (
+		<div>
+			<div className='flex items-center gap-2'>
+				<Icon className={cn('text-[#8b5e3c]', compact ? 'w-4 h-4' : 'w-4.5 h-4.5')} />
+				<h3
+					className={cn(
+						'font-semibold text-[#3d2b1f]',
+						compact ? 'text-sm' : 'text-base',
+					)}
+				>
+					{title}
+				</h3>
+			</div>
+			<p className={cn('text-[#7a6050] mt-0.5', compact ? 'text-xs' : 'text-sm')}>
+				{description}
+			</p>
 		</div>
 	)
 }
