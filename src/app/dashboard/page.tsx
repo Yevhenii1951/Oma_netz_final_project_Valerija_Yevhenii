@@ -232,11 +232,13 @@ export default async function DashboardPage() {
 
 	// Count completed requests for senior/relative
 	const doneCount =
-		role !== 'HELPER' && role !== 'ADMIN'
+		role === 'SENIOR' || role === 'RELATIVE'
 			? await prisma.request.count({
 					where: { seniorId: userId, status: 'DONE' },
 				})
 			: 0
+	const showOpenRequestsFeed =
+		role === 'HELPER' && user?.helperStatus === 'APPROVED'
 
 	const isHelper = role === 'HELPER'
 	const greeting = getGreeting()
@@ -574,7 +576,7 @@ export default async function DashboardPage() {
 				)}
 
 				{/* ─── OPEN REQUESTS FEED ─── */}
-				{(!isHelper || user?.helperStatus === 'APPROVED') && (
+				{showOpenRequestsFeed && (
 					<section>
 						<div className='flex items-center justify-between mb-4'>
 							<h2 className='font-bold text-[#3d2b1f]'>

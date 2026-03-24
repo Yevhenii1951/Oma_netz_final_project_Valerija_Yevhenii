@@ -14,9 +14,10 @@ export function Sidebar() {
 	const pathname = usePathname()
 	const { data: session } = useSession()
 	const [showBlock, setShowBlock] = useState(false)
+	const role = session?.user.role
 
 	const isPendingHelper =
-		session?.user.role === 'HELPER' && session?.user.helperStatus !== 'APPROVED'
+		role === 'HELPER' && session?.user.helperStatus !== 'APPROVED'
 
 	function isLocked(href: string) {
 		if (!isPendingHelper) return false
@@ -45,16 +46,14 @@ export function Sidebar() {
 				{navItems
 					.filter(
 						item =>
+							!(item.href === '/requests/new' && role === 'ADMIN') &&
 							!(
 								item.href === '/rewards' &&
-								(session?.user.role === 'ADMIN' ||
-									session?.user.role === 'SENIOR' ||
-									session?.user.role === 'RELATIVE')
+								(role === 'ADMIN' || role === 'SENIOR' || role === 'RELATIVE')
 							) &&
 							!(
 								item.href === '/map' &&
-								(session?.user.role === 'SENIOR' ||
-									session?.user.role === 'RELATIVE')
+								(role === 'SENIOR' || role === 'RELATIVE')
 							),
 					)
 					.map(({ href, icon: Icon, label, primary }) => {
