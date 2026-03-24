@@ -10,7 +10,8 @@ import { prisma } from '@/lib/prisma'
 import { getRoleUiTokens } from '@/lib/role-ui'
 import { formatDate, formatRelativeTime } from '@/lib/utils'
 import { CATEGORIES } from '@/types'
-import { Calendar, Heart, MapPin, PlusCircle, Users, type LucideIcon } from 'lucide-react'
+import { Icon } from '@iconify/react'
+import { Calendar, MapPin, PlusCircle, Users } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -89,7 +90,6 @@ export default async function RequestsPage({ searchParams }: Props) {
 								const { cardAccent, iconBg, rolePill, roleLabel, descBorder } =
 									getRoleUiTokens(srole)
 								const helperCardBg = srole === 'HELPER' ? '!bg-[#f0faf4]' : ''
-								const CategoryIcon = getCategoryIcon(req.category)
 								return (
 									<Link
 										key={req.id}
@@ -101,7 +101,10 @@ export default async function RequestsPage({ searchParams }: Props) {
 											<div
 												className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-colors ${iconBg}`}
 											>
-												<CategoryIcon className='w-6 h-6' />
+												<Icon
+													icon={getCategoryIcon(req.category)}
+													className='w-6 h-6'
+												/>
 											</div>
 
 											{/* Content */}
@@ -193,6 +196,15 @@ export default async function RequestsPage({ searchParams }: Props) {
 	)
 }
 
-function getCategoryIcon(category: string): LucideIcon {
-	return CATEGORIES.find(item => item.value === category)?.icon ?? Heart
+function getCategoryIcon(category: string): string {
+	const icons: Record<string, string> = {
+		EINKAUF: 'ph:shopping-cart-bold',
+		ARZT: 'ph:first-aid-bold',
+		SPAZIERGANG: 'ph:person-simple-walk-bold',
+		TECHNIK: 'ph:laptop-bold',
+		TRANSPORT: 'ph:car-bold',
+		HAUSHALT: 'ph:house-bold',
+		ANDERES: 'ph:heart-bold',
+	}
+	return icons[category] ?? 'ph:heart-bold'
 }
