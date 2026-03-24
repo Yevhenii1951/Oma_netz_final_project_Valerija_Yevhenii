@@ -1,222 +1,210 @@
-'use client'
-
-import { PageShell } from '@/components/shell'
-import { useToast } from '@/components/ui/toaster'
-import { cn } from '@/lib/utils'
+import { auth } from '@/auth'
+import { RequestFilters } from '@/components/request-filters'
+import {
+	CategoryBadge,
+	EmptyState,
+	PageShell,
+	StatusBadge,
+} from '@/components/shell'
+import { prisma } from '@/lib/prisma'
+import { getRoleUiTokens } from '@/lib/role-ui'
+import { formatDate, formatRelativeTime } from '@/lib/utils'
 import { CATEGORIES } from '@/types'
-import { motion } from 'framer-motion'
-import { AlignLeft, Clock, FileText, Loader2, MapPin } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { Icon } from '@iconify/react'
+import { Calendar, MapPin, PlusCircle, Users } from 'lucide-react'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
 
-const TIME_OPTIONS = [
-	'Flexibel (jederzeit)',
-	'Morgen früh',
-	'Heute Nachmittag',
-	'Heute Abend',
-	'Diese Woche',
-	'Nächste Woche',
-]
+export const metadata = { title: 'Anfragen' }
 
-export default function NewRequestPage() {
-	const router = useRouter()
-	const { toast } = useToast()
-	const [isSubmitting, setIsSubmitting] = useState(false)
-	const [error, setError] = useState('')
-	const [form, setForm] = useState({
-		title: '',
-		description: '',
-		category: '',
-		address: '',
-		plz: '',
-		desiredTime: 'Flexibel (jederzeit)',
+interface Props {
+	searchParams: Promise<{ category?: string; status?: string; mine?: string }>
+}
+
+export default async function RequestsPage({ searchParams }: Props) {
+	const session = await auth()
+	if (!session?.user) redirect('/login')
+
+	const params = await searchParams
+	const category = params.category as string | undefined
+	const status = params.status ?? 'OPEN'
+	const mineOnly = params.mine === 'true'
+
+	const where: Record<string, unknown> = {}
+	if (status !== 'ALL') where.status = status
+	if (category) where.category = category
+	if (mineOnly) where.seniorId = session.user.id
+
+	const requests = await prisma.request.findMany({
+		where,
+		orderBy: { createdAt: 'desc' },
+		take: 50,
+		include: {
+			senior: { select: { id: true, name: true, image: true, role: true } },
+			_count: { select: { offers: true } },
+		},
 	})
 
-	function set(key: string, value: string) {
-		setForm(prev => ({ ...prev, [key]: value }))
-	}
-
-	async function handleSubmit(e: React.FormEvent) {
-		e.preventDefault()
-		if (!form.category) {
-			setError('Bitte wählen Sie eine Kategorie.')
-			return
-		}
-		setIsSubmitting(true)
-		setError('')
-
-		try {
-			const res = await fetch('/api/requests', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(form),
-			})
-			const json = await res.json()
-			if (!res.ok) throw new Error(json.error || 'Fehler beim Erstellen')
-			const created = json.data ?? json
-			toast({ title: '📝 Anfrage erstellt!', variant: 'success' })
-			router.push(`/requests/${created.id}`)
-		} catch (err: unknown) {
-			setError(
-				err instanceof Error ? err.message : 'Ein Fehler ist aufgetreten',
-			)
-			setIsSubmitting(false)
-		}
-	}
-
 	return (
-		<PageShell title='Hilfe anfragen'>
-			<motion.div
-				initial={{ opacity: 0, y: 16 }}
-				animate={{ opacity: 1, y: 0 }}
-				className='max-w-xl mx-auto'
-			>
-				<p className='text-[#7a6050] mb-6 text-sm'>
-					Beschreiben Sie, wobei Sie Hilfe benötigen. Freiwillige in Ihrer Nähe
-					werden benachrichtigt.
-				</p>
-
-				<form onSubmit={handleSubmit} className='space-y-6'>
-					{/* Kategorie */}
+		<PageShell title='Anfragen'>
+			<div className='max-w-4xl mx-auto px-4 py-8'>
+				<div className='flex items-center justify-between mb-6'>
 					<div>
-						<label className='block text-sm font-semibold text-[#3d2b1f] mb-3'>
-							Kategorie <span className='text-[#8b5e3c]'>*</span>
-						</label>
-						<div className='grid grid-cols-2 sm:grid-cols-4 gap-2'>
-							{CATEGORIES.map(cat => {
-								const CategoryIcon = cat.icon
+						<h1 className='text-2xl font-bold text-[#3d2b1f]'>
+							{mineOnly ? 'Meine Anfragen' : 'Alle Anfragen'}
+						</h1>
+						<p className='text-[#7a6050] text-sm mt-0.5'>
+							{requests.length} {requests.length === 1 ? 'Anfrage' : 'Anfragen'}{' '}
+							gefunden
+						</p>
+					</div>
+					<Link href='/requests/new' className='btn-primary'>
+						<PlusCircle size={16} /> Neu
+					</Link>
+				</div>
+
+				{/* Filters */}
+				<RequestFilters
+					categories={CATEGORIES}
+					currentCategory={category}
+					currentStatus={status}
+				/>
+
+				{/* List */}
+				<div className='mt-6'>
+					{requests.length === 0 ? (
+						<EmptyState
+							icon='📋'
+							title='Keine Anfragen gefunden'
+							description='Ändere die Filter oder erstelle eine neue Anfrage.'
+							action={
+								<Link href='/requests/new' className='btn-primary'>
+									<PlusCircle size={16} /> Erste Anfrage erstellen
+								</Link>
+							}
+						/>
+					) : (
+						<div className='space-y-3'>
+							{requests.map(req => {
+								const srole = req.senior.role
+								const { cardAccent, iconBg, rolePill, roleLabel, descBorder } =
+									getRoleUiTokens(srole)
+								const helperCardBg = srole === 'HELPER' ? '!bg-[#f0faf4]' : ''
 								return (
-								<button
-									key={cat.value}
-									type='button'
-									onClick={() => set('category', cat.value)}
-									className={cn(
-										'flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-all text-center',
-										form.category === cat.value
-											? 'border-[#8b5e3c] bg-[#f5ede0]'
-											: 'border-[#ddd0be] bg-[#ffffff] hover:border-[#c8956c]',
-									)}
-								>
-									<CategoryIcon className='w-7 h-7' />
-									<span className='text-xs font-medium text-[#3d2b1f] leading-tight'>
-										{cat.label}
-									</span>
-								</button>
+									<Link
+										key={req.id}
+										href={`/requests/${req.id}`}
+										className={`card p-4 md:p-5 card-hover block group animate-fade-in ${cardAccent} ${helperCardBg}`}
+									>
+										<div className='flex items-start gap-4'>
+											{/* Category icon */}
+											<div
+												className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-colors ${iconBg}`}
+											>
+												<Icon
+													icon={getCategoryIcon(req.category)}
+													className='w-6 h-6'
+												/>
+											</div>
+
+											{/* Content */}
+											<div className='flex-1 min-w-0'>
+												<div className='flex items-start gap-2 flex-wrap'>
+													<h3 className='font-semibold text-[#3d2b1f] text-base group-hover:text-[#6b4226] transition-colors flex-1'>
+														{req.title}
+													</h3>
+													<div className='flex gap-2 shrink-0 items-center'>
+														<span
+															className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${rolePill}`}
+														>
+															{roleLabel}
+														</span>
+														<CategoryBadge category={req.category as string} />
+														<StatusBadge
+															status={
+																req.status as
+																	| 'OPEN'
+																	| 'IN_PROGRESS'
+																	| 'DONE'
+																	| 'CANCELLED'
+															}
+														/>
+													</div>
+												</div>
+
+												{/* Description — expressive */}
+												{req.description && (
+													<div className={`mt-2 pl-3 border-l-2 ${descBorder}`}>
+														<p className='text-[#7a6050] text-sm italic line-clamp-2 leading-relaxed'>
+															{req.description}
+														</p>
+													</div>
+												)}
+
+												<div className='flex items-center gap-4 mt-3 flex-wrap'>
+													<span className='flex items-center gap-1.5 text-xs text-[#b09880]'>
+														<MapPin size={12} className='text-[#b09880]' />
+														{req.address}
+													</span>
+													{req.desiredTime && (
+														<span className='flex items-center gap-1.5 text-xs text-[#b09880]'>
+															<Calendar size={12} className='text-[#b09880]' />
+															{formatDate(req.desiredTime, {
+																day: '2-digit',
+																month: 'short',
+																hour: '2-digit',
+																minute: '2-digit',
+															})}
+														</span>
+													)}
+													<span
+														className={`flex items-center gap-1.5 text-xs ${
+															req._count.offers > 0 &&
+															req.status === 'OPEN' &&
+															req.senior.id === session.user.id
+																? 'text-[#8b5e3c] font-semibold'
+																: 'text-[#b09880]'
+														}`}
+													>
+														{req._count.offers > 0 &&
+														req.status === 'OPEN' &&
+														req.senior.id === session.user.id ? (
+															<span className='relative flex h-2 w-2 mr-0.5'>
+																<span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-[#c8956c] opacity-75' />
+																<span className='relative inline-flex rounded-full h-2 w-2 bg-[#8b5e3c]' />
+															</span>
+														) : (
+															<Users size={12} className='text-[#b09880]' />
+														)}
+														{req._count.offers}{' '}
+														{req._count.offers === 1 ? 'Angebot' : 'Angebote'}
+													</span>
+													<span className='text-xs text-[#b09880]'>
+														{formatRelativeTime(req.createdAt)}
+													</span>
+												</div>
+											</div>
+										</div>
+									</Link>
 								)
 							})}
 						</div>
-					</div>
-
-					{/* Titel */}
-					<div>
-						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
-							<FileText className='inline w-4 h-4 mr-1 text-[#b09880]' />
-							Kurze Beschreibung <span className='text-[#8b5e3c]'>*</span>
-						</label>
-						<input
-							type='text'
-							className='input-field'
-							placeholder='z.B. Begleitung zum Arzt am Dienstag'
-							value={form.title}
-							onChange={e => set('title', e.target.value)}
-							required
-							maxLength={120}
-						/>
-					</div>
-
-					{/* Beschreibung */}
-					<div>
-						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
-							<AlignLeft className='inline w-4 h-4 mr-1 text-[#b09880]' />
-							Detaillierte Beschreibung
-						</label>
-						<textarea
-							className='input-field resize-none'
-							rows={3}
-							placeholder='Weitere Details (optional)'
-							value={form.description}
-							onChange={e => set('description', e.target.value)}
-							maxLength={500}
-						/>
-					</div>
-
-					{/* Adresse */}
-					<div className='grid grid-cols-[1fr_auto] gap-3'>
-						<div>
-							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
-								<MapPin className='inline w-4 h-4 mr-1 text-[#b09880]' />
-								Straße &amp; Hausnummer
-							</label>
-							<input
-								type='text'
-								className='input-field'
-								placeholder='Königsplatz 1'
-								value={form.address}
-								onChange={e => set('address', e.target.value)}
-							/>
-						</div>
-						<div>
-							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
-								PLZ
-							</label>
-							<input
-								type='text'
-								className='input-field w-24'
-								placeholder='34117'
-								value={form.plz}
-								onChange={e => set('plz', e.target.value)}
-								maxLength={5}
-							/>
-						</div>
-					</div>
-
-					{/* Wunschzeit */}
-					<div>
-						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
-							<Clock className='inline w-4 h-4 mr-1 text-[#b09880]' />
-							Wunschzeit
-						</label>
-						<div className='flex flex-wrap gap-2'>
-							{TIME_OPTIONS.map(t => (
-								<button
-									key={t}
-									type='button'
-									onClick={() => set('desiredTime', t)}
-									className={cn(
-										'text-sm rounded-full px-4 py-1.5 border transition-all',
-										form.desiredTime === t
-											? 'bg-[#8b5e3c] text-[#ffffff] border-[#8b5e3c]'
-											: 'bg-[#ffffff] text-[#7a6050] border-[#ddd0be] hover:border-[#c8956c]',
-									)}
-								>
-									{t}
-								</button>
-							))}
-						</div>
-					</div>
-
-					{error && (
-						<div className='bg-red-50 text-red-600 text-sm rounded-xl p-3 border border-red-100'>
-							{error}
-						</div>
 					)}
-
-					<button
-						type='submit'
-						disabled={isSubmitting || !form.title}
-						className='btn-primary w-full py-3 text-base'
-					>
-						{isSubmitting ? (
-							<>
-								<Loader2 className='inline w-4 h-4 mr-2 animate-spin' />
-								Wird gesendet…
-							</>
-						) : (
-							'Hilfe anfragen ✓'
-						)}
-					</button>
-				</form>
-			</motion.div>
+				</div>
+			</div>
 		</PageShell>
 	)
+}
+
+function getCategoryIcon(category: string): string {
+	const icons: Record<string, string> = {
+		EINKAUF: 'ph:shopping-cart-bold',
+		ARZT: 'ph:first-aid-bold',
+		SPAZIERGANG: 'ph:person-simple-walk-bold',
+		TECHNIK: 'ph:laptop-bold',
+		TRANSPORT: 'ph:car-bold',
+		HAUSHALT: 'ph:house-bold',
+		ANDERES: 'ph:heart-bold',
+	}
+	return icons[category] ?? 'ph:heart-bold'
 }
