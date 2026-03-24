@@ -1,0 +1,10 @@
+{
+	"name": "OMA-NETZ Kassel",
+	"short_name": "OMA-NETZ",
+	"description": "Freiwillige Nachbarschaftshilfe für ältere Menschen in Kassel",
+	"start_url": "/",
+	"display": "standalone",
+	"background_color": "#f5ede0",
+	"theme_color": "#8b5e3c",
+	"icons": []
+}
