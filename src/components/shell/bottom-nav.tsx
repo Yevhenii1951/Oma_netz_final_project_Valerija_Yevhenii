@@ -13,6 +13,7 @@ export function BottomNav() {
 	const pathname = usePathname()
 	const { data: session } = useSession()
 	const [showBlock, setShowBlock] = useState(false)
+	const isAdminArea = pathname.startsWith('/admin')
 
 	const isPendingHelper =
 		session?.user.role === 'HELPER' && session?.user.helperStatus !== 'APPROVED'
@@ -31,6 +32,13 @@ export function BottomNav() {
 					{mobileItems
 						.filter(item => {
 							const role = session?.user.role
+							if (
+								isAdminArea &&
+								(item.href === '/dashboard' ||
+									item.href === '/requests/new' ||
+									item.href === '/chat')
+							)
+								return false
 							if (item.href === '/map' && role !== 'HELPER') return false
 							if (
 								item.href === '/rewards' &&
