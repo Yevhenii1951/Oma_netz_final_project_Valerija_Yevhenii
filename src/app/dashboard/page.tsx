@@ -320,7 +320,7 @@ export default async function DashboardPage() {
 						) : (
 							<>
 								<Link
-									href='/requests/new'
+									href='/requests?mine=true'
 									className='p-4 rounded-2xl bg-[#8b5e3c] flex items-center gap-3 hover:bg-[#6b4226] transition-colors group'
 								>
 									<div className='w-10 h-10 rounded-xl bg-[#ffffff]/20 flex items-center justify-center'>
@@ -334,7 +334,7 @@ export default async function DashboardPage() {
 									</div>
 								</Link>
 								<Link
-									href='/requests?mine=true'
+									href='/dashboard?openAi=1&voice=1'
 									className='card p-4 flex items-center gap-3 card-hover group bg-[#f5ede0] border-[#e8d5be]'
 								>
 									<div className='w-10 h-10 rounded-xl bg-[#e8d5be] flex items-center justify-center group-hover:bg-[#8b5e3c] transition-colors'>

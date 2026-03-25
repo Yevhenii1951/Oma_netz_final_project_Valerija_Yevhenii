@@ -46,6 +46,13 @@ export default async function RequestDetailPage({ params }: Props) {
 
 	if (!request) notFound()
 
+	if (
+		(session.user.role === 'SENIOR' || session.user.role === 'RELATIVE') &&
+		request.seniorId !== session.user.id
+	) {
+		redirect('/requests?mine=true')
+	}
+
 	const isOwner = session.user.id === request.seniorId
 	const isHelper = session.user.id !== request.seniorId
 	const isSameRole = request.senior.role === session.user.role
