@@ -115,7 +115,7 @@ export default async function AdminPage() {
 	const initialTab = pendingHelpers.length > 0 ? 'pending' : 'stats'
 
 	return (
-		<PageShell title='Admin Panel'>
+		<PageShell title='Admin Panel' hideSidebar>
 			<AdminClient
 				key={initialTab}
 				stats={{
