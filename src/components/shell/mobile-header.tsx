@@ -1,7 +1,6 @@
 'use client'
 
-import { Bell } from 'lucide-react'
-import { LogOut } from 'lucide-react'
+import { Bell, LogOut } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'

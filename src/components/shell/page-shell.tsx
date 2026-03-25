@@ -16,7 +16,13 @@ export function PageShell({
 	return (
 		<>
 			{!hideSidebar && <Sidebar />}
-			<div className={hideSidebar ? 'min-h-screen bg-[#f5ede0]' : 'lg:pl-64 min-h-screen bg-[#f5ede0]'}>
+			<div
+				className={
+					hideSidebar
+						? 'min-h-screen bg-[#f5ede0]'
+						: 'lg:pl-64 min-h-screen bg-[#f5ede0]'
+				}
+			>
 				<MobileHeader title={title} showOnDesktop={hideSidebar} />
 				<main className='pb-24 lg:pb-8'>{children}</main>
 			</div>
