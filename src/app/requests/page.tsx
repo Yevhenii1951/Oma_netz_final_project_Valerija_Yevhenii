@@ -30,8 +30,8 @@ export default async function RequestsPage({ searchParams }: Props) {
 
 	const params = await searchParams
 	const category = params.category as string | undefined
-	const status = params.status ?? 'OPEN'
 	const mineOnly = isSeniorView || params.mine === 'true'
+	const status = params.status ?? (mineOnly ? 'ALL' : 'OPEN')
 
 	const where: Record<string, unknown> = {}
 	if (status !== 'ALL') where.status = status
@@ -45,6 +45,13 @@ export default async function RequestsPage({ searchParams }: Props) {
 		include: {
 			senior: { select: { id: true, name: true, image: true, role: true } },
 			_count: { select: { offers: true } },
+			offers: {
+				where: { status: 'ACCEPTED' },
+				take: 1,
+				select: {
+					helper: { select: { name: true } },
+				},
+			},
 		},
 	})
 
@@ -90,6 +97,7 @@ export default async function RequestsPage({ searchParams }: Props) {
 					) : (
 						<div className='space-y-3'>
 							{requests.map(req => {
+								const acceptedHelperName = req.offers[0]?.helper.name ?? null
 								const srole = req.senior.role
 								const { cardAccent, iconBg, rolePill, roleLabel, descBorder } =
 									getRoleUiTokens(srole)
@@ -186,6 +194,16 @@ export default async function RequestsPage({ searchParams }: Props) {
 													<span className='text-xs text-[#b09880]'>
 														{formatRelativeTime(req.createdAt)}
 													</span>
+													{mineOnly && acceptedHelperName && req.status === 'IN_PROGRESS' && (
+														<span className='text-xs font-medium text-sky-700 bg-sky-50 border border-sky-100 rounded-full px-2 py-0.5'>
+															In Bearbeitung: {acceptedHelperName}
+														</span>
+													)}
+													{mineOnly && acceptedHelperName && req.status === 'DONE' && (
+														<span className='text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-2 py-0.5'>
+															Abgeschlossen von: {acceptedHelperName}
+														</span>
+													)}
 												</div>
 											</div>
 										</div>

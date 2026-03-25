@@ -79,7 +79,14 @@ export default async function DashboardPage() {
 					where: { seniorId: userId },
 					orderBy: { createdAt: 'desc' },
 					take: 3,
-					include: { _count: { select: { offers: true } } },
+					include: {
+						_count: { select: { offers: true } },
+						offers: {
+							where: { status: 'ACCEPTED' },
+							take: 1,
+							select: { helper: { select: { name: true } } },
+						},
+					},
 				})
 			: []
 
@@ -428,6 +435,7 @@ export default async function DashboardPage() {
 						) : (
 							<div className='space-y-3'>
 								{myRequests.map(req => {
+									const acceptedHelperName = req.offers[0]?.helper.name ?? null
 									const hasOffers =
 										req._count.offers > 0 && req.status === 'OPEN'
 									const CategoryIcon = getCategoryIcon(req.category)
@@ -466,6 +474,16 @@ export default async function DashboardPage() {
 														? `🙋 ${req._count.offers} ${req._count.offers === 1 ? 'neues Angebot' : 'neue Angebote'}!`
 														: `${req._count.offers} Angebote · ${formatRelativeTime(req.createdAt)}`}
 												</p>
+												{acceptedHelperName && req.status === 'IN_PROGRESS' && (
+													<p className='text-xs mt-1 text-sky-700'>
+														In Bearbeitung: {acceptedHelperName}
+													</p>
+												)}
+												{acceptedHelperName && req.status === 'DONE' && (
+													<p className='text-xs mt-1 text-emerald-700'>
+														Abgeschlossen von: {acceptedHelperName}
+													</p>
+												)}
 											</div>
 											<StatusBadge
 												status={
