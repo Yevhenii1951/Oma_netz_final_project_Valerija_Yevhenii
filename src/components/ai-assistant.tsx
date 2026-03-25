@@ -14,7 +14,7 @@ import {
 	X,
 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface ChatMessage {
@@ -31,7 +31,6 @@ interface ParsedRequest {
 	desiredTime?: string
 }
 
-/** Extracts <CREATE_REQUEST>{...}</CREATE_REQUEST> tag from message text */
 function extractCreateRequest(text: string): {
 	display: string
 	request: ParsedRequest | null
@@ -48,7 +47,25 @@ function extractCreateRequest(text: string): {
 }
 
 export function AiAssistantButton() {
-	const [open, setOpen] = useState(false)
+	const router = useRouter()
+	const pathname = usePathname()
+	const searchParams = useSearchParams()
+	const openFromQuery = searchParams.get('openAi') === '1'
+	const [open, setOpen] = useState(openFromQuery)
+
+	useEffect(() => {
+		setOpen(openFromQuery)
+	}, [openFromQuery])
+
+	function closeAndCleanQuery() {
+		setOpen(false)
+		if (!openFromQuery) return
+		const params = new URLSearchParams(searchParams.toString())
+		params.delete('openAi')
+		params.delete('voice')
+		const next = params.toString()
+		router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false })
+	}
 
 	return (
 		<>
@@ -71,7 +88,7 @@ export function AiAssistantButton() {
 
 			{/* Chat panel */}
 			<AnimatePresence>
-				{open && <AiChatPanel onClose={() => setOpen(false)} />}
+				{open && <AiChatPanel onClose={closeAndCleanQuery} />}
 			</AnimatePresence>
 		</>
 	)
@@ -80,8 +97,10 @@ export function AiAssistantButton() {
 function AiChatPanel({ onClose }: { onClose: () => void }) {
 	const { data: session } = useSession()
 	const router = useRouter()
+	const searchParams = useSearchParams()
 	const messagesEndRef = useRef<HTMLDivElement>(null)
 	const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
+	const autoVoiceStartedRef = useRef(false)
 	const [input, setInput] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
 	const [isListening, setIsListening] = useState(false)
@@ -101,46 +120,12 @@ function AiChatPanel({ onClose }: { onClose: () => void }) {
 	}, [messages])
 
 	useEffect(() => {
-		const SpeechRecognition = window.SpeechRecognition ?? window.webkitSpeechRecognition
+		const SpeechRecognition =
+			window.SpeechRecognition ?? window.webkitSpeechRecognition
 		setVoiceSupported(!!SpeechRecognition)
 	}, [])
 
-	function toggleVoice() {
-		if (isListening) {
-			recognitionRef.current?.stop()
-			setIsListening(false)
-			return
-		}
-		const SpeechRecognition = window.SpeechRecognition ?? window.webkitSpeechRecognition
-		if (!SpeechRecognition) return
-
-		const recognition: SpeechRecognitionInstance = new SpeechRecognition()
-		recognition.lang = 'de-DE'
-		recognition.interimResults = true
-		recognition.continuous = false
-		recognitionRef.current = recognition
-
-		let finalTranscript = ''
-		recognition.onresult = (e: SpeechRecognitionEvent) => {
-			let interim = ''
-			for (let i = e.resultIndex; i < e.results.length; i++) {
-				const t = e.results[i][0].transcript
-				if (e.results[i].isFinal) finalTranscript += t
-				else interim = t
-			}
-			setInput(finalTranscript || interim)
-		}
-		recognition.onerror = () => setIsListening(false)
-		recognition.onend = () => {
-			setIsListening(false)
-			if (finalTranscript.trim()) {
-				sendMessage(finalTranscript.trim())
-				setInput('')
-			}
-		}
-		recognition.start()
-		setIsListening(true)
-	}
+	const shouldAutoVoice = searchParams.get('voice') === '1'
 
 	const sendMessage = useCallback(
 		async (text: string) => {
@@ -207,6 +192,56 @@ function AiChatPanel({ onClose }: { onClose: () => void }) {
 		[messages, isLoading],
 	)
 
+	const startVoice = useCallback(() => {
+		if (isListening) return
+		const SpeechRecognition =
+			window.SpeechRecognition ?? window.webkitSpeechRecognition
+		if (!SpeechRecognition) return
+
+		const recognition: SpeechRecognitionInstance = new SpeechRecognition()
+		recognition.lang = 'de-DE'
+		recognition.interimResults = true
+		recognition.continuous = false
+		recognitionRef.current = recognition
+
+		let finalTranscript = ''
+		recognition.onresult = (e: SpeechRecognitionEvent) => {
+			let interim = ''
+			for (let i = e.resultIndex; i < e.results.length; i++) {
+				const t = e.results[i][0].transcript
+				if (e.results[i].isFinal) finalTranscript += t
+				else interim = t
+			}
+			setInput(finalTranscript || interim)
+		}
+		recognition.onerror = () => setIsListening(false)
+		recognition.onend = () => {
+			setIsListening(false)
+			if (finalTranscript.trim()) {
+				sendMessage(finalTranscript.trim())
+				setInput('')
+			}
+		}
+		recognition.start()
+		setIsListening(true)
+	}, [isListening, sendMessage])
+
+	useEffect(() => {
+		if (!shouldAutoVoice || !voiceSupported || autoVoiceStartedRef.current)
+			return
+		autoVoiceStartedRef.current = true
+		startVoice()
+	}, [shouldAutoVoice, voiceSupported, startVoice])
+
+	function toggleVoice() {
+		if (isListening) {
+			recognitionRef.current?.stop()
+			setIsListening(false)
+			return
+		}
+		startVoice()
+	}
+
 	function handleSubmit(e: React.FormEvent) {
 		e.preventDefault()
 		sendMessage(input)
@@ -256,7 +291,7 @@ function AiChatPanel({ onClose }: { onClose: () => void }) {
 			animate={{ opacity: 1, y: 0, scale: 1 }}
 			exit={{ opacity: 0, y: 20, scale: 0.95 }}
 			transition={{ duration: 0.25, ease: 'easeOut' }}
-			className='fixed bottom-24 right-4 lg:bottom-8 lg:right-6 z-50 w-[340px] max-w-[calc(100vw-2rem)] flex flex-col bg-[#ffffff] rounded-3xl shadow-2xl border border-[#ddd0be] overflow-hidden'
+			className='fixed bottom-24 right-4 lg:bottom-8 lg:right-6 z-50 w-85 max-w-[calc(100vw-2rem)] flex flex-col bg-[#ffffff] rounded-3xl shadow-2xl border border-[#ddd0be] overflow-hidden'
 			style={{ height: '500px', maxHeight: 'calc(100vh - 8rem)' }}
 		>
 			{/* Header */}

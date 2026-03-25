@@ -1,7 +1,7 @@
 'use client'
 
-import { Bell } from 'lucide-react'
-import { useSession } from 'next-auth/react'
+import { Bell, LogOut } from 'lucide-react'
+import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Avatar } from './avatar'
@@ -44,12 +44,25 @@ function useUnreadCount() {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function MobileHeader({ title }: { title?: string }) {
+export function MobileHeader({
+	title,
+	showOnDesktop = false,
+}: {
+	title?: string
+	showOnDesktop?: boolean
+}) {
 	const { data: session } = useSession()
 	const unreadCount = useUnreadCount()
+	const showProfileLink = session?.user.role !== 'ADMIN'
 
 	return (
-		<header className='lg:hidden sticky top-0 z-30 bg-[#ffffff]/95 backdrop-blur-lg border-b border-[#ddd0be] px-4 py-3 flex items-center justify-between'>
+		<header
+			className={
+				showOnDesktop
+					? 'sticky top-0 z-30 bg-[#ffffff]/95 backdrop-blur-lg border-b border-[#ddd0be] px-4 py-3 flex items-center justify-between'
+					: 'lg:hidden sticky top-0 z-30 bg-[#ffffff]/95 backdrop-blur-lg border-b border-[#ddd0be] px-4 py-3 flex items-center justify-between'
+			}
+		>
 			<div className='flex items-center gap-2'>
 				<Link
 					href='/landing'
@@ -57,10 +70,17 @@ export function MobileHeader({ title }: { title?: string }) {
 				>
 					<span className='text-base leading-none select-none'>👵</span>
 				</Link>
-				<span className='font-bold text-[#3d2b1f] text-base'>
-					{title ?? 'OMA-NETZ'}
-				</span>
+				{!showOnDesktop && (
+					<span className='font-bold text-[#3d2b1f] text-base'>
+						{title ?? 'OMA-NETZ'}
+					</span>
+				)}
 			</div>
+			{showOnDesktop && (
+				<span className='absolute left-1/2 -translate-x-1/2 font-bold text-[#3d2b1f] text-base pointer-events-none'>
+					{title ?? 'Admin panel'}
+				</span>
+			)}
 			<div className='flex items-center gap-2'>
 				<Link
 					href='/notifications'
@@ -73,13 +93,22 @@ export function MobileHeader({ title }: { title?: string }) {
 						</span>
 					)}
 				</Link>
-				<Link href='/profile'>
-					<Avatar
-						name={session?.user?.name}
-						image={session?.user?.image}
-						size='xs'
-					/>
-				</Link>
+				{showProfileLink && (
+					<Link href='/profile'>
+						<Avatar
+							name={session?.user?.name}
+							image={session?.user?.image}
+							size='xs'
+						/>
+					</Link>
+				)}
+				<button
+					onClick={() => signOut({ callbackUrl: '/login' })}
+					className='p-2 rounded-xl text-[#7a6050] hover:bg-[#ede3d4] hover:text-red-600 transition-colors'
+					title='Abmelden'
+				>
+					<LogOut size={18} />
+				</button>
 			</div>
 		</header>
 	)

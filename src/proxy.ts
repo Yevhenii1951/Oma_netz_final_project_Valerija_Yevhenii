@@ -37,7 +37,12 @@ export async function proxy(request: NextRequest) {
 	}
 
 	if (isAuthRoute && session) {
-		return NextResponse.redirect(new URL('/dashboard', request.url))
+		return NextResponse.redirect(
+			new URL(
+				session.user.role === 'ADMIN' ? '/admin' : '/dashboard',
+				request.url,
+			),
+		)
 	}
 
 	// Admin-only guard
@@ -55,6 +60,11 @@ export async function proxy(request: NextRequest) {
 		if (isLocked) {
 			return NextResponse.redirect(new URL('/dashboard', request.url))
 		}
+	}
+
+	// Helpers can never create requests directly
+	if (pathname.startsWith('/requests/new') && session?.user.role === 'HELPER') {
+		return NextResponse.redirect(new URL('/requests', request.url))
 	}
 
 	return NextResponse.next()

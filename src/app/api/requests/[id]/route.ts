@@ -1,4 +1,4 @@
-import { requireAuth, logAndError } from '@/lib/api-helpers'
+import { logAndError, requireAuth } from '@/lib/api-helpers'
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -10,6 +10,9 @@ export async function GET(
 	{ params }: { params: Promise<{ id: string }> },
 ) {
 	try {
+		const session = await requireAuth()
+		if (session instanceof NextResponse) return session
+
 		const { id } = await params
 		const request = await prisma.request.findUnique({
 			where: { id },
@@ -49,6 +52,16 @@ export async function GET(
 			return NextResponse.json(
 				{ error: 'Anfrage nicht gefunden.' },
 				{ status: 404 },
+			)
+		}
+
+		if (
+			(session.user.role === 'SENIOR' || session.user.role === 'RELATIVE') &&
+			request.seniorId !== session.user.id
+		) {
+			return NextResponse.json(
+				{ error: 'Keine Berechtigung.' },
+				{ status: 403 },
 			)
 		}
 

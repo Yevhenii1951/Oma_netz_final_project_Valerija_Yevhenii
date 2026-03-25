@@ -28,6 +28,19 @@ export async function PATCH(
 			data: { helperStatus: newStatus },
 			select: { id: true, name: true, email: true, helperStatus: true },
 		})
+		const matchToken = user.name ?? user.email ?? user.id
+
+		// Mark related admin notification as read for the admin who handled this registration
+		await prisma.notification.updateMany({
+			where: {
+				userId: session.user.id,
+				read: false,
+				link: '/admin',
+				title: { startsWith: '👤 Neue Registrierung:' },
+				body: { contains: matchToken },
+			},
+			data: { read: true },
+		})
 
 		// Create notification for the helper
 		await prisma.notification.create({

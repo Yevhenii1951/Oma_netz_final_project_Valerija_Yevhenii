@@ -1,4 +1,4 @@
-import { requireAuth, logAndError } from '@/lib/api-helpers'
+import { logAndError, requireAuth } from '@/lib/api-helpers'
 import { prisma } from '@/lib/prisma'
 import { geocodeAddress } from '@/lib/utils'
 import { NextRequest, NextResponse } from 'next/server'
@@ -66,6 +66,14 @@ export async function POST(req: NextRequest) {
 	try {
 		const session = await requireAuth()
 		if (session instanceof NextResponse) return session
+		if (session.user.role === 'HELPER' || session.user.role === 'ADMIN') {
+			return NextResponse.json(
+				{
+					error: 'Nur Hilfesuchende oder Angehörige können Anfragen erstellen.',
+				},
+				{ status: 403 },
+			)
+		}
 
 		const body = await req.json()
 		const data = createRequestSchema.parse(body)

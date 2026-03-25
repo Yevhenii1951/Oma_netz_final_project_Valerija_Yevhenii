@@ -1,10 +1,10 @@
 import {
-  Gift,
-  Home,
-  Map,
-  MessageCircle,
-  PlusCircle,
-  Search,
+	Gift,
+	Home,
+	Map,
+	MessageCircle,
+	PlusCircle,
+	Search,
 } from 'lucide-react'
 
 // Routes blocked for helpers awaiting approval

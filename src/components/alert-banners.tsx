@@ -9,7 +9,7 @@ import {
 	type LucideIcon,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface Alert {
 	id: string
@@ -21,6 +21,17 @@ interface Alert {
 export function AlertBanners({ alerts }: { alerts: Alert[] }) {
 	const router = useRouter()
 	const [dismissed, setDismissed] = useState<Set<string>>(new Set())
+
+	useEffect(() => {
+		const approvalAlerts = alerts.filter(a =>
+			a.title.toLowerCase().includes('profil freigegeben'),
+		)
+		for (const alert of approvalAlerts) {
+			void fetch(`/api/notifications/${alert.id}`, { method: 'PATCH' }).catch(
+				() => null,
+			)
+		}
+	}, [alerts])
 
 	async function handleClick(alert: Alert) {
 		// Mark as read

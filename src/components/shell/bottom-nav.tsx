@@ -13,6 +13,7 @@ export function BottomNav() {
 	const pathname = usePathname()
 	const { data: session } = useSession()
 	const [showBlock, setShowBlock] = useState(false)
+	const role = session?.user.role
 
 	const isPendingHelper =
 		session?.user.role === 'HELPER' && session?.user.helperStatus !== 'APPROVED'
@@ -30,7 +31,13 @@ export function BottomNav() {
 				<div className='flex items-center justify-around max-w-md mx-auto'>
 					{mobileItems
 						.filter(item => {
-							const role = session?.user.role
+							if (role === 'HELPER' && item.href === '/requests/new')
+								return false
+							if (
+								role === 'ADMIN' &&
+								(item.href === '/requests/new' || item.href === '/chat')
+							)
+								return false
 							if (item.href === '/map' && role !== 'HELPER') return false
 							if (
 								item.href === '/rewards' &&

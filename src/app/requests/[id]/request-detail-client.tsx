@@ -53,6 +53,14 @@ interface RequestDetails {
 	offers: OfferWithHelper[]
 }
 
+interface ChatPreviewMessage {
+	id: string
+	content: string
+	createdAt: string
+	senderId: string
+	sender: { id: string; name: string | null }
+}
+
 interface Props {
 	request: RequestDetails
 	isOwner: boolean
@@ -62,6 +70,7 @@ interface Props {
 	currentUserId: string
 	userRole: string
 	hasRating: boolean
+	chatPreviewMessages: ChatPreviewMessage[]
 }
 
 export default function RequestDetailClient({
@@ -69,8 +78,10 @@ export default function RequestDetailClient({
 	isOwner,
 	isSameRole,
 	myOffer,
+	currentUserId,
 	userRole,
 	hasRating,
+	chatPreviewMessages,
 }: Props) {
 	const router = useRouter()
 	const { toast } = useToast()
@@ -210,6 +221,7 @@ export default function RequestDetailClient({
 	const acceptedOffer = localRequest.offers.find(
 		(o: OfferWithHelper) => o.status === 'ACCEPTED',
 	)
+	const hasChatPreview = chatPreviewMessages.length > 0
 
 	return (
 		<PageShell title='Anfrage'>
@@ -462,6 +474,55 @@ export default function RequestDetailClient({
 								</span>
 							)}
 						</button>
+					</motion.div>
+				)}
+
+				{/* Owner: compact chat access + preview */}
+				{isOwner && acceptedOffer && localRequest.status !== 'OPEN' && (
+					<motion.div
+						initial={{ opacity: 0, y: 12 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ delay: 0.12 }}
+						className='card p-4 space-y-3'
+					>
+						<div className='flex items-center justify-between gap-2'>
+							<p className='text-xs font-semibold text-[#b09880] uppercase tracking-wide'>
+								💬 Verlauf mit dem Helfer
+							</p>
+							<button
+								onClick={() => router.push(`/chat/${localRequest.id}`)}
+								className='text-xs font-semibold text-[#8b5e3c] hover:text-[#6b4226] underline underline-offset-2'
+							>
+								Chat öffnen
+							</button>
+						</div>
+
+						{hasChatPreview ? (
+							<div className='space-y-2'>
+								{chatPreviewMessages.map(msg => {
+									const mine = msg.senderId === currentUserId
+									return (
+										<div
+											key={msg.id}
+											className={`rounded-xl p-2.5 text-xs border ${
+												mine
+													? 'bg-[#f5ede0] border-[#e8d5be]'
+													: 'bg-[#ffffff] border-[#ddd0be]'
+											}`}
+										>
+											<p className='font-medium text-[#6b4226]'>
+												{mine ? 'Du' : (msg.sender.name ?? 'Partner')}
+											</p>
+											<p className='text-[#7a6050] mt-0.5'>{msg.content}</p>
+										</div>
+									)
+								})}
+							</div>
+						) : (
+							<p className='text-xs text-[#7a6050]'>
+								Noch keine Nachrichten in diesem Chat.
+							</p>
+						)}
 					</motion.div>
 				)}
 
