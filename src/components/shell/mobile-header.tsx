@@ -2,7 +2,6 @@
 
 import { Bell, LogOut } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Avatar } from './avatar'
@@ -46,10 +45,10 @@ function useUnreadCount() {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function MobileHeader({
-	title,
+	_title,
 	showOnDesktop = false,
 }: {
-	title?: string
+	_title?: string
 	showOnDesktop?: boolean
 }) {
 	const { data: session } = useSession()
@@ -70,17 +69,10 @@ export function MobileHeader({
 				>
 					<span className='text-base leading-none select-none'>👵</span>
 				</Link>
-				<span className='font-bold text-[#3d2b1f] text-base'>
-					{title ?? 'OMA-NETZ'}
-				</span>
-				<Image
-					src='/working.webp'
-					alt='Working'
-					width={26}
-					height={26}
-					className='rounded-md border border-[#ddd0be] object-cover'
-				/>
 			</div>
+			<span className='absolute left-1/2 -translate-x-1/2 font-bold text-[#3d2b1f] text-base pointer-events-none'>
+				Admin panel
+			</span>
 			<div className='flex items-center gap-2'>
 				<Link
 					href='/notifications'
