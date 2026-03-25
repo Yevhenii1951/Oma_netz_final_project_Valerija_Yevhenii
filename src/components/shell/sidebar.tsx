@@ -137,9 +137,6 @@ export function Sidebar() {
 							sizes='240px'
 						/>
 					</div>
-					<p className='mt-2 text-xs text-[#7a6050] px-1'>
-						Profil jederzeit bearbeiten
-					</p>
 				</div>
 			)}
 

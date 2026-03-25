@@ -31,7 +31,6 @@ interface ParsedRequest {
 	desiredTime?: string
 }
 
-/** Extracts <CREATE_REQUEST>{...}</CREATE_REQUEST> tag from message text */
 function extractCreateRequest(text: string): {
 	display: string
 	request: ParsedRequest | null
@@ -51,11 +50,11 @@ export function AiAssistantButton() {
 	const router = useRouter()
 	const pathname = usePathname()
 	const searchParams = useSearchParams()
-	const [open, setOpen] = useState(false)
 	const openFromQuery = searchParams.get('openAi') === '1'
+	const [open, setOpen] = useState(openFromQuery)
 
 	useEffect(() => {
-		if (openFromQuery) setOpen(true)
+		setOpen(openFromQuery)
 	}, [openFromQuery])
 
 	function closeAndCleanQuery() {

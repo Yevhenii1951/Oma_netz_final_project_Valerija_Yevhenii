@@ -194,16 +194,20 @@ export default async function RequestsPage({ searchParams }: Props) {
 													<span className='text-xs text-[#b09880]'>
 														{formatRelativeTime(req.createdAt)}
 													</span>
-													{mineOnly && acceptedHelperName && req.status === 'IN_PROGRESS' && (
-														<span className='text-xs font-medium text-sky-700 bg-sky-50 border border-sky-100 rounded-full px-2 py-0.5'>
-															In Bearbeitung: {acceptedHelperName}
-														</span>
-													)}
-													{mineOnly && acceptedHelperName && req.status === 'DONE' && (
-														<span className='text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-2 py-0.5'>
-															Abgeschlossen von: {acceptedHelperName}
-														</span>
-													)}
+													{mineOnly &&
+														acceptedHelperName &&
+														req.status === 'IN_PROGRESS' && (
+															<span className='text-xs font-medium text-sky-700 bg-sky-50 border border-sky-100 rounded-full px-2 py-0.5'>
+																In Bearbeitung: {acceptedHelperName}
+															</span>
+														)}
+													{mineOnly &&
+														acceptedHelperName &&
+														req.status === 'DONE' && (
+															<span className='text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full px-2 py-0.5'>
+																Abgeschlossen von: {acceptedHelperName}
+															</span>
+														)}
 												</div>
 											</div>
 										</div>

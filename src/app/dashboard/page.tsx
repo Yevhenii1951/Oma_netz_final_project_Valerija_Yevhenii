@@ -381,7 +381,7 @@ export default async function DashboardPage() {
 								return (
 									<Link
 										key={id}
-										href={`/chat/${request.id}`}
+										href={`/requests/${request.id}`}
 										className='card p-4 flex items-center gap-3 card-hover'
 									>
 										<div className='text-2xl'>
