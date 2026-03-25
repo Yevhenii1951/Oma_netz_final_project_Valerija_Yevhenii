@@ -31,7 +31,8 @@ export function BottomNav() {
 				<div className='flex items-center justify-around max-w-md mx-auto'>
 					{mobileItems
 						.filter(item => {
-							if (role === 'HELPER' && item.href === '/requests/new') return false
+							if (role === 'HELPER' && item.href === '/requests/new')
+								return false
 							if (
 								role === 'ADMIN' &&
 								(item.href === '/requests/new' || item.href === '/chat')

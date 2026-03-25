@@ -488,7 +488,9 @@ export default async function DashboardPage() {
 				{isHelper && user?.helperStatus === 'APPROVED' && (
 					<section className='rounded-3xl border border-[#ddd0be] bg-[#fdf8f2] p-5 md:p-6 shadow-[0_2px_10px_rgba(61,43,31,0.04)]'>
 						<div className='flex items-center justify-between mb-4'>
-							<h2 className='font-bold text-[#3d2b1f]'>Neue Anfragen in Kassel</h2>
+							<h2 className='font-bold text-[#3d2b1f]'>
+								Neue Anfragen in Kassel
+							</h2>
 							<SeeAllLink href='/requests' />
 						</div>
 

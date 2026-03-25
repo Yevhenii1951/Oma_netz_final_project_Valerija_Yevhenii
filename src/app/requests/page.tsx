@@ -88,9 +88,9 @@ export default async function RequestsPage({ searchParams }: Props) {
 							}
 							action={
 								canCreateRequest ? (
-								<Link href='/requests/new' className='btn-primary'>
-									<PlusCircle size={16} /> Erste Anfrage erstellen
-								</Link>
+									<Link href='/requests/new' className='btn-primary'>
+										<PlusCircle size={16} /> Erste Anfrage erstellen
+									</Link>
 								) : undefined
 							}
 						/>
