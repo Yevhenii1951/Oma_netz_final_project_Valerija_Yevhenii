@@ -19,16 +19,16 @@ import {
 	CheckCircle,
 	Clock,
 	Cross,
+	Footprints,
 	Heart,
 	House,
-	type LucideIcon,
 	Laptop,
 	MapPin,
-	Footprints,
 	PlusCircle,
 	ShoppingCart,
 	Star,
 	TrendingUp,
+	type LucideIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -38,6 +38,7 @@ export const metadata = { title: 'Dashboard' }
 export default async function DashboardPage() {
 	const session = await auth()
 	if (!session?.user) redirect('/login')
+	if (session.user.role === 'ADMIN') redirect('/admin')
 
 	const userId = session.user.id
 	const role = session.user.role
@@ -330,35 +331,35 @@ export default async function DashboardPage() {
 							{myActivity.map(({ id, request }) => {
 								const CategoryIcon = getCategoryIcon(request.category)
 								return (
-								<Link
-									key={id}
-									href={`/chat/${request.id}`}
-									className='card p-4 flex items-center gap-3 card-hover'
-								>
-									<div className='text-2xl'>
-										<CategoryIcon className='w-6 h-6' />
-									</div>
-									<div className='flex-1 min-w-0'>
-										<p className='font-semibold text-[#3d2b1f] text-sm truncate'>
-											{request.title}
-										</p>
-										<div className='flex items-center gap-2 mt-0.5'>
-											<MapPin size={11} className='text-[#b09880]' />
-											<span className='text-xs text-[#b09880] truncate'>
-												{request.address}
-											</span>
+									<Link
+										key={id}
+										href={`/chat/${request.id}`}
+										className='card p-4 flex items-center gap-3 card-hover'
+									>
+										<div className='text-2xl'>
+											<CategoryIcon className='w-6 h-6' />
 										</div>
-									</div>
-									<StatusBadge
-										status={
-											request.status as
-												| 'OPEN'
-												| 'IN_PROGRESS'
-												| 'DONE'
-												| 'CANCELLED'
-										}
-									/>
-								</Link>
+										<div className='flex-1 min-w-0'>
+											<p className='font-semibold text-[#3d2b1f] text-sm truncate'>
+												{request.title}
+											</p>
+											<div className='flex items-center gap-2 mt-0.5'>
+												<MapPin size={11} className='text-[#b09880]' />
+												<span className='text-xs text-[#b09880] truncate'>
+													{request.address}
+												</span>
+											</div>
+										</div>
+										<StatusBadge
+											status={
+												request.status as
+													| 'OPEN'
+													| 'IN_PROGRESS'
+													| 'DONE'
+													| 'CANCELLED'
+											}
+										/>
+									</Link>
 								)
 							})}
 						</div>
@@ -411,7 +412,7 @@ export default async function DashboardPage() {
 												</span>
 											)}
 											<div className='text-2xl'>
-													<CategoryIcon className='w-6 h-6' />
+												<CategoryIcon className='w-6 h-6' />
 											</div>
 											<div className='flex-1 min-w-0'>
 												<p className='font-semibold text-[#3d2b1f] text-sm truncate'>

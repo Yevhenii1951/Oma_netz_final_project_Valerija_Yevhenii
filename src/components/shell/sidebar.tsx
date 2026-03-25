@@ -14,6 +14,7 @@ export function Sidebar() {
 	const pathname = usePathname()
 	const { data: session } = useSession()
 	const [showBlock, setShowBlock] = useState(false)
+	const role = session?.user.role
 
 	const isPendingHelper =
 		session?.user.role === 'HELPER' && session?.user.helperStatus !== 'APPROVED'
@@ -46,15 +47,16 @@ export function Sidebar() {
 					.filter(
 						item =>
 							!(
+								role === 'ADMIN' &&
+								(item.href === '/requests/new' || item.href === '/chat')
+							) &&
+							!(
 								item.href === '/rewards' &&
-								(session?.user.role === 'ADMIN' ||
-									session?.user.role === 'SENIOR' ||
-									session?.user.role === 'RELATIVE')
+								(role === 'ADMIN' || role === 'SENIOR' || role === 'RELATIVE')
 							) &&
 							!(
 								item.href === '/map' &&
-								(session?.user.role === 'SENIOR' ||
-									session?.user.role === 'RELATIVE')
+								(role === 'SENIOR' || role === 'RELATIVE')
 							),
 					)
 					.map(({ href, icon: Icon, label, primary }) => {
