@@ -41,6 +41,17 @@ export default async function RequestDetailPage({ params }: Props) {
 			},
 			_count: { select: { offers: true } },
 			rating: { select: { score: true } },
+			chat: {
+				select: {
+					messages: {
+						orderBy: { createdAt: 'desc' },
+						take: 5,
+						include: {
+							sender: { select: { id: true, name: true } },
+						},
+					},
+				},
+			},
 		},
 	})
 
@@ -70,6 +81,11 @@ export default async function RequestDetailPage({ params }: Props) {
 			currentUserId={session.user.id}
 			userRole={session.user.role}
 			hasRating={hasRating}
+			chatPreviewMessages={
+				request.chat
+					? JSON.parse(JSON.stringify(request.chat.messages.reverse()))
+					: []
+			}
 		/>
 	)
 }

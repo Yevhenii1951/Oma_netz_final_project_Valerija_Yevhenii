@@ -63,7 +63,7 @@ export default async function RequestsPage({ searchParams }: Props) {
 					</div>
 					{canCreateRequest && (
 						<Link href='/requests/new' className='btn-primary'>
-							<PlusCircle size={16} /> Neu
+							<PlusCircle size={16} /> Anfrage stellen
 						</Link>
 					)}
 				</div>
@@ -85,13 +85,6 @@ export default async function RequestsPage({ searchParams }: Props) {
 								canCreateRequest
 									? 'Ändere die Filter oder erstelle eine neue Anfrage.'
 									: 'Ändere die Filter oder probiere es später erneut.'
-							}
-							action={
-								canCreateRequest ? (
-									<Link href='/requests/new' className='btn-primary'>
-										<PlusCircle size={16} /> Erste Anfrage erstellen
-									</Link>
-								) : undefined
 							}
 						/>
 					) : (

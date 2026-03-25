@@ -320,7 +320,7 @@ export default async function DashboardPage() {
 						) : (
 							<>
 								<Link
-									href='/requests?mine=true'
+									href='/requests/new'
 									className='p-4 rounded-2xl bg-[#8b5e3c] flex items-center gap-3 hover:bg-[#6b4226] transition-colors group'
 								>
 									<div className='w-10 h-10 rounded-xl bg-[#ffffff]/20 flex items-center justify-center'>

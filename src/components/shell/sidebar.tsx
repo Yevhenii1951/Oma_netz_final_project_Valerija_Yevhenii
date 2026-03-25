@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils'
 import { Lock, LogOut, Shield } from 'lucide-react'
 import { signOut, useSession } from 'next-auth/react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
@@ -15,6 +16,7 @@ export function Sidebar() {
 	const { data: session } = useSession()
 	const [showBlock, setShowBlock] = useState(false)
 	const role = session?.user.role
+	const canEditProfile = role === 'SENIOR' || role === 'HELPER'
 
 	const isPendingHelper =
 		session?.user.role === 'HELPER' && session?.user.helperStatus !== 'APPROVED'
@@ -124,23 +126,63 @@ export function Sidebar() {
 				)}
 			</nav>
 
+			{canEditProfile && (
+				<div className='mt-4 rounded-2xl border border-[#ddd0be] bg-white p-2.5'>
+					<div className='relative h-24 w-full overflow-hidden rounded-xl'>
+						<Image
+							src='/working.webp'
+							alt='Senior and helper'
+							fill
+							className='object-cover'
+							sizes='240px'
+						/>
+					</div>
+					<p className='mt-2 text-xs text-[#7a6050] px-1'>
+						Profil jederzeit bearbeiten
+					</p>
+				</div>
+			)}
+
 			{/* Bottom: user card */}
 			<div className='border-t border-[#ddd0be] pt-4 mt-4'>
 				{session?.user && (
 					<div className='flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-[#ede3d4] transition-colors'>
-						<Avatar
-							name={session.user.name}
-							image={session.user.image}
-							size='sm'
-						/>
-						<div className='flex-1 min-w-0'>
-							<p className='text-sm font-semibold text-[#3d2b1f] truncate'>
-								{session.user.name ?? 'Kein Name'}
-							</p>
-							<p className='text-xs font-semibold capitalize px-1.5 py-0.5 rounded-md bg-sky-50 text-sky-600 border border-sky-100 inline-block mt-0.5'>
-								{session.user.role?.toLowerCase()}
-							</p>
-						</div>
+						{canEditProfile ? (
+							<Link
+								href='/profile'
+								className='flex items-center gap-3 flex-1 min-w-0'
+							>
+								<Avatar
+									name={session.user.name}
+									image={session.user.image}
+									size='sm'
+								/>
+								<div className='flex-1 min-w-0'>
+									<p className='text-sm font-semibold text-[#3d2b1f] truncate'>
+										{session.user.name ?? 'Kein Name'}
+									</p>
+									<p className='text-xs font-semibold capitalize px-1.5 py-0.5 rounded-md bg-sky-50 text-sky-600 border border-sky-100 inline-block mt-0.5'>
+										{session.user.role?.toLowerCase()}
+									</p>
+								</div>
+							</Link>
+						) : (
+							<>
+								<Avatar
+									name={session.user.name}
+									image={session.user.image}
+									size='sm'
+								/>
+								<div className='flex-1 min-w-0'>
+									<p className='text-sm font-semibold text-[#3d2b1f] truncate'>
+										{session.user.name ?? 'Kein Name'}
+									</p>
+									<p className='text-xs font-semibold capitalize px-1.5 py-0.5 rounded-md bg-sky-50 text-sky-600 border border-sky-100 inline-block mt-0.5'>
+										{session.user.role?.toLowerCase()}
+									</p>
+								</div>
+							</>
+						)}
 						<button
 							onClick={() => signOut({ callbackUrl: '/login' })}
 							className='p-1.5 rounded-lg text-[#b09880] hover:text-red-600 hover:bg-red-50 transition-colors'

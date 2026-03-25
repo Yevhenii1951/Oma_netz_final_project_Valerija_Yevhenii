@@ -1,4 +1,4 @@
-import { requireAuth, logAndError } from '@/lib/api-helpers'
+import { logAndError, requireAuth } from '@/lib/api-helpers'
 import { prisma } from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -59,7 +59,10 @@ export async function GET(
 			(session.user.role === 'SENIOR' || session.user.role === 'RELATIVE') &&
 			request.seniorId !== session.user.id
 		) {
-			return NextResponse.json({ error: 'Keine Berechtigung.' }, { status: 403 })
+			return NextResponse.json(
+				{ error: 'Keine Berechtigung.' },
+				{ status: 403 },
+			)
 		}
 
 		return NextResponse.json({ data: request })

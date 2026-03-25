@@ -53,6 +53,7 @@ export function MobileHeader({
 }) {
 	const { data: session } = useSession()
 	const unreadCount = useUnreadCount()
+	const showProfileLink = session?.user.role !== 'ADMIN'
 
 	return (
 		<header
@@ -92,13 +93,15 @@ export function MobileHeader({
 						</span>
 					)}
 				</Link>
-				<Link href='/profile'>
-					<Avatar
-						name={session?.user?.name}
-						image={session?.user?.image}
-						size='xs'
-					/>
-				</Link>
+				{showProfileLink && (
+					<Link href='/profile'>
+						<Avatar
+							name={session?.user?.name}
+							image={session?.user?.image}
+							size='xs'
+						/>
+					</Link>
+				)}
 				<button
 					onClick={() => signOut({ callbackUrl: '/login' })}
 					className='p-2 rounded-xl text-[#7a6050] hover:bg-[#ede3d4] hover:text-red-600 transition-colors'
