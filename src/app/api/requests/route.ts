@@ -66,6 +66,12 @@ export async function POST(req: NextRequest) {
 	try {
 		const session = await requireAuth()
 		if (session instanceof NextResponse) return session
+		if (session.user.role === 'HELPER' || session.user.role === 'ADMIN') {
+			return NextResponse.json(
+				{ error: 'Nur Hilfesuchende oder Angehörige können Anfragen erstellen.' },
+				{ status: 403 },
+			)
+		}
 
 		const body = await req.json()
 		const data = createRequestSchema.parse(body)

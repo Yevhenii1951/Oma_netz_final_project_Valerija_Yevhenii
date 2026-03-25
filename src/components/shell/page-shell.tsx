@@ -1,5 +1,7 @@
 'use client'
 
+import { AiAssistantButton } from '@/components/ai-assistant'
+import { useSession } from 'next-auth/react'
 import { BottomNav } from './bottom-nav'
 import { MobileHeader } from './mobile-header'
 import { Sidebar } from './sidebar'
@@ -13,6 +15,9 @@ export function PageShell({
 	title?: string
 	hideSidebar?: boolean
 }) {
+	const { data: session } = useSession()
+	const showAiAssistant = session?.user.role === 'SENIOR'
+
 	return (
 		<>
 			{!hideSidebar && <Sidebar />}
@@ -26,6 +31,7 @@ export function PageShell({
 				<MobileHeader title={title} showOnDesktop={hideSidebar} />
 				<main className='pb-24 lg:pb-8'>{children}</main>
 			</div>
+			{showAiAssistant && <AiAssistantButton />}
 			<BottomNav />
 		</>
 	)

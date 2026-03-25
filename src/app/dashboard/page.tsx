@@ -1,5 +1,4 @@
 import { auth } from '@/auth'
-import { AiAssistantButton } from '@/components/ai-assistant'
 import { AlertBanners } from '@/components/alert-banners'
 import {
 	CategoryBadge,
@@ -14,6 +13,7 @@ import { getRoleUiTokens } from '@/lib/role-ui'
 import { formatDate, formatRelativeTime } from '@/lib/utils'
 import {
 	ArrowRight,
+	Bell,
 	Calendar,
 	Car,
 	CheckCircle,
@@ -24,6 +24,7 @@ import {
 	House,
 	Laptop,
 	MapPin,
+	Mic,
 	PlusCircle,
 	ShoppingCart,
 	Star,
@@ -67,6 +68,10 @@ export default async function DashboardPage() {
 		},
 	})
 
+	const openRequestsCount = await prisma.request.count({
+		where: { status: 'OPEN' },
+	})
+
 	// Fetch user's own requests (if senior/relative)
 	const myRequests =
 		role !== 'HELPER'
@@ -102,7 +107,7 @@ export default async function DashboardPage() {
 
 	// Count completed requests for senior/relative
 	const doneCount =
-		role !== 'HELPER' && role !== 'ADMIN'
+		role !== 'HELPER'
 			? await prisma.request.count({
 					where: { seniorId: userId, status: 'DONE' },
 				})
@@ -110,6 +115,9 @@ export default async function DashboardPage() {
 
 	const isHelper = role === 'HELPER'
 	const greeting = getGreeting()
+	const unreadNotifications = await prisma.notification.count({
+		where: { userId, read: false },
+	})
 
 	// Fetch recent unread notifications (for alert banners)
 	// eslint-disable-next-line react-hooks/purity
@@ -154,175 +162,208 @@ export default async function DashboardPage() {
 					</div>
 				)}
 
-				{/* ─── GREETING ─── */}
-				<div className='mb-6'>
-					<p className='text-[#7a6050] text-sm mb-1'>{greeting}</p>
-					<h1 className='text-2xl font-bold text-[#3d2b1f]'>
-						{user?.name?.split(' ')[0] ?? 'Willkommen'} 👋
-					</h1>
-				</div>
-
-				{/* ─── STATS ROW (senior/relative — right under name) ─── */}
-				{!isHelper && role !== 'ADMIN' && (
-					<div className='grid grid-cols-3 gap-3 mb-6'>
-						<StatCard
-							label='Meine Anfragen'
-							value={user?._count.sentRequests ?? 0}
-							icon={<PlusCircle size={20} />}
-							color='text-[#8b5e3c]'
-							bg='bg-[#f5ede0]'
-						/>
-						<StatCard
-							label='Helfer verfügbar'
-							value={openRequests.length}
-							icon={<Heart size={20} />}
-							color='text-rose-500'
-							bg='bg-rose-50'
-						/>
-						<StatCard
-							label='Abgeschlossen'
-							value={doneCount}
-							icon={<CheckCircle size={20} />}
-							color='text-sky-500'
-							bg='bg-sky-50'
-						/>
+				<section className='mb-8 rounded-3xl border border-[#ddd0be] bg-[#fdf8f2] p-5 md:p-6 shadow-[0_2px_10px_rgba(61,43,31,0.04)]'>
+					<div className='mb-4'>
+						<p className='text-[11px] font-semibold tracking-[0.16em] uppercase text-[#b09880]'>
+							Übersicht
+						</p>
 					</div>
-				)}
 
-				{/* ─── ALERT BANNERS (unread notifications) ─── */}
-				<AlertBanners
-					alerts={recentAlerts.map(a => ({
-						id: a.id,
-						title: a.title,
-						body: a.body,
-						link: a.link,
-					}))}
-				/>
-
-				{/* ─── STATS ROW (helper) ─── */}
-				{isHelper && (
-					<div className='grid grid-cols-2 md:grid-cols-4 gap-3 mb-8'>
-						<StatCard
-							label='Geholfen'
-							value={user?.helpCount ?? 0}
-							icon={<Heart size={20} />}
-							color='text-[#8b5e3c]'
-							bg='bg-[#f5ede0]'
-						/>
-						<StatCard
-							label='Bewertung'
-							value={user?.ratingAvg ? `${user.ratingAvg.toFixed(1)}★` : '—'}
-							icon={<Star size={20} />}
-							color='text-amber-500'
-							bg='bg-amber-50'
-						/>
-						<StatCard
-							label='Punkte'
-							value={user?.points ?? 0}
-							icon={<TrendingUp size={20} />}
-							color='text-emerald-500'
-							bg='bg-emerald-50'
-						/>
-						<StatCard
-							label='Offen'
-							value={openRequests.length}
-							icon={<Clock size={20} />}
-							color='text-sky-500'
-							bg='bg-sky-50'
-						/>
+					<div className='mb-6 flex items-start justify-between gap-3'>
+						<div>
+							<p className='text-[#7a6050] text-sm mb-1'>{greeting}</p>
+							<h1 className='text-2xl font-bold text-[#3d2b1f]'>
+								{user?.name?.split(' ')[0] ?? 'Willkommen'} 👋
+							</h1>
+						</div>
+						{isHelper && (
+							<Link
+								href='/notifications'
+								className='relative h-10 w-10 rounded-xl border border-[#ddd0be] bg-white flex items-center justify-center text-[#7a6050] hover:bg-[#ede3d4] hover:text-[#3d2b1f] transition-colors'
+								aria-label='Benachrichtigungen öffnen'
+							>
+								<Bell size={19} />
+								{unreadNotifications > 0 && (
+									<span className='absolute -top-1 -right-1 min-w-4.5 h-4.5 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold px-1'>
+										{unreadNotifications > 9 ? '9+' : unreadNotifications}
+									</span>
+								)}
+							</Link>
+						)}
 					</div>
-				)}
+
+					{/* ─── STATS ROW (senior/relative — right under name) ─── */}
+					{!isHelper && (
+						<div className='grid grid-cols-3 gap-3 mb-6'>
+							<StatCard
+								label='Meine Anfragen'
+								value={user?._count.sentRequests ?? 0}
+								icon={<PlusCircle size={20} />}
+								color='text-[#8b5e3c]'
+								bg='bg-[#f5ede0]'
+							/>
+							<StatCard
+								label='Helfer verfügbar'
+								value={openRequestsCount}
+								icon={<Heart size={20} />}
+								color='text-rose-500'
+								bg='bg-rose-50'
+							/>
+							<StatCard
+								label='Abgeschlossen'
+								value={doneCount}
+								icon={<CheckCircle size={20} />}
+								color='text-sky-500'
+								bg='bg-sky-50'
+							/>
+						</div>
+					)}
+
+					{/* ─── ALERT BANNERS (unread notifications) ─── */}
+					<AlertBanners
+						alerts={recentAlerts.map(a => ({
+							id: a.id,
+							title: a.title,
+							body: a.body,
+							link: a.link,
+						}))}
+					/>
+
+					{/* ─── STATS ROW (helper) ─── */}
+					{isHelper && (
+						<div className='grid grid-cols-2 md:grid-cols-4 gap-3 mb-8'>
+							<StatCard
+								label='Geholfen'
+								value={user?.helpCount ?? 0}
+								icon={<Heart size={20} />}
+								color='text-[#8b5e3c]'
+								bg='bg-[#f5ede0]'
+							/>
+							<StatCard
+								label='Bewertung'
+								value={user?.ratingAvg ? `${user.ratingAvg.toFixed(1)}★` : '—'}
+								icon={<Star size={20} />}
+								color='text-amber-500'
+								bg='bg-amber-50'
+							/>
+							<StatCard
+								label='Punkte'
+								value={user?.points ?? 0}
+								icon={<TrendingUp size={20} />}
+								color='text-emerald-500'
+								bg='bg-emerald-50'
+							/>
+							<StatCard
+								label='Offen'
+								value={openRequestsCount}
+								icon={<Clock size={20} />}
+								color='text-sky-500'
+								bg='bg-sky-50'
+							/>
+						</div>
+					)}
+				</section>
 
 				{/* ─── QUICK ACTIONS ─── */}
-				<div className='grid grid-cols-2 gap-3 mb-8'>
-					{isHelper ? (
-						<>
-							<Link
-								href='/requests'
-								className='card p-4 flex items-center gap-3 card-hover group'
-							>
-								<div className='w-10 h-10 rounded-xl bg-[#e8d5be] flex items-center justify-center group-hover:bg-[#8b5e3c] transition-colors'>
-									<Heart
-										size={18}
-										className='text-[#8b5e3c] group-hover:text-[#ffffff] transition-colors'
+				<section className='mb-8 rounded-3xl border border-[#ddd0be] bg-[#fdf8f2] p-5 md:p-6 shadow-[0_2px_10px_rgba(61,43,31,0.04)]'>
+					<div className='flex items-center justify-between mb-4'>
+						<h2 className='font-bold text-[#3d2b1f]'>Schnellzugriff</h2>
+					</div>
+					<div className='grid grid-cols-2 gap-3'>
+						{isHelper ? (
+							<>
+								<Link
+									href='/requests'
+									className='card p-4 flex items-center gap-3 card-hover group'
+								>
+									<div className='w-10 h-10 rounded-xl bg-[#e8d5be] flex items-center justify-center group-hover:bg-[#8b5e3c] transition-colors'>
+										<Heart
+											size={18}
+											className='text-[#8b5e3c] group-hover:text-[#ffffff] transition-colors'
+										/>
+									</div>
+									<div>
+										<p className='font-semibold text-[#3d2b1f] text-sm'>
+											Anfragen
+										</p>
+										<p className='text-xs text-[#b09880]'>Hilfe anbieten</p>
+									</div>
+									<ArrowRight
+										size={15}
+										className='ml-auto text-[#b09880] group-hover:text-[#8b5e3c] transition-colors'
 									/>
-								</div>
-								<div>
-									<p className='font-semibold text-[#3d2b1f] text-sm'>
-										Anfragen
-									</p>
-									<p className='text-xs text-[#b09880]'>Hilfe anbieten</p>
-								</div>
-								<ArrowRight
-									size={15}
-									className='ml-auto text-[#b09880] group-hover:text-[#8b5e3c] transition-colors'
-								/>
-							</Link>
-							<Link
-								href='/rewards'
-								className='card p-4 flex items-center gap-3 card-hover group'
-							>
-								<div className='w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center group-hover:bg-amber-500 transition-colors'>
-									<Star
-										size={18}
-										className='text-amber-500 group-hover:text-[#ffffff] transition-colors'
+								</Link>
+								<Link
+									href='/rewards'
+									className='card p-4 flex items-center gap-3 card-hover group'
+								>
+									<div className='w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center group-hover:bg-amber-500 transition-colors'>
+										<Star
+											size={18}
+											className='text-amber-500 group-hover:text-[#ffffff] transition-colors'
+										/>
+									</div>
+									<div>
+										<p className='font-semibold text-[#3d2b1f] text-sm'>
+											Belohnungen
+										</p>
+										<p className='text-xs text-[#b09880]'>
+											{user?.points ?? 0} Punkte
+										</p>
+									</div>
+									<ArrowRight
+										size={15}
+										className='ml-auto text-[#b09880] group-hover:text-amber-500 transition-colors'
 									/>
-								</div>
-								<div>
-									<p className='font-semibold text-[#3d2b1f] text-sm'>
-										Belohnungen
-									</p>
-									<p className='text-xs text-[#b09880]'>
-										{user?.points ?? 0} Punkte
-									</p>
-								</div>
-								<ArrowRight
-									size={15}
-									className='ml-auto text-[#b09880] group-hover:text-amber-500 transition-colors'
-								/>
-							</Link>
-						</>
-					) : (
-						<>
-							<Link
-								href='/requests/new'
-								className='p-4 rounded-2xl bg-[#8b5e3c] flex items-center gap-3 hover:bg-[#6b4226] transition-colors group'
-							>
-								<div className='w-10 h-10 rounded-xl bg-[#ffffff]/20 flex items-center justify-center'>
-									<PlusCircle size={18} className='text-[#ffffff]' />
-								</div>
-								<div>
-									<p className='font-semibold text-[#ffffff] text-sm'>
-										Anfrage stellen
-									</p>
-									<p className='text-xs text-[#e8d5be]'>Hilfe anfordern</p>
-								</div>
-							</Link>
-							<Link
-								href='/requests'
-								className='card p-4 flex items-center gap-3 card-hover group'
-							>
-								<div className='w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center group-hover:bg-sky-500 transition-colors'>
-									<Calendar
-										size={18}
-										className='text-sky-500 group-hover:text-[#ffffff] transition-colors'
+								</Link>
+							</>
+						) : (
+							<>
+								<Link
+									href='/requests/new'
+									className='p-4 rounded-2xl bg-[#8b5e3c] flex items-center gap-3 hover:bg-[#6b4226] transition-colors group'
+								>
+									<div className='w-10 h-10 rounded-xl bg-[#ffffff]/20 flex items-center justify-center'>
+										<PlusCircle size={18} className='text-[#ffffff]' />
+									</div>
+									<div>
+										<p className='font-semibold text-[#ffffff] text-sm'>
+											Anfrage stellen
+										</p>
+										<p className='text-xs text-[#e8d5be]'>Hilfe anfordern</p>
+									</div>
+								</Link>
+								<Link
+									href='/requests?mine=true'
+									className='card p-4 flex items-center gap-3 card-hover group bg-[#f5ede0] border-[#e8d5be]'
+								>
+									<div className='w-10 h-10 rounded-xl bg-[#e8d5be] flex items-center justify-center group-hover:bg-[#8b5e3c] transition-colors'>
+										<Mic
+											size={18}
+											className='text-[#8b5e3c] group-hover:text-[#ffffff] transition-colors'
+										/>
+									</div>
+									<div>
+										<p className='font-semibold text-[#3d2b1f] text-sm'>
+											Mit Stimme erstellen
+										</p>
+										<p className='text-xs text-[#7a6050]'>
+											KI-Button unten rechts nutzen
+										</p>
+									</div>
+									<ArrowRight
+										size={15}
+										className='ml-auto text-[#b09880] group-hover:text-[#8b5e3c]'
 									/>
-								</div>
-								<div>
-									<p className='font-semibold text-[#3d2b1f] text-sm'>
-										Anfragen
-									</p>
-									<p className='text-xs text-[#b09880]'>Alle ansehen</p>
-								</div>
-								<ArrowRight size={15} className='ml-auto text-[#b09880]' />
-							</Link>
-						</>
-					)}
-				</div>
+								</Link>
+							</>
+						)}
+					</div>
+				</section>
 
 				{/* ─── MY ACTIVITY (helper) ─── */}
 				{isHelper && myActivity.length > 0 && (
-					<section className='mb-8'>
+					<section className='mb-8 rounded-3xl border border-[#ddd0be] bg-[#fdf8f2] p-5 md:p-6 shadow-[0_2px_10px_rgba(61,43,31,0.04)]'>
 						<div className='flex items-center justify-between mb-4'>
 							<h2 className='font-bold text-[#3d2b1f]'>Meine Aktivitäten</h2>
 							<SeeAllLink href='/chat' />
@@ -368,7 +409,7 @@ export default async function DashboardPage() {
 
 				{/* ─── MY REQUESTS (senior/relative) ─── */}
 				{!isHelper && (
-					<section className='mb-8'>
+					<section className='mb-8 rounded-3xl border border-[#ddd0be] bg-[#fdf8f2] p-5 md:p-6 shadow-[0_2px_10px_rgba(61,43,31,0.04)]'>
 						<div className='flex items-center justify-between mb-4'>
 							<h2 className='font-bold text-[#3d2b1f]'>Meine Anfragen</h2>
 							<SeeAllLink href='/requests?mine=true' />
@@ -444,12 +485,10 @@ export default async function DashboardPage() {
 				)}
 
 				{/* ─── OPEN REQUESTS FEED ─── */}
-				{(!isHelper || user?.helperStatus === 'APPROVED') && (
-					<section>
+				{isHelper && user?.helperStatus === 'APPROVED' && (
+					<section className='rounded-3xl border border-[#ddd0be] bg-[#fdf8f2] p-5 md:p-6 shadow-[0_2px_10px_rgba(61,43,31,0.04)]'>
 						<div className='flex items-center justify-between mb-4'>
-							<h2 className='font-bold text-[#3d2b1f]'>
-								{isHelper ? 'Neue Anfragen in Kassel' : 'Aktuelle Anfragen'}
-							</h2>
+							<h2 className='font-bold text-[#3d2b1f]'>Neue Anfragen in Kassel</h2>
 							<SeeAllLink href='/requests' />
 						</div>
 
@@ -533,7 +572,6 @@ export default async function DashboardPage() {
 			</div>
 
 			{/* Floating AI Assistant */}
-			<AiAssistantButton />
 		</PageShell>
 	)
 }

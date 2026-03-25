@@ -24,11 +24,14 @@ interface Props {
 export default async function RequestsPage({ searchParams }: Props) {
 	const session = await auth()
 	if (!session?.user) redirect('/login')
+	const role = session.user.role
+	const isSeniorView = role === 'SENIOR' || role === 'RELATIVE'
+	const canCreateRequest = role !== 'HELPER' && role !== 'ADMIN'
 
 	const params = await searchParams
 	const category = params.category as string | undefined
 	const status = params.status ?? 'OPEN'
-	const mineOnly = params.mine === 'true'
+	const mineOnly = isSeniorView || params.mine === 'true'
 
 	const where: Record<string, unknown> = {}
 	if (status !== 'ALL') where.status = status
@@ -58,9 +61,11 @@ export default async function RequestsPage({ searchParams }: Props) {
 							gefunden
 						</p>
 					</div>
-					<Link href='/requests/new' className='btn-primary'>
-						<PlusCircle size={16} /> Neu
-					</Link>
+					{canCreateRequest && (
+						<Link href='/requests/new' className='btn-primary'>
+							<PlusCircle size={16} /> Neu
+						</Link>
+					)}
 				</div>
 
 				{/* Filters */}
@@ -76,11 +81,17 @@ export default async function RequestsPage({ searchParams }: Props) {
 						<EmptyState
 							icon='📋'
 							title='Keine Anfragen gefunden'
-							description='Ändere die Filter oder erstelle eine neue Anfrage.'
+							description={
+								canCreateRequest
+									? 'Ändere die Filter oder erstelle eine neue Anfrage.'
+									: 'Ändere die Filter oder probiere es später erneut.'
+							}
 							action={
+								canCreateRequest ? (
 								<Link href='/requests/new' className='btn-primary'>
 									<PlusCircle size={16} /> Erste Anfrage erstellen
 								</Link>
+								) : undefined
 							}
 						/>
 					) : (

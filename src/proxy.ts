@@ -62,6 +62,11 @@ export async function proxy(request: NextRequest) {
 		}
 	}
 
+	// Helpers can never create requests directly
+	if (pathname.startsWith('/requests/new') && session?.user.role === 'HELPER') {
+		return NextResponse.redirect(new URL('/requests', request.url))
+	}
+
 	return NextResponse.next()
 }
 

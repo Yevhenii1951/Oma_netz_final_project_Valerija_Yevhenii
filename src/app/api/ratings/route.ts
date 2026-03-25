@@ -1,4 +1,4 @@
-import { requireAuth, logAndError } from '@/lib/api-helpers'
+import { logAndError, requireAuth } from '@/lib/api-helpers'
 import { prisma } from '@/lib/prisma'
 import { POINTS_PER_HELP } from '@/lib/utils'
 import { NextRequest, NextResponse } from 'next/server'
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
 				data: {
 					userId: helperId,
 					title: `${stars} Neue Bewertung erhalten!`,
-					body: `${session.user.name ?? 'Jemand'} hat dir ${data.score} Stern${data.score !== 1 ? 'e' : ''} gegeben. Du erhältst ${POINTS_PER_HELP} Punkte! 🎉`,
+					body: `${session.user.name ?? 'Jemand'} hat dir ${data.score} Stern${data.score !== 1 ? 'e' : ''} gegeben.${data.comment?.trim() ? ` Feedback: "${data.comment.trim()}".` : ''} Du erhältst ${POINTS_PER_HELP} Punkte! 🎉`,
 					link: `/requests/${data.requestId}`,
 				},
 			})

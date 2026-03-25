@@ -41,18 +41,17 @@ export function CategoryBadge({
 }) {
 	const meta = CATEGORIES.find(c => c.value === category)
 	if (!meta) return null
-	const sizeClass = size === 'xs' ? 'text-xs px-1.5 py-0.5' : ''
+	const sizeClass = size === 'xs' ? 'text-[11px]' : 'text-xs'
 	return (
 		<span
 			className={cn(
-				'badge',
-				meta.bg,
+				'inline-flex items-center gap-1 font-semibold leading-none',
 				meta.color,
 				sizeClass,
-				'inline-flex items-center gap-1',
+				'opacity-90',
 			)}
 		>
-			<Icon icon={meta.icon} className='w-3.5 h-3.5 shrink-0' />
+			<Icon icon={meta.icon} className='w-3.5 h-3.5 shrink-0 opacity-90' />
 			{meta.label}
 		</span>
 	)

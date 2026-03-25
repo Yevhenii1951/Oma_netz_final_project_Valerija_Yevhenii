@@ -3,6 +3,7 @@
 import { PageShell } from '@/components/shell'
 import { useToast } from '@/components/ui/toaster'
 import { Bell, CheckCheck, Loader2 } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -18,6 +19,8 @@ interface Notification {
 export default function NotificationsPage() {
 	const router = useRouter()
 	const { toast } = useToast()
+	const { data: session } = useSession()
+	const isAdmin = session?.user.role === 'ADMIN'
 	const [notifications, setNotifications] = useState<Notification[]>([])
 	const [loading, setLoading] = useState(true)
 	const [marking, setMarking] = useState(false)
@@ -58,7 +61,7 @@ export default function NotificationsPage() {
 	const unreadCount = notifications.filter(n => !n.read).length
 
 	return (
-		<PageShell title='Benachrichtigungen' hideSidebar>
+		<PageShell title='Benachrichtigungen' hideSidebar={isAdmin}>
 			<div className='max-w-2xl mx-auto px-4 py-8'>
 				{/* Header */}
 				<div className='flex items-center justify-between mb-6'>

@@ -46,6 +46,7 @@ export function Sidebar() {
 				{navItems
 					.filter(
 						item =>
+							!(role === 'HELPER' && item.href === '/requests/new') &&
 							!(
 								role === 'ADMIN' &&
 								(item.href === '/requests/new' || item.href === '/chat')

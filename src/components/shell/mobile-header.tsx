@@ -45,10 +45,10 @@ function useUnreadCount() {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function MobileHeader({
-	_title,
+	title,
 	showOnDesktop = false,
 }: {
-	_title?: string
+	title?: string
 	showOnDesktop?: boolean
 }) {
 	const { data: session } = useSession()
@@ -69,10 +69,17 @@ export function MobileHeader({
 				>
 					<span className='text-base leading-none select-none'>👵</span>
 				</Link>
+				{!showOnDesktop && (
+					<span className='font-bold text-[#3d2b1f] text-base'>
+						{title ?? 'OMA-NETZ'}
+					</span>
+				)}
 			</div>
-			<span className='absolute left-1/2 -translate-x-1/2 font-bold text-[#3d2b1f] text-base pointer-events-none'>
-				Admin panel
-			</span>
+			{showOnDesktop && (
+				<span className='absolute left-1/2 -translate-x-1/2 font-bold text-[#3d2b1f] text-base pointer-events-none'>
+					{title ?? 'Admin panel'}
+				</span>
+			)}
 			<div className='flex items-center gap-2'>
 				<Link
 					href='/notifications'
