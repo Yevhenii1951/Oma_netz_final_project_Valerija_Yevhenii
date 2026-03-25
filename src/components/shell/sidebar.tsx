@@ -17,6 +17,8 @@ export function Sidebar() {
 	const [showBlock, setShowBlock] = useState(false)
 	const role = session?.user.role
 	const canEditProfile = role === 'SENIOR' || role === 'HELPER'
+	const profileBannerSrc =
+		role === 'SENIOR' ? '/oma_final_clean_300.png' : '/working.webp'
 
 	const isPendingHelper =
 		session?.user.role === 'HELPER' && session?.user.helperStatus !== 'APPROVED'
@@ -128,9 +130,9 @@ export function Sidebar() {
 
 			{canEditProfile && (
 				<div className='mt-4 rounded-2xl border border-[#ddd0be] bg-white p-2.5'>
-					<div className='relative h-24 w-full overflow-hidden rounded-xl'>
+					<div className='relative h-32 w-4/5 mx-auto overflow-hidden rounded-xl'>
 						<Image
-							src='/working.webp'
+							src={profileBannerSrc}
 							alt='Senior and helper'
 							fill
 							className='object-cover'
