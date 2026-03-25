@@ -16,7 +16,7 @@ export function PageShell({
 			<Sidebar />
 			<div className='lg:pl-64 min-h-screen bg-[#f5ede0]'>
 				<MobileHeader title={title} />
-				<main className='pb-24 lg:pb-8'>{children}</main>
+				<main className='pb-24 lg:pb-8 lg:pl-4'>{children}</main>
 			</div>
 			<BottomNav />
 		</>
