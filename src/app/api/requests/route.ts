@@ -95,9 +95,6 @@ export async function POST(req: NextRequest) {
 			},
 		})
 
-		// Notify subscribed helpers via Telegram (fire-and-forget)
-		notifyHelpers(request.id, data.category, data.title).catch(console.error)
-
 		return NextResponse.json(
 			{ data: request, message: 'Anfrage erstellt!' },
 			{ status: 201 },
@@ -112,41 +109,4 @@ export async function POST(req: NextRequest) {
 		}
 		return logAndError('[POST /api/requests]', err)
 	}
-}
-
-// ─── HELPER: notify Telegram volunteers ──────────────────────────────────────
-
-async function notifyHelpers(
-	requestId: string,
-	category: string,
-	title: string,
-) {
-	const helpers = await prisma.user.findMany({
-		where: {
-			role: 'HELPER',
-			telegramChatId: { not: null },
-			isBanned: false,
-		},
-		select: { telegramChatId: true },
-	})
-
-	const token = process.env.TELEGRAM_BOT_TOKEN
-	if (!token || helpers.length === 0) return
-
-	const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-	const text = `🆕 *Neue Anfrage in Kassel!*\n📌 ${title}\n📂 Kategorie: ${category}\n\n👉 [Jetzt ansehen](${appUrl}/requests/${requestId})`
-
-	await Promise.all(
-		helpers.map(({ telegramChatId }) =>
-			fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					chat_id: telegramChatId,
-					text,
-					parse_mode: 'Markdown',
-				}),
-			}).catch(() => null),
-		),
-	)
 }

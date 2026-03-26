@@ -1,4 +1,4 @@
-import { requireAuth, logAndError } from '@/lib/api-helpers'
+import { logAndError, requireAuth } from '@/lib/api-helpers'
 import { prisma } from '@/lib/prisma'
 import { getPusherServer } from '@/lib/pusher-server'
 import { NextRequest, NextResponse } from 'next/server'
@@ -19,7 +19,7 @@ export async function POST(
 			where: { id },
 			include: {
 				request: true,
-				helper: { select: { id: true, name: true, telegramChatId: true } },
+				helper: { select: { id: true, name: true } },
 			},
 		})
 
@@ -120,23 +120,6 @@ export async function POST(
 				chatId: chat.id,
 			})
 			?.catch(() => null)
-
-		// Notify via Telegram if available
-		if (offer.helper.telegramChatId) {
-			const token = process.env.TELEGRAM_BOT_TOKEN
-			const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
-			if (token) {
-				fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({
-						chat_id: offer.helper.telegramChatId,
-						text: `✅ *Deine Bewerbung wurde angenommen!*\n\n👉 [Zum Chat](${appUrl}/chat/${offer.requestId})`,
-						parse_mode: 'Markdown',
-					}),
-				}).catch(() => null)
-			}
-		}
 
 		return NextResponse.json({
 			data: { chatId: chat.id, requestId: offer.requestId },

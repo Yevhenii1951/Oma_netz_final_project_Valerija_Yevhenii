@@ -77,10 +77,5 @@ export function truncate(text: string, maxLen: number): string {
 	return text.slice(0, maxLen - 3) + '...'
 }
 
-/** Generate a random 6-character alphanumeric Telegram link code */
-export function generateTelegramCode(): string {
-	return Math.random().toString(36).substring(2, 8).toUpperCase()
-}
-
 /** Points earned per completed help */
 export const POINTS_PER_HELP = 10
