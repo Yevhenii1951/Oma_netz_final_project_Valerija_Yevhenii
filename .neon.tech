@@ -1,0 +1,24 @@
+                              Connection Information
+      Parameter       |                           Value                            
+----------------------+------------------------------------------------------------
+ Database             | neondb
+ Client User          | neondb_owner
+ Host                 | ep-lingering-field-al5fng3k.c-3.eu-central-1.aws.neon.tech
+ Host Address         | 3.127.101.230
+ Server Port          | 5432
+ Options              | 
+ Protocol Version     | 3.0
+ Password Used        | true
+ GSSAPI Authenticated | false
+ Backend PID          | 93360228
+ SSL Connection       | true
+ SSL Library          | OpenSSL
+ SSL Protocol         | TLSv1.3
+ SSL Key Bits         | 256
+ SSL Cipher           | TLS_AES_256_GCM_SHA384
+ SSL Compression      | false
+ ALPN                 | postgresql
+ Superuser            | off
+ Hot Standby          | off
+(19 rows)
+
