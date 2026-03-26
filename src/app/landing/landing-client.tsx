@@ -35,7 +35,10 @@ import {
 	Users,
 } from 'lucide-react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+
+const CAROUSEL_AUTOPLAY_MS = 4000
+const CAROUSEL_TRANSITION_SEC = 0.72
 
 const CAROUSEL_IMAGES = [
 	'/carussel/oma1.png',
@@ -99,30 +102,54 @@ const FadeUp = ({
 function JourneyTimeline() {
 	const [active, setActive] = useState(0)
 	const [isPaused, setIsPaused] = useState(false)
+	const [isInView, setIsInView] = useState(false)
+	const carouselRef = useRef<HTMLDivElement | null>(null)
 
 	useEffect(() => {
-		if (isPaused) return
+		const node = carouselRef.current
+		if (!node || typeof IntersectionObserver === 'undefined') {
+			setIsInView(true)
+			return
+		}
+
+		const observer = new IntersectionObserver(
+			entries => {
+				setIsInView(entries[0]?.isIntersecting ?? false)
+			},
+			{ threshold: 0.25 },
+		)
+
+		observer.observe(node)
+		return () => observer.disconnect()
+	}, [])
+
+	useEffect(() => {
+		if (isPaused || !isInView) return
 		const id = setInterval(() => {
 			setActive(p => (p + 1) % STEPS.length)
-		}, 5000)
+		}, CAROUSEL_AUTOPLAY_MS)
 		return () => clearInterval(id)
-	}, [isPaused])
+	}, [isPaused, isInView])
 
 	useEffect(() => {
-		const preloaded: HTMLImageElement[] = []
+		if (!isInView) return
 
-		for (const src of CAROUSEL_IMAGES) {
+		// Preload only current and next frame to avoid heavy bulk decode work.
+		const nextIndex = (active + 1) % CAROUSEL_IMAGES.length
+		const preloadSet = [CAROUSEL_IMAGES[active], CAROUSEL_IMAGES[nextIndex]]
+
+		const preloaded: HTMLImageElement[] = []
+		for (const src of preloadSet) {
 			const image = new Image()
+			image.decoding = 'async'
 			image.src = src
 			preloaded.push(image)
 		}
 
 		return () => {
-			for (const image of preloaded) {
-				image.src = ''
-			}
+			for (const image of preloaded) image.src = ''
 		}
-	}, [])
+	}, [active, isInView])
 
 	const progressIndicators = STEPS.map((_, i) => (
 		<button
@@ -140,7 +167,10 @@ function JourneyTimeline() {
 	))
 
 	return (
-		<div className='flex flex-col items-center gap-8 py-8 w-full'>
+		<div
+			ref={carouselRef}
+			className='flex flex-col items-center gap-8 py-8 w-full'
+		>
 			<div className='hidden md:flex items-center justify-center gap-2 w-full max-w-5xl px-4'>
 				{STEPS.map((step, i) => {
 					const isActive = i === active
@@ -191,11 +221,14 @@ function JourneyTimeline() {
 									key={CAROUSEL_IMAGES[active % CAROUSEL_IMAGES.length]}
 									src={CAROUSEL_IMAGES[active % CAROUSEL_IMAGES.length]}
 									alt=''
-									className='absolute inset-0 w-full h-full object-contain drop-shadow-md'
-									initial={{ opacity: 0, scale: 1.02 }}
+									className='absolute inset-0 w-full h-full object-contain drop-shadow-md will-change-transform'
+									initial={{ opacity: 0, scale: 1.01 }}
 									animate={{ opacity: 1, scale: 1 }}
-									exit={{ opacity: 0, scale: 0.985 }}
-									transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+									exit={{ opacity: 0, scale: 0.995 }}
+									transition={{
+										duration: CAROUSEL_TRANSITION_SEC,
+										ease: [0.22, 1, 0.36, 1],
+									}}
 								/>
 							</AnimatePresence>
 						</div>
