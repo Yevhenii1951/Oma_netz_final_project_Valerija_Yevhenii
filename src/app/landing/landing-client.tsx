@@ -102,15 +102,12 @@ const FadeUp = ({
 function JourneyTimeline() {
 	const [active, setActive] = useState(0)
 	const [isPaused, setIsPaused] = useState(false)
-	const [isInView, setIsInView] = useState(false)
+	const [isInView, setIsInView] = useState(true)
 	const carouselRef = useRef<HTMLDivElement | null>(null)
 
 	useEffect(() => {
 		const node = carouselRef.current
-		if (!node || typeof IntersectionObserver === 'undefined') {
-			setIsInView(true)
-			return
-		}
+		if (!node || typeof IntersectionObserver === 'undefined') return
 
 		const observer = new IntersectionObserver(
 			entries => {
