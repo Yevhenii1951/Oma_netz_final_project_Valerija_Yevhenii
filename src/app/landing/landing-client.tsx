@@ -439,14 +439,14 @@ export default function LandingClient() {
 						className='flex flex-col sm:flex-row items-center justify-center gap-3 mb-6'
 					>
 						<Link
-							href='/dashboard'
+							href='/register?role=SENIOR'
 							className='btn-primary btn-glow text-base px-8 py-3.5 w-full sm:w-auto'
 						>
 							<HandHelping size={18} className='inline mr-1' /> Ich brauche
 							Hilfe <ArrowRight size={16} />
 						</Link>
 						<Link
-							href='/dashboard'
+							href='/register?role=HELPER'
 							className='btn-secondary text-base px-8 py-3.5 w-full sm:w-auto'
 						>
 							<Handshake size={18} className='inline mr-1' /> Ich möchte helfen
