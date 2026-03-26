@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, Heart, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -118,7 +118,9 @@ function LoginForm() {
 								<button
 									type='button'
 									onClick={() => setShowPw(!showPw)}
-									aria-label={showPw ? 'Passwort verbergen' : 'Passwort anzeigen'}
+									aria-label={
+										showPw ? 'Passwort verbergen' : 'Passwort anzeigen'
+									}
 									className='absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-[#7a6652] hover:text-[#3d2b1f] rounded-lg transition-colors'
 								>
 									{showPw ? <EyeOff size={17} /> : <Eye size={17} />}
@@ -155,16 +157,6 @@ function LoginForm() {
 						</p>
 					</div>
 				</div>
-
-				{/* Demo hint — only visible in development */}
-				{process.env.NODE_ENV === 'development' && (
-					<div className='mt-4 p-4 bg-amber-50 rounded-2xl border border-amber-100 text-center'>
-						<p className='text-xs text-amber-700 font-medium flex items-center justify-center gap-1.5'>
-							<Heart size={12} fill='currentColor' />
-							Entwicklungsmodus — Demo-Zugang verfügbar
-						</p>
-					</div>
-				)}
 
 				<p className='text-center text-xs text-[#b09880] mt-6'>
 					<Link href='/' className='hover:text-[#7a6050]'>

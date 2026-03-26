@@ -372,7 +372,9 @@ export default async function DashboardPage() {
 				{isHelper && myActivity.length > 0 && (
 					<section className='mb-8 rounded-3xl border border-[#ddd0be] bg-[#fdf8f2] p-5 md:p-6 shadow-[0_2px_10px_rgba(61,43,31,0.04)]'>
 						<div className='flex items-center justify-between mb-4'>
-							<h2 className='font-bold text-[#3d2b1f]'>Meine Aktivitäten</h2>
+							<h2 className='font-bold text-[#3d2b1f] animate-pulse [animation-duration:2.4s] [animation-timing-function:ease-in-out]'>
+								Meine Aktivitäten
+							</h2>
 							<SeeAllLink href='/chat' />
 						</div>
 						<div className='space-y-3'>
@@ -418,7 +420,9 @@ export default async function DashboardPage() {
 				{!isHelper && (
 					<section className='mb-8 rounded-3xl border border-[#ddd0be] bg-[#fdf8f2] p-5 md:p-6 shadow-[0_2px_10px_rgba(61,43,31,0.04)]'>
 						<div className='flex items-center justify-between mb-4'>
-							<h2 className='font-bold text-[#3d2b1f]'>Meine Anfragen</h2>
+							<h2 className='font-bold text-[#3d2b1f] animate-pulse [animation-duration:2.4s] [animation-timing-function:ease-in-out]'>
+								Meine Aktivitäten
+							</h2>
 							<SeeAllLink href='/requests?mine=true' />
 						</div>
 						{myRequests.length === 0 ? (
