@@ -16,7 +16,7 @@ import {
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 
 type Role = 'SENIOR' | 'HELPER' | 'RELATIVE'
 
@@ -69,12 +69,19 @@ const COMMON_LANGUAGES = [
 function RegisterForm() {
 	const router = useRouter()
 	const searchParams = useSearchParams()
-	const defaultRole = (searchParams.get('role') as Role) ?? 'HELPER'
+	const roleParam = searchParams.get('role')
+	const defaultRole: Role =
+		roleParam === 'SENIOR' || roleParam === 'HELPER' || roleParam === 'RELATIVE'
+			? roleParam
+			: 'HELPER'
 
 	const totalSteps = (role: Role) => (role === 'HELPER' ? 3 : 2)
 
 	const [step, setStep] = useState<1 | 2 | 3>(1)
 	const [role, setRole] = useState<Role>(defaultRole)
+	const seniorRoleRef = useRef<HTMLButtonElement | null>(null)
+	const helperRoleRef = useRef<HTMLButtonElement | null>(null)
+	const relativeRoleRef = useRef<HTMLButtonElement | null>(null)
 	// Step 2 fields
 	const [name, setName] = useState('')
 	const [email, setEmail] = useState('')
@@ -92,6 +99,17 @@ function RegisterForm() {
 
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState('')
+
+	useEffect(() => {
+		setRole(defaultRole)
+	}, [defaultRole])
+
+	useEffect(() => {
+		if (step !== 1) return
+		if (role === 'SENIOR') seniorRoleRef.current?.focus()
+		if (role === 'HELPER') helperRoleRef.current?.focus()
+		if (role === 'RELATIVE') relativeRoleRef.current?.focus()
+	}, [role, step])
 
 	function toggleLanguage(lang: string) {
 		setLanguages(prev =>
@@ -200,6 +218,13 @@ function RegisterForm() {
 									{roleOptions.map(({ value, icon: RoleIcon, label, desc }) => (
 										<button
 											key={value}
+											ref={
+												value === 'SENIOR'
+													? seniorRoleRef
+													: value === 'HELPER'
+														? helperRoleRef
+														: relativeRoleRef
+											}
 											type='button'
 											onClick={() => setRole(value)}
 											className={`w-full flex items-start gap-3 p-4 rounded-2xl border-2 text-left transition-all ${role === value ? 'border-[#8b5e3c] bg-[#f5ede0]' : 'border-[#ddd0be] bg-[#ffffff] hover:border-[#c8956c]'}`}
