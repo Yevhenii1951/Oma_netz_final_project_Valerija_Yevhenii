@@ -182,20 +182,20 @@ export default function AdminClient({
 
 	const tabs: { key: Tab; icon: LucideIcon; label: string; count?: number }[] =
 		[
-			{ key: 'stats', icon: BarChart3, label: 'Stats' },
+			{ key: 'stats', icon: BarChart3, label: 'Statistik' },
 			{
 				key: 'pending',
 				icon: Bell,
-				label: 'Pending Helpers',
+				label: 'Offene Helfer',
 				count: stats.pendingHelpers,
 			},
-			{ key: 'helpers', icon: Users, label: 'Helpers' },
-			{ key: 'seniors', icon: User, label: 'Seniors' },
-			{ key: 'requests', icon: ClipboardList, label: 'Requests' },
+			{ key: 'helpers', icon: Users, label: 'Helfer' },
+			{ key: 'seniors', icon: User, label: 'Senioren' },
+			{ key: 'requests', icon: ClipboardList, label: 'Anfragen' },
 			{
 				key: 'redemptions',
 				icon: Gift,
-				label: 'Redemptions',
+				label: 'Einloesungen',
 				count: pendingRedemptions.length,
 			},
 		]
@@ -298,55 +298,55 @@ export default function AdminClient({
 		tone: string
 	}[] = [
 		{
-			label: 'Users',
+			label: 'Nutzer',
 			value: stats.userCount,
 			icon: User,
-			subtext: 'All registered accounts',
-			context: `+${Math.max(1, Math.ceil(stats.userCount * 0.02))} this week`,
+			subtext: 'Alle registrierten Konten',
+			context: `+${Math.max(1, Math.ceil(stats.userCount * 0.02))} diese Woche`,
 			tone: 'from-[#f8efe3] to-white',
 		},
 		{
-			label: 'Requests',
+			label: 'Anfragen',
 			value: stats.requestCount,
 			icon: FileText,
-			subtext: 'All created support requests',
-			context: `+${Math.max(1, Math.ceil(stats.requestCount * 0.03))} today`,
+			subtext: 'Alle erstellten Hilfsanfragen',
+			context: `+${Math.max(1, Math.ceil(stats.requestCount * 0.03))} heute`,
 			tone: 'from-[#f9f3ea] to-white',
 		},
 		{
-			label: 'Open Requests',
+			label: 'Offene Anfragen',
 			value: stats.openRequests,
 			icon: LockOpen,
-			subtext: 'Open and waiting',
-			context: `${Math.round((stats.openRequests / Math.max(stats.requestCount, 1)) * 100)}% open`,
+			subtext: 'Offen und wartend',
+			context: `${Math.round((stats.openRequests / Math.max(stats.requestCount, 1)) * 100)}% offen`,
 			tone: 'from-amber-50 to-white',
 		},
 		{
-			label: 'Completed',
+			label: 'Erledigt',
 			value: stats.doneRequests,
 			icon: CheckCircle2,
-			subtext: 'Requests marked done',
-			context: `${Math.round((stats.doneRequests / Math.max(stats.requestCount, 1)) * 100)}% done`,
+			subtext: 'Als erledigt markierte Anfragen',
+			context: `${Math.round((stats.doneRequests / Math.max(stats.requestCount, 1)) * 100)}% erledigt`,
 			tone: 'from-emerald-50 to-white',
 		},
 		{
-			label: 'Offers',
+			label: 'Angebote',
 			value: stats.offerCount,
 			icon: Handshake,
-			subtext: 'Submitted helper offers',
+			subtext: 'Abgegebene Helfer-Angebote',
 			context: `avg ${
 				stats.requestCount > 0
 					? (stats.offerCount / stats.requestCount).toFixed(1)
 					: '0.0'
-			} per request`,
+			} pro Anfrage`,
 			tone: 'from-slate-100 to-white',
 		},
 		{
-			label: 'Ratings',
+			label: 'Bewertungen',
 			value: stats.ratingCount,
 			icon: Star,
-			subtext: 'System feedback count',
-			context: `+${Math.max(1, Math.ceil(stats.ratingCount * 0.02))} since yesterday`,
+			subtext: 'Anzahl Systembewertungen',
+			context: `+${Math.max(1, Math.ceil(stats.ratingCount * 0.02))} seit gestern`,
 			tone: 'from-[#f6efe6] to-white',
 		},
 	]
@@ -362,8 +362,8 @@ export default function AdminClient({
 	if (stats.pendingHelpers > 0) {
 		priorityItems.push({
 			id: 'pending-helpers',
-			message: `${stats.pendingHelpers} helper ${stats.pendingHelpers === 1 ? 'application is' : 'applications are'} waiting for review`,
-			cta: 'Review now',
+			message: `${stats.pendingHelpers} Helfer-${stats.pendingHelpers === 1 ? 'Bewerbung wartet' : 'Bewerbungen warten'} auf Pruefung`,
+			cta: 'Jetzt pruefen',
 			tab: 'pending',
 			high: true,
 		})
@@ -372,8 +372,8 @@ export default function AdminClient({
 	if (pendingRedemptions.length > 0) {
 		priorityItems.push({
 			id: 'pending-redemptions',
-			message: `${pendingRedemptions.length} redemption ${pendingRedemptions.length === 1 ? 'request is' : 'requests are'} still pending`,
-			cta: 'Open redemptions',
+			message: `${pendingRedemptions.length} ${pendingRedemptions.length === 1 ? 'Einloesung ist' : 'Einloesungen sind'} noch offen`,
+			cta: 'Einloesungen oeffnen',
 			tab: 'redemptions',
 			high: false,
 		})
@@ -390,7 +390,7 @@ export default function AdminClient({
 						status: 'OPEN',
 						address: 'Kassel-Mitte',
 						createdAt: new Date().toISOString(),
-						senior: { name: 'Demo Senior' },
+						senior: { name: 'Demo-Senior' },
 						_count: { offers: 0 },
 					},
 				]
@@ -406,26 +406,28 @@ export default function AdminClient({
 		...pendingHelpers.map(h => ({
 			id: `helper-${h.id}`,
 			createdAt: h.createdAt,
-			title: 'New helper application',
-			subtitle: `${h.name ?? h.email ?? 'Unknown'} awaits review`,
-			badge: 'Helper',
+			title: 'Neue Helfer-Bewerbung',
+			subtitle: `${h.name ?? h.email ?? 'Unbekannt'} wartet auf Pruefung`,
+			badge: 'Helfer',
 			type: 'helper' as const,
 		})),
 		...redemptionList.map(r => ({
 			id: `redemption-${r.id}`,
 			createdAt: r.createdAt,
 			title:
-				r.status === 'fulfilled' ? 'Redemption completed' : 'Reward redeemed',
+				r.status === 'fulfilled'
+					? 'Einloesung abgeschlossen'
+					: 'Belohnung eingeloest',
 			subtitle: `${r.user.name ?? r.user.email} - ${r.reward.title}`,
-			badge: 'Reward',
+			badge: 'Belohnung',
 			type: 'redemption' as const,
 		})),
 		...allRequests.slice(0, 3).map(r => ({
 			id: `request-${r.id}`,
 			createdAt: r.createdAt,
-			title: 'New request',
-			subtitle: `${r.title} - ${r.senior.name ?? 'Unknown'}`,
-			badge: 'Request',
+			title: 'Neue Anfrage',
+			subtitle: `${r.title} - ${r.senior.name ?? 'Unbekannt'}`,
+			badge: 'Anfrage',
 			type: 'request' as const,
 		})),
 	]
@@ -442,8 +444,8 @@ export default function AdminClient({
 					{
 						id: 'demo-activity',
 						createdAt: new Date().toISOString(),
-						title: 'Welcome to the admin area',
-						subtitle: 'Recent system activity will appear here.',
+						title: 'Willkommen im Adminbereich',
+						subtitle: 'Aktuelle Systemaktivitaeten erscheinen hier.',
 						badge: 'System',
 						type: 'system' as const,
 					},
@@ -459,31 +461,31 @@ export default function AdminClient({
 	}[] = [
 		{
 			tab: 'pending',
-			title: 'Review helper applications',
-			description: 'Process approvals to avoid verification backlog',
-			meta: `${stats.pendingHelpers} open`,
+			title: 'Helfer-Bewerbungen pruefen',
+			description: 'Freigaben bearbeiten, um Rueckstau zu vermeiden',
+			meta: `${stats.pendingHelpers} offen`,
 			icon: UserPlus,
 			priority: true,
 		},
 		{
 			tab: 'requests',
-			title: 'Moderate requests',
-			description: 'Check open cases and prioritize urgent ones',
-			meta: `${stats.openRequests} open`,
+			title: 'Anfragen moderieren',
+			description: 'Offene Faelle pruefen und Dringendes priorisieren',
+			meta: `${stats.openRequests} offen`,
 			icon: ClipboardCheck,
 		},
 		{
 			tab: 'helpers',
-			title: 'Manage helpers',
-			description: 'Control status, bans, and account lifecycle',
-			meta: `${helperList.length} helpers`,
+			title: 'Helfer verwalten',
+			description: 'Status, Sperren und Kontolebenszyklus steuern',
+			meta: `${helperList.length} Helfer`,
 			icon: UserCog,
 		},
 		{
 			tab: 'redemptions',
-			title: 'Process rewards',
-			description: 'Confirm and fulfill pending redemptions',
-			meta: `${pendingRedemptions.length} pending`,
+			title: 'Belohnungen bearbeiten',
+			description: 'Offene Einloesungen bestaetigen und erledigen',
+			meta: `${pendingRedemptions.length} offen`,
 			icon: Gift,
 		},
 	]
@@ -516,9 +518,9 @@ export default function AdminClient({
 		REJECTED: 'bg-red-50 text-red-600 border border-red-200',
 	}
 	const helperStatusLabel: Record<string, string> = {
-		PENDING_REVIEW: 'In Review',
-		APPROVED: 'Approved',
-		REJECTED: 'Rejected',
+		PENDING_REVIEW: 'In Pruefung',
+		APPROVED: 'Freigegeben',
+		REJECTED: 'Abgelehnt',
 	}
 
 	const pendingStatusOptions = ['ALL', 'PENDING_REVIEW']
@@ -736,16 +738,16 @@ export default function AdminClient({
 			<div className='mb-4 flex items-center justify-between gap-3 lg:hidden'>
 				<div>
 					<p className='text-xs uppercase tracking-[0.22em] text-[#b09880] font-semibold'>
-						Admin Workspace
+						Adminbereich
 					</p>
 					<h1 className='text-xl font-semibold text-[#3d2b1f]'>
-						Operations Dashboard
+						Betriebs-Dashboard
 					</h1>
 				</div>
 				<button
 					onClick={() => setIsDrawerOpen(true)}
 					className='h-10 w-10 rounded-xl border border-[#ddd0be] bg-white text-[#7a6050] flex items-center justify-center shadow-sm'
-					aria-label='Open admin navigation'
+					aria-label='Admin-Navigation oeffnen'
 				>
 					<Menu className='w-5 h-5' />
 				</button>
@@ -756,7 +758,7 @@ export default function AdminClient({
 					<button
 						onClick={() => setIsDrawerOpen(false)}
 						className='absolute inset-0 bg-black/35'
-						aria-label='Close admin navigation overlay'
+						aria-label='Admin-Navigation schliessen'
 					/>
 					<div className='absolute right-0 top-0 h-full w-[85%] max-w-sm bg-[#fdf8f2] border-l border-[#ddd0be] p-4 shadow-2xl'>
 						<div className='flex items-center justify-between mb-4'>
@@ -851,8 +853,8 @@ export default function AdminClient({
 							<section className='rounded-2xl border border-[#eadbcc] bg-linear-to-r from-[#fffaf4] to-white p-4 sm:p-5 shadow-sm'>
 								<SectionHeading
 									icon={AlertTriangle}
-									title='Priority Board'
-									description='Tasks that need direct admin attention right now.'
+									title='Prioritaeten'
+									description='Aufgaben, die jetzt direkte Admin-Aufmerksamkeit brauchen.'
 								/>
 								<div className='mt-3 space-y-2.5'>
 									{priorityItems.length > 0 ? (
@@ -885,7 +887,7 @@ export default function AdminClient({
 										))
 									) : (
 										<div className='rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-emerald-800 text-sm font-medium'>
-											No urgent tasks right now. Operations are healthy.
+											Aktuell keine dringenden Aufgaben. Alles laeuft stabil.
 										</div>
 									)}
 								</div>
@@ -894,8 +896,8 @@ export default function AdminClient({
 							<section className='rounded-2xl border border-[#eadbcc] bg-white p-4 sm:p-5 shadow-sm'>
 								<SectionHeading
 									icon={BarChart3}
-									title='KPI Overview'
-									description='Core metrics for daily e-commerce style operations tracking.'
+									title='KPI-Ueberblick'
+									description='Kernmetriken fuer den taeglichen Betrieb.'
 								/>
 								{isBootLoading ? (
 									<KpiSkeleton />
@@ -940,8 +942,8 @@ export default function AdminClient({
 							<section className='rounded-2xl border border-[#eadbcc] bg-linear-to-br from-white to-[#fcf7f0] p-4 sm:p-5 shadow-sm'>
 								<SectionHeading
 									icon={SlidersHorizontal}
-									title='Quick Actions'
-									description='Fast entry points for high-impact admin workflows.'
+									title='Schnellaktionen'
+									description='Direkte Einstiege fuer wichtige Admin-Workflows.'
 								/>
 								<div className='mt-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3'>
 									{quickActions.map(action => {
@@ -972,7 +974,7 @@ export default function AdminClient({
 													{action.description}
 												</p>
 												<div className='mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#8b5e3c]'>
-													Open{' '}
+													Oeffnen{' '}
 													<ArrowRight className='w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5' />
 												</div>
 											</button>
@@ -986,27 +988,27 @@ export default function AdminClient({
 									<div className='flex items-center justify-between gap-2 p-4 border-b border-[#f0e8dc]'>
 										<SectionHeading
 											icon={FileText}
-											title='Latest Requests'
-											description='Tabular overview of the latest requests.'
+											title='Neueste Anfragen'
+											description='Tabellarische Uebersicht der neuesten Anfragen.'
 											compact
 										/>
 										<button
 											onClick={() => setActiveTab('requests')}
 											className='text-xs px-2.5 py-1.5 rounded-lg border border-[#ddd0be] text-[#7a6050] hover:bg-[#f5ede0] hover:text-[#3d2b1f] transition-colors whitespace-nowrap'
 										>
-											Open all
+											Alle oeffnen
 										</button>
 									</div>
 									<div className='overflow-x-auto'>
 										<table className='min-w-210 w-full text-sm'>
 											<thead className='bg-[#fcf8f2] border-b border-[#f0e8dc] text-xs text-[#7a6050] uppercase tracking-wide'>
 												<tr>
-													<th className='px-4 py-2.5 text-left'>Title</th>
+													<th className='px-4 py-2.5 text-left'>Titel</th>
 													<th className='px-4 py-2.5 text-left'>Senior</th>
-													<th className='px-4 py-2.5 text-left'>Category</th>
+													<th className='px-4 py-2.5 text-left'>Kategorie</th>
 													<th className='px-4 py-2.5 text-left'>Status</th>
-													<th className='px-4 py-2.5 text-left'>Offers</th>
-													<th className='px-4 py-2.5 text-left'>Created</th>
+													<th className='px-4 py-2.5 text-left'>Angebote</th>
+													<th className='px-4 py-2.5 text-left'>Erstellt</th>
 												</tr>
 											</thead>
 											<tbody className='divide-y divide-[#f5ede0]'>
@@ -1020,7 +1022,7 @@ export default function AdminClient({
 															{r.title}
 														</td>
 														<td className='px-4 py-3 text-[#7a6050]'>
-															{r.senior.name ?? 'Unknown'}
+															{r.senior.name ?? 'Unbekannt'}
 														</td>
 														<td className='px-4 py-3'>
 															<CategoryBadge category={r.category} />
@@ -1053,8 +1055,8 @@ export default function AdminClient({
 									<div className='p-4 border-b border-[#f0e8dc]'>
 										<SectionHeading
 											icon={Bell}
-											title='Activity Stream'
-											description='Recent events with clear timeline context.'
+											title='Aktivitaets-Feed'
+											description='Aktuelle Ereignisse mit klarer Zeitleiste.'
 											compact
 										/>
 									</div>
@@ -1112,12 +1114,12 @@ export default function AdminClient({
 											{tableHeading(activeTab)}
 										</h3>
 										<p className='text-sm text-[#7a6050]'>
-											Search, status filter, sortable columns and pagination for
-											faster admin workflows.
+											Suche, Statusfilter, sortierbare Spalten und
+											Seitennavigation fuer schnellere Admin-Workflows.
 										</p>
 									</div>
 									<div className='text-xs px-2.5 py-1.5 rounded-lg bg-[#f5ede0] border border-[#e8d5be] text-[#7a6050] font-medium w-max'>
-										{currentRows.length} results
+										{currentRows.length} Ergebnisse
 									</div>
 								</div>
 
@@ -1130,7 +1132,7 @@ export default function AdminClient({
 												setQuery(e.target.value)
 												setPage(1)
 											}}
-											placeholder='Search by name, email, title or location'
+											placeholder='Suche nach Name, E-Mail, Titel oder Ort'
 											className='w-full h-10 rounded-xl border border-[#ddd0be] bg-white pl-9 pr-3 text-sm text-[#3d2b1f] outline-none focus:border-[#8b5e3c]'
 										/>
 									</label>
@@ -1147,7 +1149,7 @@ export default function AdminClient({
 											>
 												{activeStatusOptions.map(option => (
 													<option key={option} value={option}>
-														{option}
+														{filterOptionLabel(option, activeTab)}
 													</option>
 												))}
 											</select>
@@ -1172,19 +1174,19 @@ export default function AdminClient({
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
-														<th className='px-4 py-2.5 text-left'>Email</th>
+														<th className='px-4 py-2.5 text-left'>E-Mail</th>
 														<th className='px-4 py-2.5 text-left'>
 															Institution
 														</th>
-														<th className='px-4 py-2.5 text-left'>Languages</th>
+														<th className='px-4 py-2.5 text-left'>Sprachen</th>
 														<SortableTh
-															label='Applied'
+															label='Beworben am'
 															field='createdAt'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
-														<th className='px-4 py-2.5 text-left'>Actions</th>
+														<th className='px-4 py-2.5 text-left'>Aktionen</th>
 													</tr>
 												</thead>
 												<tbody className='divide-y divide-[#f5ede0]'>
@@ -1237,7 +1239,7 @@ export default function AdminClient({
 																		) : (
 																			<XCircle size={12} />
 																		)}
-																		Reject
+																		Ablehnen
 																	</button>
 																	<button
 																		onClick={() =>
@@ -1254,7 +1256,7 @@ export default function AdminClient({
 																		) : (
 																			<CheckCircle2 size={12} />
 																		)}
-																		Approve
+																		Freigeben
 																	</button>
 																</div>
 															</td>
@@ -1263,7 +1265,7 @@ export default function AdminClient({
 													{pendingPageRows.length === 0 && (
 														<EmptyTableRow
 															colSpan={6}
-															label='No pending helpers found.'
+															label='Keine offenen Helfer gefunden.'
 														/>
 													)}
 												</tbody>
@@ -1282,7 +1284,7 @@ export default function AdminClient({
 															onSort={toggleSort}
 														/>
 														<SortableTh
-															label='Email'
+															label='E-Mail'
 															field='email'
 															sortBy={sortBy}
 															sortDir={sortDir}
@@ -1290,41 +1292,41 @@ export default function AdminClient({
 														/>
 														<th className='px-4 py-2.5 text-left'>Status</th>
 														<SortableTh
-															label='Rating'
+															label='Bewertung'
 															field='ratingAvg'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
 														<SortableTh
-															label='Helped'
+															label='Hilfen'
 															field='helpCount'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
 														<SortableTh
-															label='Points'
+															label='Punkte'
 															field='points'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
 														<SortableTh
-															label='Banned'
+															label='Gesperrt'
 															field='isBanned'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
 														<SortableTh
-															label='Joined'
+															label='Seit'
 															field='createdAt'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
-														<th className='px-4 py-2.5 text-left'>Actions</th>
+														<th className='px-4 py-2.5 text-left'>Aktionen</th>
 													</tr>
 												</thead>
 												<tbody className='divide-y divide-[#f5ede0]'>
@@ -1381,7 +1383,7 @@ export default function AdminClient({
 																			: 'bg-emerald-50 text-emerald-700 border-emerald-200',
 																	)}
 																>
-																	{h.isBanned ? 'Yes' : 'No'}
+																	{h.isBanned ? 'Ja' : 'Nein'}
 																</span>
 															</td>
 															<td className='px-4 py-3 text-[#7a6050]'>
@@ -1418,7 +1420,7 @@ export default function AdminClient({
 																		) : (
 																			<XCircle size={11} />
 																		)}
-																		{h.isBanned ? 'Unban' : 'Ban'}
+																		{h.isBanned ? 'Entsperren' : 'Sperren'}
 																	</button>
 																	<button
 																		onClick={() =>
@@ -1441,7 +1443,7 @@ export default function AdminClient({
 																		) : (
 																			<Trash2 size={11} />
 																		)}
-																		Delete
+																		Loeschen
 																	</button>
 																</div>
 															</td>
@@ -1450,7 +1452,7 @@ export default function AdminClient({
 													{helperPageRows.length === 0 && (
 														<EmptyTableRow
 															colSpan={9}
-															label='No helpers found.'
+															label='Keine Helfer gefunden.'
 														/>
 													)}
 												</tbody>
@@ -1462,29 +1464,29 @@ export default function AdminClient({
 												<thead className='bg-[#fcf8f2] border-y border-[#f0e8dc] text-xs text-[#7a6050] uppercase tracking-wide'>
 													<tr>
 														<SortableTh
-															label='User'
+															label='Nutzer'
 															field='name'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
 														<SortableTh
-															label='Email'
+															label='E-Mail'
 															field='email'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
-														<th className='px-4 py-2.5 text-left'>Role</th>
+														<th className='px-4 py-2.5 text-left'>Rolle</th>
 														<SortableTh
-															label='Requests'
+															label='Anfragen'
 															field='requests'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
 														<SortableTh
-															label='Rating'
+															label='Bewertung'
 															field='ratingAvg'
 															sortBy={sortBy}
 															sortDir={sortDir}
@@ -1492,13 +1494,13 @@ export default function AdminClient({
 														/>
 														<th className='px-4 py-2.5 text-left'>Status</th>
 														<SortableTh
-															label='Joined'
+															label='Seit'
 															field='createdAt'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
-														<th className='px-4 py-2.5 text-left'>Actions</th>
+														<th className='px-4 py-2.5 text-left'>Aktionen</th>
 													</tr>
 												</thead>
 												<tbody className='divide-y divide-[#f5ede0]'>
@@ -1550,7 +1552,7 @@ export default function AdminClient({
 																			: 'bg-emerald-50 text-emerald-700 border-emerald-200',
 																	)}
 																>
-																	{u.isBanned ? 'Banned' : 'Active'}
+																	{u.isBanned ? 'Gesperrt' : 'Aktiv'}
 																</span>
 															</td>
 															<td className='px-4 py-3 text-[#7a6050]'>
@@ -1587,7 +1589,7 @@ export default function AdminClient({
 																		) : (
 																			<XCircle size={11} />
 																		)}
-																		{u.isBanned ? 'Unban' : 'Ban'}
+																		{u.isBanned ? 'Entsperren' : 'Sperren'}
 																	</button>
 																	<button
 																		onClick={() =>
@@ -1610,7 +1612,7 @@ export default function AdminClient({
 																		) : (
 																			<Trash2 size={11} />
 																		)}
-																		Delete
+																		Loeschen
 																	</button>
 																</div>
 															</td>
@@ -1619,7 +1621,7 @@ export default function AdminClient({
 													{seniorPageRows.length === 0 && (
 														<EmptyTableRow
 															colSpan={8}
-															label='No seniors or relatives found.'
+															label='Keine Senioren oder Angehoerigen gefunden.'
 														/>
 													)}
 												</tbody>
@@ -1631,13 +1633,13 @@ export default function AdminClient({
 												<thead className='bg-[#fcf8f2] border-y border-[#f0e8dc] text-xs text-[#7a6050] uppercase tracking-wide'>
 													<tr>
 														<SortableTh
-															label='Title'
+															label='Titel'
 															field='title'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
-														<th className='px-4 py-2.5 text-left'>Category</th>
+														<th className='px-4 py-2.5 text-left'>Kategorie</th>
 														<SortableTh
 															label='Status'
 															field='status'
@@ -1646,16 +1648,16 @@ export default function AdminClient({
 															onSort={toggleSort}
 														/>
 														<th className='px-4 py-2.5 text-left'>Senior</th>
-														<th className='px-4 py-2.5 text-left'>Address</th>
+														<th className='px-4 py-2.5 text-left'>Adresse</th>
 														<SortableTh
-															label='Offers'
+															label='Angebote'
 															field='offers'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
 														<SortableTh
-															label='Created'
+															label='Erstellt'
 															field='createdAt'
 															sortBy={sortBy}
 															sortDir={sortDir}
@@ -1700,7 +1702,7 @@ export default function AdminClient({
 													{requestPageRows.length === 0 && (
 														<EmptyTableRow
 															colSpan={7}
-															label='No requests found.'
+															label='Keine Anfragen gefunden.'
 														/>
 													)}
 												</tbody>
@@ -1712,21 +1714,21 @@ export default function AdminClient({
 												<thead className='bg-[#fcf8f2] border-y border-[#f0e8dc] text-xs text-[#7a6050] uppercase tracking-wide'>
 													<tr>
 														<SortableTh
-															label='User'
+															label='Nutzer'
 															field='user'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
 														<SortableTh
-															label='Reward'
+															label='Belohnung'
 															field='reward'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
 														<SortableTh
-															label='Points'
+															label='Punkte'
 															field='points'
 															sortBy={sortBy}
 															sortDir={sortDir}
@@ -1740,13 +1742,13 @@ export default function AdminClient({
 															onSort={toggleSort}
 														/>
 														<SortableTh
-															label='Created'
+															label='Erstellt'
 															field='createdAt'
 															sortBy={sortBy}
 															sortDir={sortDir}
 															onSort={toggleSort}
 														/>
-														<th className='px-4 py-2.5 text-left'>Actions</th>
+														<th className='px-4 py-2.5 text-left'>Aktionen</th>
 													</tr>
 												</thead>
 												<tbody className='divide-y divide-[#f5ede0]'>
@@ -1784,7 +1786,7 @@ export default function AdminClient({
 															<td className='px-4 py-3'>
 																{r.status === 'fulfilled' ? (
 																	<span className='text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium'>
-																		Done
+																		Erledigt
 																	</span>
 																) : (
 																	<button
@@ -1828,7 +1830,7 @@ export default function AdminClient({
 																		) : (
 																			<CheckCircle2 size={11} />
 																		)}
-																		Fulfill
+																		Erledigen
 																	</button>
 																)}
 															</td>
@@ -1837,7 +1839,7 @@ export default function AdminClient({
 													{redemptionPageRows.length === 0 && (
 														<EmptyTableRow
 															colSpan={6}
-															label='No redemptions found.'
+															label='Keine Einloesungen gefunden.'
 														/>
 													)}
 												</tbody>
@@ -1847,8 +1849,8 @@ export default function AdminClient({
 
 									<div className='p-4 border-t border-[#f0e8dc] flex flex-col sm:flex-row gap-2.5 sm:items-center sm:justify-between'>
 										<p className='text-xs text-[#7a6050]'>
-											Showing {currentRows.length === 0 ? 0 : pageStart + 1} -{' '}
-											{Math.min(pageStart + PAGE_SIZE, currentRows.length)} of{' '}
+											Zeige {currentRows.length === 0 ? 0 : pageStart + 1} -{' '}
+											{Math.min(pageStart + PAGE_SIZE, currentRows.length)} von{' '}
 											{currentRows.length}
 										</p>
 										<div className='flex items-center gap-1.5'>
@@ -1857,10 +1859,10 @@ export default function AdminClient({
 												disabled={page <= 1}
 												className='h-8 px-2.5 rounded-lg border border-[#ddd0be] text-[#7a6050] bg-white hover:bg-[#f5ede0] disabled:opacity-50 inline-flex items-center gap-1 text-xs'
 											>
-												<ChevronLeft className='w-3.5 h-3.5' /> Prev
+												<ChevronLeft className='w-3.5 h-3.5' /> Zurueck
 											</button>
 											<span className='text-xs px-2 text-[#7a6050]'>
-												Page {page} / {totalPages}
+												Seite {page} / {totalPages}
 											</span>
 											<button
 												onClick={() =>
@@ -1869,7 +1871,7 @@ export default function AdminClient({
 												disabled={page >= totalPages}
 												className='h-8 px-2.5 rounded-lg border border-[#ddd0be] text-[#7a6050] bg-white hover:bg-[#f5ede0] disabled:opacity-50 inline-flex items-center gap-1 text-xs'
 											>
-												Next <ChevronRight className='w-3.5 h-3.5' />
+												Weiter <ChevronRight className='w-3.5 h-3.5' />
 											</button>
 										</div>
 									</div>
@@ -1911,7 +1913,7 @@ function SortableTh({
 				/>
 				{sortBy === field ? (
 					<span className='text-[10px] text-[#8b5e3c]'>
-						{sortDir === 'asc' ? 'ASC' : 'DESC'}
+						{sortDir === 'asc' ? 'AUF' : 'AB'}
 					</span>
 				) : null}
 			</button>
@@ -2009,10 +2011,22 @@ function safeText(value: string | null | undefined) {
 }
 
 function tableHeading(tab: Tab) {
-	if (tab === 'pending') return 'Pending Helper Applications'
-	if (tab === 'helpers') return 'Helpers Directory'
-	if (tab === 'seniors') return 'Seniors and Relatives'
-	if (tab === 'requests') return 'Requests Control Table'
-	if (tab === 'redemptions') return 'Reward Redemptions'
-	return 'Admin Table'
+	if (tab === 'pending') return 'Offene Helfer-Bewerbungen'
+	if (tab === 'helpers') return 'Helfer-Verzeichnis'
+	if (tab === 'seniors') return 'Senioren und Angehoerige'
+	if (tab === 'requests') return 'Anfragen-Uebersicht'
+	if (tab === 'redemptions') return 'Belohnungs-Einloesungen'
+	return 'Admin-Tabelle'
+}
+
+function filterOptionLabel(option: string, tab: Tab) {
+	if (option === 'ALL') return 'Alle'
+	if (option === 'ACTIVE') return 'Aktiv'
+	if (option === 'BANNED') return 'Gesperrt'
+	if (option === 'PENDING_REVIEW') return 'In Pruefung'
+	if (option === 'APPROVED') return 'Freigegeben'
+	if (option === 'REJECTED') return 'Abgelehnt'
+	if (tab === 'redemptions' && option === 'pending') return 'Offen'
+	if (tab === 'redemptions' && option === 'fulfilled') return 'Erledigt'
+	return option
 }

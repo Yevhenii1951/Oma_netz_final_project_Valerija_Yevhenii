@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import AdminClient from './admin-client'
 
-export const metadata = { title: 'Admin Panel' }
+export const metadata = { title: 'Adminbereich' }
 
 export default async function AdminPage() {
 	const session = await auth()
@@ -115,7 +115,7 @@ export default async function AdminPage() {
 	const initialTab = pendingHelpers.length > 0 ? 'pending' : 'stats'
 
 	return (
-		<PageShell title='Admin Panel' hideSidebar>
+		<PageShell title='Adminbereich' hideSidebar>
 			<AdminClient
 				key={initialTab}
 				stats={{
