@@ -3,6 +3,9 @@ import { hash } from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
+const adminEmail = 'admin@oma-netz.de'
+const seedPassword = '123123nfnf'
+
 const SENIOR_USERS = [
 	{
 		name: 'Hildegard Müller',
@@ -287,18 +290,22 @@ const REWARDS = [
 async function main() {
 	console.log('🌱 Seeding database…')
 
-	const password = await hash('password123', 12)
+	const password = await hash(seedPassword, 12)
 
 	// Admin
 	const admin = await prisma.user.upsert({
-		where: { email: 'admin@oma-netz.de' },
-		update: {},
+		where: { email: adminEmail },
+		update: {
+			name: 'Admin',
+			role: 'ADMIN',
+			isBanned: false,
+			password,
+		},
 		create: {
-			email: 'admin@oma-netz.de',
+			email: adminEmail,
 			name: 'Admin',
 			password: password,
 			role: 'ADMIN',
-
 			points: 0,
 		},
 	})
@@ -309,7 +316,11 @@ async function main() {
 		SENIOR_USERS.map(s =>
 			prisma.user.upsert({
 				where: { email: s.email },
-				update: {},
+				update: {
+					...s,
+					role: 'SENIOR',
+					isBanned: false,
+				},
 				create: {
 					...s,
 					password: password,
@@ -322,18 +333,26 @@ async function main() {
 
 	// Helpers
 	const helpers = await Promise.all(
-		HELPER_USERS.map(h =>
+		HELPER_USERS.map((h, index) =>
 			prisma.user.upsert({
 				where: { email: h.email },
-				update: { helperStatus: 'APPROVED' },
+				update: {
+					...h,
+					role: 'HELPER',
+					helperStatus: 'APPROVED',
+					isBanned: false,
+					helpCount: 8 + index,
+					points: 40 + index * 10,
+					ratingAvg: 4.2 + index * 0.1,
+				},
 				create: {
 					...h,
 					password: password,
 					role: 'HELPER',
 					helperStatus: 'APPROVED',
-					helpCount: Math.floor(Math.random() * 20),
-					points: Math.floor(Math.random() * 200),
-					ratingAvg: 4 + Math.random(),
+					helpCount: 8 + index,
+					points: 40 + index * 10,
+					ratingAvg: 4.2 + index * 0.1,
 				},
 			}),
 		),
@@ -341,32 +360,63 @@ async function main() {
 	console.log(`✓ ${helpers.length} Helfer erstellt`)
 
 	// Requests
-	const requests = await Promise.all(
-		SAMPLE_REQUESTS.map((r, i) =>
-			prisma.request.create({
+	let createdRequests = 0
+	for (let i = 0; i < SAMPLE_REQUESTS.length; i += 1) {
+		const request = SAMPLE_REQUESTS[i]
+		const seniorId = seniors[i % seniors.length].id
+
+		const existing = await prisma.request.findFirst({
+			where: {
+				title: request.title,
+				address: request.address,
+				seniorId,
+			},
+			select: { id: true },
+		})
+
+		if (!existing) {
+			await prisma.request.create({
 				data: {
-					...r,
-					category: r.category as RequestCategory,
-					seniorId: seniors[i % seniors.length].id,
+					...request,
+					category: request.category as RequestCategory,
+					seniorId,
 					status: 'OPEN',
 				},
-			}),
-		),
-	)
-	console.log(`✓ ${requests.length} Anfragen erstellt`)
+			})
+			createdRequests += 1
+		}
+	}
+	console.log(`✓ ${createdRequests} neue Anfragen erstellt`)
 
 	// Rewards
-	await prisma.reward.deleteMany()
+	let createdRewards = 0
+	let updatedRewards = 0
 	for (const rwd of REWARDS) {
-		await prisma.reward.create({
-			data: { ...rwd, isActive: true },
+		const existingReward = await prisma.reward.findFirst({
+			where: { title: rwd.title },
+			select: { id: true },
 		})
+
+		if (existingReward) {
+			await prisma.reward.update({
+				where: { id: existingReward.id },
+				data: { ...rwd, isActive: true },
+			})
+			updatedRewards += 1
+		} else {
+			await prisma.reward.create({
+				data: { ...rwd, isActive: true },
+			})
+			createdRewards += 1
+		}
 	}
-	console.log(`✓ ${REWARDS.length} Belohnungen erstellt`)
+	console.log(
+		`✓ Belohnungen synchronisiert (neu: ${createdRewards}, aktualisiert: ${updatedRewards})`,
+	)
 
 	console.log('\n✅ Seed abgeschlossen!')
-	console.log('\n📋 Login-Daten (alle Passwörter: password123)')
-	console.log('  Admin:  admin@oma-netz.de')
+	console.log(`\n📋 Login-Daten (alle Passwörter: ${seedPassword})`)
+	console.log(`  Admin:  ${adminEmail}`)
 	console.log('  Senior: hildegard@example.com')
 	console.log('  Helfer: lena@example.com')
 }
