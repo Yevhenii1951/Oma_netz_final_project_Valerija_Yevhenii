@@ -244,7 +244,10 @@ interface QuickAccessSectionProps {
 	points: number
 }
 
-export function QuickAccessSection({ isHelper, points }: QuickAccessSectionProps) {
+export function QuickAccessSection({
+	isHelper,
+	points,
+}: QuickAccessSectionProps) {
 	return (
 		<section className='mb-8 rounded-3xl border border-[#ddd0be] bg-[#fdf8f2] p-5 md:p-6 shadow-[0_2px_10px_rgba(61,43,31,0.04)]'>
 			<div className='flex items-center justify-between mb-4'>
@@ -283,7 +286,9 @@ export function QuickAccessSection({ isHelper, points }: QuickAccessSectionProps
 								/>
 							</div>
 							<div>
-								<p className='font-semibold text-[#3d2b1f] text-sm'>Belohnungen</p>
+								<p className='font-semibold text-[#3d2b1f] text-sm'>
+									Belohnungen
+								</p>
 								<p className='text-xs text-[#b09880]'>{points} Punkte</p>
 							</div>
 							<ArrowRight
@@ -488,11 +493,7 @@ export function SeniorActivitySection({
 								</div>
 								<StatusBadge
 									status={
-										req.status as
-											| 'OPEN'
-											| 'IN_PROGRESS'
-											| 'DONE'
-											| 'CANCELLED'
+										req.status as 'OPEN' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED'
 									}
 								/>
 							</Link>
