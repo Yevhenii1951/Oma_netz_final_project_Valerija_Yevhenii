@@ -18,6 +18,7 @@ import {
 	Home,
 	Laptop,
 	MapPin,
+	Menu,
 	MessageCircle,
 	MessageSquareText,
 	PersonStanding,
@@ -33,6 +34,7 @@ import {
 	UserPlus,
 	UserRoundPlus,
 	Users,
+	X,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
@@ -152,7 +154,7 @@ function JourneyTimeline() {
 		<button
 			key={i}
 			onClick={() => setActive(i)}
-			className={`w-2 h-2 rounded-full transition-all duration-300 ${
+			className={`w-2.5 h-2.5 rounded-full transition-all duration-300 min-h-[44px] min-w-[44px] flex items-center justify-center -m-2.5 ${
 				i === active
 					? 'bg-[#8b5e3c] scale-125 w-4'
 					: i < active
@@ -166,7 +168,7 @@ function JourneyTimeline() {
 	return (
 		<div
 			ref={carouselRef}
-			className='flex flex-col items-center gap-8 py-8 w-full'
+			className='flex flex-col items-center gap-4 sm:gap-6 md:gap-8 py-8 w-full'
 		>
 			<div className='hidden md:flex items-center justify-center gap-2 w-full max-w-5xl px-4'>
 				{STEPS.map((step, i) => {
@@ -177,7 +179,7 @@ function JourneyTimeline() {
 							key={i}
 							onClick={() => setActive(i)}
 							aria-label={`Перейти к шагу ${i + 1}`}
-							className='relative flex items-center justify-center'
+							className='relative flex items-center justify-center min-h-[56px] min-w-[56px]'
 							whileHover={{ scale: 1.1 }}
 							whileTap={{ scale: 0.95 }}
 							onMouseEnter={() => setIsPaused(true)}
@@ -201,18 +203,18 @@ function JourneyTimeline() {
 				})}
 			</div>
 
-			<div className='md:hidden flex justify-center gap-2 mb-4'>
+			<div className='md:hidden flex justify-center gap-3 mb-2 flex-wrap px-2'>
 				{progressIndicators}
 			</div>
 
 			<div
-				className='w-full max-w-xl px-4'
+				className='w-full max-w-xl px-3 sm:px-4'
 				onMouseEnter={() => setIsPaused(true)}
 				onMouseLeave={() => setIsPaused(false)}
 			>
-				<div className='bg-white rounded-3xl p-6 shadow-xl border border-[#e8d5be] text-center'>
-					<div className='mx-auto mb-4 max-w-2xl'>
-						<div className='relative w-full aspect-4/3 overflow-hidden rounded-2xl'>
+				<div className='bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-xl border border-[#e8d5be] text-center'>
+					<div className='mx-auto mb-3 sm:mb-4 max-w-2xl'>
+						<div className='relative w-full aspect-4/3 overflow-hidden rounded-lg sm:rounded-2xl'>
 							<AnimatePresence initial={false} mode='sync'>
 								<motion.img
 									key={CAROUSEL_IMAGES[active % CAROUSEL_IMAGES.length]}
@@ -231,15 +233,15 @@ function JourneyTimeline() {
 						</div>
 					</div>
 
-					<span className='inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3 bg-[#8b5e3c]/10 text-[#8b5e3c]'>
+					<span className='inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-2 sm:mb-3 bg-[#8b5e3c]/10 text-[#8b5e3c]'>
 						Schritt {active + 1}
 					</span>
 
-					<h3 className='heading-serif text-xl md:text-2xl font-bold text-[#3d2b1f] mb-2'>
+					<h3 className='heading-serif text-base sm:text-xl md:text-2xl font-bold text-[#3d2b1f] mb-1 sm:mb-2'>
 						{STEPS[active].title}
 					</h3>
 
-					<p className='text-[#7a6050] leading-relaxed text-sm'>
+					<p className='text-[#7a6050] leading-relaxed text-xs sm:text-sm'>
 						{STEPS[active].desc}
 					</p>
 				</div>
@@ -322,6 +324,8 @@ const STEPS: { icon: LucideIcon; title: string; desc: string }[] = [
 ]
 
 export default function LandingClient() {
+	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+	
 	const stats = [
 		{ value: 500, suffix: '+', label: 'Aktive Helfer' },
 		{ value: 1200, suffix: '+', label: 'Erfüllte Anfragen' },
@@ -364,19 +368,21 @@ export default function LandingClient() {
 
 	return (
 		<div className='min-h-screen bg-[#f5ede0]'>
+			{/* Navigation */}
 			<nav className='sticky top-0 z-50 bg-[#ffffff]/90 backdrop-blur-xl border-b border-[#ddd0be]/80 shadow-[0_1px_8px_rgba(61,43,31,0.06)]'>
-				<div className='max-w-6xl mx-auto px-4 h-16 flex items-center justify-between gap-4'>
+				<div className='max-w-6xl mx-auto px-3 sm:px-4 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4'>
+					{/* Logo */}
 					<motion.div
 						initial={{ opacity: 0, x: -12 }}
 						animate={{ opacity: 1, x: 0 }}
 						transition={{ duration: 0.5 }}
-						className='flex items-center gap-2 shrink-0'
+						className='flex items-center gap-2 shrink-0 min-h-[44px]'
 					>
 						<a href='#hero' className='flex items-center gap-2 group'>
-							<div className='w-9 h-9 rounded-xl bg-linear-to-br from-[#8b5e3c] to-[#6b4226] flex items-center justify-center shadow-[0_2px_8px_rgba(139,94,60,0.3)] group-hover:shadow-[0_4px_14px_rgba(139,94,60,0.45)] transition-shadow'>
-								<span className='text-[#ffffff] font-bold text-base'>O</span>
+							<div className='w-8 sm:w-9 h-8 sm:h-9 rounded-xl bg-linear-to-br from-[#8b5e3c] to-[#6b4226] flex items-center justify-center shadow-[0_2px_8px_rgba(139,94,60,0.3)] group-hover:shadow-[0_4px_14px_rgba(139,94,60,0.45)] transition-shadow'>
+								<span className='text-[#ffffff] font-bold text-sm sm:text-base'>O</span>
 							</div>
-							<div>
+							<div className='hidden sm:block'>
 								<span className='font-bold text-[#3d2b1f] text-base leading-none block tracking-tight'>
 									OMA-NETZ
 								</span>
@@ -387,6 +393,7 @@ export default function LandingClient() {
 						</a>
 					</motion.div>
 
+					{/* Desktop Navigation */}
 					<motion.div
 						initial={{ opacity: 0, y: -8 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -404,7 +411,7 @@ export default function LandingClient() {
 							<a
 								key={href}
 								href={href}
-								className='relative px-3 py-1.5 text-sm font-medium text-[#7a6050] hover:text-[#3d2b1f] transition-colors rounded-lg hover:bg-[#f5ede0] group'
+								className='relative px-3 py-2.5 text-sm font-medium text-[#7a6050] hover:text-[#3d2b1f] transition-colors rounded-lg hover:bg-[#f5ede0] group min-h-[44px] flex items-center'
 							>
 								{label}
 								<span className='absolute bottom-0.5 left-3 right-3 h-px bg-[#8b5e3c] scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
@@ -412,33 +419,97 @@ export default function LandingClient() {
 						))}
 					</motion.div>
 
+					{/* Desktop Auth Buttons */}
 					<motion.div
 						initial={{ opacity: 0, x: 12 }}
 						animate={{ opacity: 1, x: 0 }}
 						transition={{ duration: 0.5 }}
-						className='flex items-center gap-3 shrink-0'
+						className='hidden md:flex items-center gap-3 shrink-0'
 					>
 						<Link
 							href='/login'
-							className='text-[#7a6050] font-medium text-sm hover:text-[#3d2b1f] transition-colors'
+							className='text-[#7a6050] font-medium text-sm hover:text-[#3d2b1f] transition-colors px-3 py-2.5 rounded min-h-[44px] flex items-center'
 						>
 							Anmelden
 						</Link>
-						<Link href='/register' className='btn-primary text-sm py-2 px-5'>
+						<Link href='/register' className='btn-primary text-sm py-2.5 px-5 min-h-[44px] flex items-center'>
 							Registrieren
 						</Link>
 					</motion.div>
+
+					{/* Mobile Menu Button */}
+					<button
+						onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+						className='md:hidden inline-flex items-center justify-center w-10 h-10 rounded-lg hover:bg-[#f5ede0] transition-colors min-h-[44px] min-w-[44px]'
+						aria-label='Menü öffnen'
+					>
+						{mobileMenuOpen ? (
+							<X size={20} className='text-[#3d2b1f]' />
+						) : (
+							<Menu size={20} className='text-[#3d2b1f]' />
+						)}
+					</button>
 				</div>
+
+				{/* Mobile Menu */}
+				<AnimatePresence>
+					{mobileMenuOpen && (
+						<motion.div
+							initial={{ opacity: 0, height: 0 }}
+							animate={{ opacity: 1, height: 'auto' }}
+							exit={{ opacity: 0, height: 0 }}
+							transition={{ duration: 0.3 }}
+							className='md:hidden border-t border-[#ddd0be] bg-[#f5ede0]'
+						>
+							<div className='px-3 py-4 space-y-1'>
+								{(
+									[
+										{ href: '#journey', label: 'So läuft es ab' },
+										{ href: '#categories', label: 'Kategorien' },
+										{ href: '#helpers', label: 'Helfer werden' },
+										{ href: '#trust', label: 'Vertrauen' },
+									] as { href: string; label: string }[]
+								).map(({ href, label }) => (
+									<a
+										key={href}
+										href={href}
+										onClick={() => setMobileMenuOpen(false)}
+										className='block px-4 py-3 text-[#3d2b1f] font-medium hover:bg-[#e8d5be] rounded-lg transition-colors min-h-[44px] flex items-center'
+									>
+										{label}
+									</a>
+								))}
+								<div className='flex flex-col gap-2 pt-2 border-t border-[#ddd0be]'>
+									<Link
+										href='/login'
+										onClick={() => setMobileMenuOpen(false)}
+										className='text-center px-4 py-3 text-[#3d2b1f] font-medium hover:bg-[#e8d5be] rounded-lg transition-colors min-h-[44px] flex items-center justify-center'
+									>
+										Anmelden
+									</Link>
+									<Link 
+										href='/register' 
+										onClick={() => setMobileMenuOpen(false)}
+										className='btn-primary text-center py-3 px-4 w-full min-h-[44px] flex items-center justify-center'
+									>
+										Registrieren
+									</Link>
+								</div>
+							</div>
+						</motion.div>
+					)}
+				</AnimatePresence>
 			</nav>
 
+			{/* Hero Section */}
 			<div id='hero' />
 			<BackgroundPaths>
-				<section className='max-w-6xl mx-auto px-4 pt-24 pb-20 text-center relative z-10'>
+				<section className='max-w-6xl mx-auto px-3 sm:px-4 pt-12 sm:pt-16 md:pt-24 pb-12 sm:pb-16 md:pb-20 text-center relative z-10 min-h-screen flex flex-col justify-center'>
 					<motion.h1
 						initial={{ opacity: 0, y: 32 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.8, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-						className='heading-serif text-5xl md:text-7xl font-bold text-[#3d2b1f] leading-[1.08] tracking-tight mb-3'
+						className='heading-serif text-3xl sm:text-5xl md:text-7xl font-bold text-[#3d2b1f] leading-[1.08] tracking-tight mb-2 sm:mb-3'
 					>
 						Füreinander da sein
 					</motion.h1>
@@ -447,7 +518,7 @@ export default function LandingClient() {
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.7, delay: 0.35 }}
-						className='heading-serif text-3xl md:text-4xl font-semibold shimmer-text mb-8'
+						className='heading-serif text-2xl sm:text-3xl md:text-4xl font-semibold shimmer-text mb-6 sm:mb-8'
 					>
 						in Kassel
 					</motion.p>
@@ -456,7 +527,7 @@ export default function LandingClient() {
 						initial={{ opacity: 0, y: 16 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ duration: 0.6, delay: 0.5 }}
-						className='text-xl text-[#7a6050] max-w-2xl mx-auto mb-10 leading-relaxed'
+						className='text-base sm:text-lg md:text-xl text-[#7a6050] max-w-2xl mx-auto mb-8 sm:mb-10 leading-relaxed px-2'
 					>
 						OMA-NETZ verbindet ältere Menschen mit freiwilligen Helfern für
 						alltägliche Aufgaben — kostenlos, unkompliziert und mit Herz.
@@ -470,14 +541,14 @@ export default function LandingClient() {
 					>
 						<Link
 							href='/register?role=SENIOR'
-							className='btn-primary btn-glow text-base px-8 py-3.5 w-full sm:w-auto'
+							className='btn-primary btn-glow text-base px-6 sm:px-8 py-3 sm:py-3.5 w-full sm:w-auto min-h-[44px] flex items-center justify-center'
 						>
 							<HandHelping size={18} className='inline mr-1' /> Ich brauche
 							Hilfe <ArrowRight size={16} />
 						</Link>
 						<Link
 							href='/register?role=HELPER'
-							className='btn-secondary text-base px-8 py-3.5 w-full sm:w-auto'
+							className='btn-secondary text-base px-6 sm:px-8 py-3 sm:py-3.5 w-full sm:w-auto min-h-[44px] flex items-center justify-center'
 						>
 							<Handshake size={18} className='inline mr-1' /> Ich möchte helfen
 						</Link>
@@ -487,65 +558,68 @@ export default function LandingClient() {
 						initial={{ opacity: 0 }}
 						animate={{ opacity: 1 }}
 						transition={{ delay: 0.85 }}
-						className='text-sm text-[#b09880]'
+						className='text-xs sm:text-sm text-[#b09880]'
 					>
 						Kostenlos · Keine Verpflichtung · Jederzeit
 					</motion.p>
 				</section>
 			</BackgroundPaths>
 
-			<section className='bg-[#ffffff] border-y border-[#ddd0be] py-12 shadow-[inset_0_1px_0_rgba(61,43,31,0.05)]'>
-				<div className='max-w-4xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center'>
+			{/* Stats Section */}
+			<section className='bg-[#ffffff] border-y border-[#ddd0be] py-10 sm:py-12 md:py-16 shadow-[inset_0_1px_0_rgba(61,43,31,0.05)]'>
+				<div className='max-w-4xl mx-auto px-3 sm:px-4 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center'>
 					{stats.map(({ value, suffix, label }, i) => (
 						<FadeUp key={label} delay={i * 0.08}>
-							<p className='heading-serif text-4xl font-bold text-[#3d2b1f] mb-1'>
+							<p className='heading-serif text-2xl sm:text-3xl md:text-4xl font-bold text-[#3d2b1f] mb-1'>
 								<Counter to={value} suffix={suffix} />
 							</p>
-							<p className='text-sm text-[#7a6050] font-medium'>{label}</p>
+							<p className='text-xs sm:text-sm text-[#7a6050] font-medium'>{label}</p>
 						</FadeUp>
 					))}
 				</div>
 			</section>
 
-			<section id='journey' className='max-w-6xl mx-auto px-4 py-16'>
-				<FadeUp className='text-center mb-10'>
-					<h2 className='heading-serif text-4xl font-bold text-[#3d2b1f] mb-3'>
+			{/* Journey Section */}
+			<section id='journey' className='max-w-6xl mx-auto px-3 sm:px-4 py-12 sm:py-16 md:py-20'>
+				<FadeUp className='text-center mb-8 sm:mb-10 md:mb-12'>
+					<h2 className='heading-serif text-2xl sm:text-3xl md:text-4xl font-bold text-[#3d2b1f] mb-2 sm:mb-3'>
 						So läuft es ab
 					</h2>
-					<p className='text-[#7a6050]'>
+					<p className='text-sm sm:text-base text-[#7a6050] px-2'>
 						Die Geschichte von Oma Rosa und Max – Schritt für Schritt
 					</p>
 				</FadeUp>
 				<JourneyTimeline />
 			</section>
 
+			{/* Categories Section */}
 			<section
 				id='categories'
-				className='bg-[#ffffff] border-y border-[#ddd0be] py-20'
+				className='bg-[#ffffff] border-y border-[#ddd0be] py-12 sm:py-16 md:py-20'
 			>
-				<div className='max-w-5xl mx-auto px-4'>
-					<FadeUp className='text-center mb-12'>
-						<h2 className='heading-serif text-4xl font-bold text-[#3d2b1f] mb-3'>
+				<div className='max-w-5xl mx-auto px-3 sm:px-4'>
+					<FadeUp className='text-center mb-8 sm:mb-10 md:mb-12'>
+						<h2 className='heading-serif text-2xl sm:text-3xl md:text-4xl font-bold text-[#3d2b1f] mb-2 sm:mb-3'>
 							Womit kann ich helfen?
 						</h2>
-						<p className='text-[#7a6050]'>
+						<p className='text-sm sm:text-base text-[#7a6050]'>
 							Unterstützung bei allem, was den Alltag leichter macht
 						</p>
 					</FadeUp>
-					<div className='grid grid-cols-2 md:grid-cols-3 gap-4'>
+					<div className='grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4'>
 						{features.map(({ icon: FeatureIcon, title, desc }, i) => (
 							<FadeUp key={title} delay={i * 0.07}>
-								<div className='card card-hover p-5 rounded-2xl h-full group cursor-default'>
+								<div className='card card-hover p-4 sm:p-5 rounded-xl sm:rounded-2xl h-full group cursor-default min-h-[160px] sm:min-h-[180px] flex flex-col'>
 									<div
-										className='mb-3 inline-block animate-float text-[#8b5e3c]'
+										className='mb-2 sm:mb-3 inline-block animate-float text-[#8b5e3c]'
 										style={{ animationDelay: `${i * 0.3}s` }}
 									>
-										<FeatureIcon className='w-8 h-8' />
+										<FeatureIcon className='w-6 sm:w-8 h-6 sm:h-8' />
 									</div>
-									<h3 className='font-semibold text-[#3d2b1f] mb-1 group-hover:text-[#6b4226] transition-colors'>
+									<h3 className='font-semibold text-[#3d2b1f] mb-1 group-hover:text-[#6b4226] transition-colors text-sm md:text-base'>
 										{title}
 									</h3>
-									<p className='text-sm text-[#7a6050] leading-relaxed'>
+									<p className='text-xs sm:text-sm text-[#7a6050] leading-relaxed'>
 										{desc}
 									</p>
 								</div>
@@ -555,23 +629,24 @@ export default function LandingClient() {
 				</div>
 			</section>
 
-			<section id='helpers' className='max-w-5xl mx-auto px-4 py-20'>
-				<div className='grid md:grid-cols-2 gap-12 items-center'>
+			{/* Helpers Section */}
+			<section id='helpers' className='max-w-5xl mx-auto px-3 sm:px-4 py-12 sm:py-16 md:py-20'>
+				<div className='grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center'>
 					<FadeUp>
-						<div className='inline-flex items-center gap-2 bg-emerald-50 text-emerald-600 rounded-full px-3 py-1 text-xs font-semibold mb-6 border border-emerald-100'>
+						<div className='inline-flex items-center gap-2 bg-emerald-50 text-emerald-600 rounded-full px-3 py-1.5 text-xs font-semibold mb-4 sm:mb-6 border border-emerald-100 min-h-[36px]'>
 							<Users size={12} /> Für Freiwillige Helfer
 						</div>
-						<h2 className='heading-serif text-4xl font-bold text-[#3d2b1f] mb-4 leading-tight'>
+						<h2 className='heading-serif text-2xl sm:text-3xl md:text-4xl font-bold text-[#3d2b1f] mb-3 sm:mb-4 leading-tight'>
 							Helfen und dabei
 							<span className='shimmer-text'> Punkte sammeln</span>
 						</h2>
-						<p className='text-[#7a6050] mb-6 leading-relaxed'>
+						<p className='text-sm sm:text-base text-[#7a6050] mb-6 sm:mb-8 leading-relaxed'>
 							Als freiwilliger Helfer sammelst du Punkte für jede geleistete
 							Hilfe. Diese kannst du gegen echte Prämien einlösen — von
 							Kinokarten bis zu offiziellen Ehrenamtszertifikaten der Stadt
 							Kassel.
 						</p>
-						<div className='space-y-3 mb-8'>
+						<div className='space-y-2 sm:space-y-3 mb-8 sm:mb-10'>
 							{[
 								{
 									icon: Ticket,
@@ -593,7 +668,7 @@ export default function LandingClient() {
 									whileInView={{ opacity: 1, x: 0 }}
 									viewport={{ once: true }}
 									transition={{ delay: i * 0.08, duration: 0.4 }}
-									className='flex items-center gap-3'
+									className='flex items-center gap-3 min-h-[40px]'
 								>
 									<RewardIcon className='w-5 h-5 text-[#8b5e3c] shrink-0' />
 									<span className='text-[#3d2b1f] font-medium text-sm'>
@@ -604,15 +679,15 @@ export default function LandingClient() {
 						</div>
 						<Link
 							href='/register?role=HELPER'
-							className='btn-primary btn-glow inline-flex'
+							className='btn-primary btn-glow inline-flex min-h-[44px] px-6 sm:px-8 py-2.5 sm:py-3 items-center'
 						>
 							Jetzt Helfer werden <ArrowRight size={16} />
 						</Link>
 					</FadeUp>
 
 					<FadeUp delay={0.15}>
-						<div className='bg-linear-to-br from-[#f5ede0] to-[#ffffff] rounded-3xl p-8 border border-[#e8d5be] shadow-[0_8px_36px_rgba(139,94,60,0.1)]'>
-							<div className='flex flex-col gap-4'>
+						<div className='bg-linear-to-br from-[#f5ede0] to-[#ffffff] rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-[#e8d5be] shadow-[0_8px_36px_rgba(139,94,60,0.1)]'>
+							<div className='flex flex-col gap-3 sm:gap-4'>
 								{[
 									{
 										points: '+10',
@@ -636,14 +711,14 @@ export default function LandingClient() {
 										whileInView={{ opacity: 1, x: 0 }}
 										viewport={{ once: true }}
 										transition={{ delay: i * 0.1, duration: 0.45 }}
-										className='bg-[#ffffff] rounded-2xl p-4 flex items-center gap-4 shadow-[0_2px_12px_rgba(61,43,31,0.08)] border border-[#ede3d4]'
+										className='bg-[#ffffff] rounded-xl sm:rounded-2xl p-4 flex items-center gap-4 shadow-[0_2px_12px_rgba(61,43,31,0.08)] border border-[#ede3d4] min-h-[80px]'
 									>
-										<PointIcon className='w-7 h-7 text-[#8b5e3c] shrink-0' />
-										<div>
-											<p className='font-bold text-amber-600 text-lg leading-none'>
+										<PointIcon className='w-6 sm:w-7 h-6 sm:h-7 text-[#8b5e3c] shrink-0' />
+										<div className='min-w-0'>
+											<p className='font-bold text-amber-600 text-base sm:text-lg leading-none'>
 												{points} Punkte
 											</p>
-											<p className='text-[#7a6050] text-sm'>{desc}</p>
+											<p className='text-[#7a6050] text-xs sm:text-sm'>{desc}</p>
 										</div>
 									</motion.div>
 								))}
@@ -653,25 +728,26 @@ export default function LandingClient() {
 				</div>
 			</section>
 
+			{/* Trust Section */}
 			<section
 				id='trust'
-				className='relative overflow-hidden bg-linear-to-br from-[#8b5e3c] via-[#7a5035] to-[#6b4226] py-20 text-center text-[#ffffff]'
+				className='relative overflow-hidden bg-linear-to-br from-[#8b5e3c] via-[#7a5035] to-[#6b4226] py-12 sm:py-16 md:py-20 text-center text-[#ffffff]'
 			>
 				<div className='absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.3)_0%,transparent_70%)]' />
-				<div className='relative z-10 max-w-2xl mx-auto px-4'>
+				<div className='relative z-10 max-w-2xl mx-auto px-3 sm:px-4'>
 					<FadeUp>
 						<Shield
-							size={44}
-							className='mx-auto mb-5 opacity-90 animate-float'
+							size={40}
+							className='mx-auto mb-4 sm:mb-5 opacity-90 animate-float'
 						/>
-						<h2 className='heading-serif text-4xl font-bold mb-4'>
+						<h2 className='heading-serif text-2xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4'>
 							Sicher & Vertrauenswürdig
 						</h2>
-						<p className='text-[#e8d5be] mb-8 text-lg leading-relaxed'>
+						<p className='text-[#e8d5be] mb-6 sm:mb-8 text-base sm:text-lg leading-relaxed px-2'>
 							Alle Helfer werden überprüft. Das Bewertungssystem schafft
 							Transparenz. Ihre Daten sind sicher nach DSGVO geschützt.
 						</p>
-						<div className='flex flex-wrap items-center justify-center gap-3 text-sm font-medium'>
+						<div className='flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm font-medium'>
 							{[
 								'✓ DSGVO-konform',
 								'✓ Verifizierte Helfer',
@@ -684,7 +760,7 @@ export default function LandingClient() {
 									whileInView={{ opacity: 1, scale: 1 }}
 									viewport={{ once: true }}
 									transition={{ delay: i * 0.07 }}
-									className='bg-[#ffffff]/15 rounded-full px-4 py-1.5 border border-[#ffffff]/20 backdrop-blur-sm'
+									className='bg-[#ffffff]/15 rounded-full px-3 sm:px-4 py-1.5 border border-[#ffffff]/20 backdrop-blur-sm min-h-[36px] flex items-center'
 								>
 									{t}
 								</motion.span>
@@ -694,13 +770,14 @@ export default function LandingClient() {
 				</div>
 			</section>
 
-			<section className='bg-[#fdf8f2] border-y border-[#ddd0be] py-10'>
-				<div className='max-w-4xl mx-auto px-4 flex flex-col md:flex-row items-center gap-6 text-center md:text-left'>
+			{/* Social Proof Section */}
+			<section className='bg-[#fdf8f2] border-y border-[#ddd0be] py-10 sm:py-12 md:py-16'>
+				<div className='max-w-4xl mx-auto px-3 sm:px-4 flex flex-col md:flex-row items-center gap-4 sm:gap-6 text-center md:text-left'>
 					<div className='flex -space-x-3 shrink-0 justify-center'>
 						{[User, Users, Heart, UserPlus].map((Icon, i) => (
 							<div
 								key={i}
-								className='w-10 h-10 rounded-full bg-[#f5ede0] border-2 border-[#ffffff] flex items-center justify-center shadow-sm'
+								className='w-10 h-10 rounded-full bg-[#f5ede0] border-2 border-[#ffffff] flex items-center justify-center shadow-sm min-h-[44px] min-w-[44px]'
 							>
 								<Icon size={18} className='text-[#8b5e3c]' />
 							</div>
@@ -716,7 +793,7 @@ export default function LandingClient() {
 								/>
 							))}
 						</div>
-						<p className='text-[#3d2b1f] font-medium text-sm'>
+						<p className='text-[#3d2b1f] font-medium text-xs sm:text-sm'>
 							&bdquo;OMA-NETZ hat mir enorm geholfen &mdash; mein Helfer war
 							pünktlich, freundlich und sehr zuverlässig.&ldquo;
 						</p>
@@ -727,32 +804,33 @@ export default function LandingClient() {
 				</div>
 			</section>
 
-			<section className='bg-[#f5ede0] py-24'>
-				<div className='max-w-3xl mx-auto px-4 text-center'>
+			{/* Final CTA Section */}
+			<section className='bg-[#f5ede0] py-12 sm:py-16 md:py-24'>
+				<div className='max-w-3xl mx-auto px-3 sm:px-4 text-center'>
 					<FadeUp>
 						<motion.div
 							animate={{ rotate: [0, 8, -8, 0] }}
 							transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-							className='mb-6 inline-block text-amber-400'
+							className='mb-4 sm:mb-6 inline-block text-amber-400'
 						>
-							<Sun className='w-14 h-14' />
+							<Sun className='w-12 sm:w-14 h-12 sm:h-14' />
 						</motion.div>
-						<h2 className='heading-serif text-4xl font-bold text-[#3d2b1f] mb-4'>
+						<h2 className='heading-serif text-2xl sm:text-3xl md:text-4xl font-bold text-[#3d2b1f] mb-3 sm:mb-4'>
 							Bereit loszulegen?
 						</h2>
-						<p className='text-[#7a6050] mb-8 text-lg'>
+						<p className='text-[#7a6050] mb-6 sm:mb-8 text-base sm:text-lg px-2'>
 							Registrierung dauert weniger als 2 Minuten.
 						</p>
 						<div className='flex flex-col sm:flex-row gap-3 justify-center'>
 							<Link
 								href='/register'
-								className='btn-primary btn-glow text-base px-8 py-3.5'
+								className='btn-primary btn-glow text-base px-6 sm:px-8 py-3 sm:py-3.5 w-full sm:w-auto min-h-[44px] flex items-center justify-center'
 							>
 								Kostenlos registrieren <ArrowRight size={16} />
 							</Link>
 							<Link
 								href='/requests'
-								className='btn-secondary text-base px-8 py-3.5'
+								className='btn-secondary text-base px-6 sm:px-8 py-3 sm:py-3.5 w-full sm:w-auto min-h-[44px] flex items-center justify-center'
 							>
 								Anfragen ansehen
 							</Link>
@@ -761,29 +839,30 @@ export default function LandingClient() {
 				</div>
 			</section>
 
-			<footer className='border-t border-[#ddd0be] bg-[#ffffff] py-8'>
-				<div className='max-w-6xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4'>
-					<div className='flex items-center gap-2'>
-						<div className='w-7 h-7 rounded-lg bg-linear-to-br from-[#8b5e3c] to-[#6b4226] flex items-center justify-center shadow-sm'>
-							<span className='text-[#ffffff] font-bold text-sm'>O</span>
+			{/* Footer */}
+			<footer className='border-t border-[#ddd0be] bg-[#ffffff] py-6 sm:py-8 md:py-10'>
+				<div className='max-w-6xl mx-auto px-3 sm:px-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-center sm:text-left'>
+					<div className='flex items-center gap-2 min-h-[44px]'>
+						<div className='w-6 sm:w-7 h-6 sm:h-7 rounded-lg bg-linear-to-br from-[#8b5e3c] to-[#6b4226] flex items-center justify-center shadow-sm'>
+							<span className='text-[#ffffff] font-bold text-xs sm:text-sm'>O</span>
 						</div>
-						<span className='font-semibold text-[#3d2b1f]'>
+						<span className='font-semibold text-[#3d2b1f] text-sm md:text-base'>
 							OMA-NETZ Kassel
 						</span>
 					</div>
-					<p className='text-[#b09880] text-sm'>
+					<p className='text-[#b09880] text-xs sm:text-sm'>
 						© 2026 OMA-NETZ Kassel · Nachbarschaftshilfe mit Herz
 					</p>
-					<div className='flex items-center gap-4 text-sm text-[#b09880]'>
+					<div className='flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-[#b09880]'>
 						<Link
 							href='/impressum'
-							className='hover:text-[#3d2b1f] transition-colors'
+							className='hover:text-[#3d2b1f] transition-colors min-h-[36px] flex items-center'
 						>
 							Impressum
 						</Link>
 						<Link
 							href='/datenschutz'
-							className='hover:text-[#3d2b1f] transition-colors'
+							className='hover:text-[#3d2b1f] transition-colors min-h-[36px] flex items-center'
 						>
 							Datenschutz
 						</Link>
