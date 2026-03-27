@@ -1,14 +1,12 @@
 'use client'
 
 import {
-	Role,
-} from '@/app/register/register-options'
-import {
 	BaseInfoStep,
 	HelperProfileStep,
 	RegisterCard,
 	RoleStep,
 } from '@/app/register/register-form-sections'
+import { Role } from '@/app/register/register-options'
 import { AnimatePresence, motion } from 'framer-motion'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
@@ -175,9 +173,9 @@ function RegisterForm() {
 								onSubmit={
 									role === 'HELPER'
 										? e => {
-											e.preventDefault()
-											setStep(3)
-										}
+												e.preventDefault()
+												setStep(3)
+											}
 										: handleSubmit
 								}
 							/>

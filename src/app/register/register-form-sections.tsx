@@ -88,7 +88,10 @@ export function RoleStep({
 							<p className='text-xs text-[#7a6050] mt-0.5'>{desc}</p>
 						</div>
 						{role === value && (
-							<CheckCircle size={18} className='text-[#8b5e3c] shrink-0 mt-0.5' />
+							<CheckCircle
+								size={18}
+								className='text-[#8b5e3c] shrink-0 mt-0.5'
+							/>
 						)}
 					</button>
 				))}
@@ -222,7 +225,8 @@ export function BaseInfoStep({
 				<div className='grid grid-cols-2 gap-3'>
 					<div>
 						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
-							Telefon <span className='font-normal text-[#b09880]'>(optional)</span>
+							Telefon{' '}
+							<span className='font-normal text-[#b09880]'>(optional)</span>
 						</label>
 						<input
 							type='tel'
@@ -389,8 +393,7 @@ export function HelperProfileStep({
 							value={customLang}
 							onChange={e => onCustomLangChange(e.target.value)}
 							onKeyDown={e =>
-								e.key === 'Enter' &&
-								(e.preventDefault(), onCustomLangAdd())
+								e.key === 'Enter' && (e.preventDefault(), onCustomLangAdd())
 							}
 							className='input-field flex-1 text-sm py-1.5'
 							placeholder='Andere Sprache...'
