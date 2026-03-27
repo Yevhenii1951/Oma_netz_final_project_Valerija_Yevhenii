@@ -11,9 +11,9 @@ import {
 	helperStatusColor,
 	helperStatusLabel,
 } from '@/app/admin/admin-client-data'
-import { AdminPagination } from '@/app/admin/components/admin-pagination'
 import { AdminDataTables } from '@/app/admin/components/admin-data-tables'
 import { AdminNavigation } from '@/app/admin/components/admin-navigation'
+import { AdminPagination } from '@/app/admin/components/admin-pagination'
 import { AdminStatsTab } from '@/app/admin/components/admin-stats-tab'
 import { AdminTableToolbar } from '@/app/admin/components/admin-table-toolbar'
 import {
@@ -21,15 +21,13 @@ import {
 	TableSkeleton,
 	type AdminTab,
 } from '@/app/admin/components/admin-ui'
+import { useAdminClientActions } from '@/app/admin/hooks/use-admin-client-actions'
 import {
 	useAdminTableState,
 	type SortDirection,
 } from '@/app/admin/hooks/use-admin-table-state'
-import { useAdminClientActions } from '@/app/admin/hooks/use-admin-client-actions'
 import { useToast } from '@/components/ui/toaster'
-import {
-	type LucideIcon,
-} from 'lucide-react'
+import { type LucideIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
@@ -129,16 +127,13 @@ export default function AdminClient({
 	const [page, setPage] = useState(1)
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 	const [isBootLoading, setIsBootLoading] = useState(true)
-	const {
-		handleHelperAction,
-		handleBanToggle,
-		handleDeleteUser,
-	} = useAdminClientActions({
-		router,
-		setLoadingId,
-		setBanLoadingId,
-		setDeleteLoadingId,
-	})
+	const { handleHelperAction, handleBanToggle, handleDeleteUser } =
+		useAdminClientActions({
+			router,
+			setLoadingId,
+			setBanLoadingId,
+			setDeleteLoadingId,
+		})
 
 	useEffect(() => {
 		const timer = window.setTimeout(() => setIsBootLoading(false), 650)

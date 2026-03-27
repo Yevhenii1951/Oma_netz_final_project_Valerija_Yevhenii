@@ -23,7 +23,8 @@ export function AdminPagination({
 		<div className='p-4 border-t border-[#f0e8dc] flex flex-col sm:flex-row gap-2.5 sm:items-center sm:justify-between'>
 			<p className='text-xs text-[#7a6050]'>
 				Zeige {currentRowsLength === 0 ? 0 : pageStart + 1} -{' '}
-				{Math.min(pageStart + pageSize, currentRowsLength)} von {currentRowsLength}
+				{Math.min(pageStart + pageSize, currentRowsLength)} von{' '}
+				{currentRowsLength}
 			</p>
 			<div className='flex items-center gap-1.5'>
 				<button
