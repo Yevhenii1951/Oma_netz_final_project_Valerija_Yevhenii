@@ -1,5 +1,8 @@
-import { extractCreateRequest, QUICK_SUGGESTIONS } from '@/components/ai-assistant-utils'
 import type { ChatMessage } from '@/components/ai-assistant-types'
+import {
+	extractCreateRequest,
+	QUICK_SUGGESTIONS,
+} from '@/components/ai-assistant-utils'
 import { Avatar } from '@/components/shell'
 import { cn } from '@/lib/utils'
 import { Bot, CheckCircle, Loader2, Mic, MicOff, Send, X } from 'lucide-react'

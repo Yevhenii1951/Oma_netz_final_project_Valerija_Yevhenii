@@ -1,7 +1,7 @@
 'use client'
 
-import { extractCreateRequest } from '@/components/ai-assistant-utils'
 import type { ChatMessage } from '@/components/ai-assistant-types'
+import { extractCreateRequest } from '@/components/ai-assistant-utils'
 import {
 	ChatHeader,
 	ChatInput,
@@ -103,7 +103,7 @@ export function AiChatPanel({ onClose }: AiChatPanelProps) {
 									...m,
 									content:
 										'Es tut mir leid, ich bin gerade nicht erreichbar. Bitte versuchen Sie es später.',
-							  }
+								}
 							: m,
 					),
 				)
@@ -242,10 +242,7 @@ export function AiChatPanel({ onClose }: AiChatPanelProps) {
 				}}
 				messagesEndRef={messagesEndRef}
 			/>
-			<QuickSuggestions
-				visible={messages.length <= 1}
-				onSelect={sendMessage}
-			/>
+			<QuickSuggestions visible={messages.length <= 1} onSelect={sendMessage} />
 			<ChatInput
 				voiceSupported={voiceSupported}
 				isListening={isListening}
