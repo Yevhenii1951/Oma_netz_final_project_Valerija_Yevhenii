@@ -1,70 +1,17 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
-import type { LucideIcon } from 'lucide-react'
 import {
-	CheckCircle,
-	Eye,
-	EyeOff,
-	Handshake,
-	Heart,
-	Loader2,
-	Search,
-	User,
-	X,
-} from 'lucide-react'
+	COMMON_LANGUAGES,
+	employmentOptions,
+	Role,
+	roleOptions,
+} from '@/app/register/register-options'
+import { AnimatePresence, motion } from 'framer-motion'
+import { CheckCircle, Eye, EyeOff, Loader2, Search, X } from 'lucide-react'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense, useEffect, useRef, useState } from 'react'
-
-type Role = 'SENIOR' | 'HELPER' | 'RELATIVE'
-
-const roleOptions: {
-	value: Role
-	label: string
-	icon: LucideIcon
-	desc: string
-}[] = [
-	{
-		value: 'SENIOR',
-		icon: User,
-		label: 'Hilfesuchend',
-		desc: 'Ich bin Senior und suche Unterstützung im Alltag',
-	},
-	{
-		value: 'HELPER',
-		icon: Handshake,
-		label: 'Freiwilliger Helfer',
-		desc: 'Ich möchte älteren Menschen helfen und Punkte sammeln',
-	},
-	{
-		value: 'RELATIVE',
-		icon: Heart,
-		label: 'Angehöriger',
-		desc: 'Ich organisiere Hilfe für einen älteren Angehörigen',
-	},
-]
-
-const employmentOptions = [
-	{ value: 'Student', label: 'Student/in' },
-	{ value: 'Arbeitslos', label: 'Arbeitslos' },
-	{ value: 'Jobcenter', label: 'Jobcenter-Maßnahme' },
-	{ value: 'Angestellt', label: 'Angestellt' },
-	{ value: 'FSJ', label: 'FSJ / BFD' },
-	{ value: 'Sonstiges', label: 'Sonstiges' },
-]
-
-const COMMON_LANGUAGES = [
-	'Deutsch',
-	'Englisch',
-	'Russisch',
-	'Türkisch',
-	'Arabisch',
-	'Polnisch',
-	'Ukrainisch',
-	'Französisch',
-]
 
 function RegisterForm() {
 	const router = useRouter()

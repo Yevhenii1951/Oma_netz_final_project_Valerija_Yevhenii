@@ -15,24 +15,18 @@ import {
 	ArrowRight,
 	Bell,
 	Calendar,
-	Car,
 	CheckCircle,
 	Clock,
-	Cross,
-	Footprints,
 	Heart,
-	House,
-	Laptop,
 	MapPin,
 	Mic,
 	PlusCircle,
-	ShoppingCart,
 	Star,
 	TrendingUp,
-	type LucideIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { getCategoryIcon, getGreeting } from './dashboard-utils'
 
 export const metadata = { title: 'Dashboard' }
 
@@ -598,24 +592,4 @@ export default async function DashboardPage() {
 			{/* Floating AI Assistant */}
 		</PageShell>
 	)
-}
-
-function getGreeting(): string {
-	const h = new Date().getHours()
-	if (h < 12) return 'Guten Morgen,'
-	if (h < 17) return 'Guten Tag,'
-	return 'Guten Abend,'
-}
-
-function getCategoryIcon(category: string): LucideIcon {
-	const icons: Record<string, LucideIcon> = {
-		EINKAUF: ShoppingCart,
-		ARZT: Cross,
-		SPAZIERGANG: Footprints,
-		TECHNIK: Laptop,
-		TRANSPORT: Car,
-		HAUSHALT: House,
-		ANDERES: Heart,
-	}
-	return icons[category] ?? Heart
 }

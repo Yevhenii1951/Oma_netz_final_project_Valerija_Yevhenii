@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { SERVER_LOG_ITEMS, USER_RIGHTS } from './constants'
 
 export const metadata: Metadata = {
 	title: 'Datenschutzerklärung',
@@ -176,12 +177,9 @@ export default function DatenschutzPage() {
 									Informationen in so genannten Server-Log-Dateien:
 								</p>
 								<ul className='text-sm list-disc list-inside mt-2 space-y-1'>
-									<li>Browsertyp und Browserversion</li>
-									<li>Verwendetes Betriebssystem</li>
-									<li>Referrer URL</li>
-									<li>Hostname des zugreifenden Rechners</li>
-									<li>Uhrzeit der Serveranfrage</li>
-									<li>IP-Adresse</li>
+									{SERVER_LOG_ITEMS.map(item => (
+										<li key={item}>{item}</li>
+									))}
 								</ul>
 								<p className='text-sm mt-2'>
 									Diese Daten werden nicht mit anderen Datenquellen
@@ -266,12 +264,9 @@ export default function DatenschutzPage() {
 						<div className='space-y-3 text-gray-700'>
 							<p className='text-sm'>Sie haben jederzeit das Recht auf:</p>
 							<ul className='text-sm list-disc list-inside space-y-1'>
-								<li>Auskunft über Ihre gespeicherten Daten (Art. 15 DSGVO)</li>
-								<li>Berichtigung unrichtiger Daten (Art. 16 DSGVO)</li>
-								<li>Löschung Ihrer Daten (Art. 17 DSGVO)</li>
-								<li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
-								<li>Datenübertragbarkeit (Art. 20 DSGVO)</li>
-								<li>Widerspruch gegen die Verarbeitung (Art. 21 DSGVO)</li>
+								{USER_RIGHTS.map(item => (
+									<li key={item}>{item}</li>
+								))}
 							</ul>
 							<p className='text-sm mt-3'>
 								Wenn Sie eine Anfrage zur Ausübung Ihrer Rechte haben, wenden

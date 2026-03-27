@@ -1,5 +1,10 @@
 'use client'
 
+import {
+	extractCreateRequest,
+	ParsedRequest,
+	QUICK_SUGGESTIONS,
+} from '@/components/ai-assistant-utils'
 import { Avatar } from '@/components/shell'
 import { cn } from '@/lib/utils'
 import { AnimatePresence, motion } from 'framer-motion'
@@ -21,29 +26,6 @@ interface ChatMessage {
 	id: string
 	role: 'user' | 'assistant'
 	content: string
-}
-
-interface ParsedRequest {
-	title: string
-	description: string
-	category: string
-	address: string
-	desiredTime?: string
-}
-
-function extractCreateRequest(text: string): {
-	display: string
-	request: ParsedRequest | null
-} {
-	const match = text.match(/<CREATE_REQUEST>([\s\S]*?)<\/CREATE_REQUEST>/)
-	if (!match) return { display: text, request: null }
-	try {
-		const request = JSON.parse(match[1]) as ParsedRequest
-		const display = text.replace(match[0], '').trim()
-		return { display, request }
-	} catch {
-		return { display: text, request: null }
-	}
 }
 
 export function AiAssistantButton() {
@@ -396,11 +378,7 @@ function AiChatPanel({ onClose }: { onClose: () => void }) {
 			{/* Quick suggestions */}
 			{messages.length <= 1 && (
 				<div className='px-4 pb-2 flex gap-2 overflow-x-auto scrollbar-none shrink-0'>
-					{[
-						'Anfrage erstellen',
-						'Wie funktioniert OMA-NETZ?',
-						'Punkte erklären',
-					].map(suggestion => (
+					{QUICK_SUGGESTIONS.map(suggestion => (
 						<button
 							key={suggestion}
 							onClick={() => sendMessage(suggestion)}

@@ -1,5 +1,10 @@
 'use client'
 
+import type {
+	OfferWithHelper,
+	RequestDetailClientProps,
+	RequestDetails,
+} from '@/app/requests/[id]/request-detail-types'
 import {
 	Avatar,
 	CategoryBadge,
@@ -24,55 +29,6 @@ import {
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-interface OfferHelper {
-	name: string | null
-	ratingAvg: number
-	helpCount: number
-}
-
-interface OfferWithHelper {
-	id: string
-	message: string | null
-	status: 'PENDING' | 'ACCEPTED' | 'DECLINED'
-	createdAt: string
-	helper: OfferHelper
-}
-
-interface RequestDetails {
-	id: string
-	title: string
-	description: string
-	category: string
-	status: 'OPEN' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED'
-	address: string | null
-	plz: string | null
-	desiredTime: string | null
-	createdAt: string
-	_count: { offers: number }
-	senior: { name: string | null; ratingAvg: number }
-	offers: OfferWithHelper[]
-}
-
-interface ChatPreviewMessage {
-	id: string
-	content: string
-	createdAt: string
-	senderId: string
-	sender: { id: string; name: string | null }
-}
-
-interface Props {
-	request: RequestDetails
-	isOwner: boolean
-	isHelper: boolean
-	isSameRole: boolean
-	myOffer: OfferWithHelper | null
-	currentUserId: string
-	userRole: string
-	hasRating: boolean
-	chatPreviewMessages: ChatPreviewMessage[]
-}
-
 export default function RequestDetailClient({
 	request,
 	isOwner,
@@ -82,7 +38,7 @@ export default function RequestDetailClient({
 	userRole,
 	hasRating,
 	chatPreviewMessages,
-}: Props) {
+}: RequestDetailClientProps) {
 	const router = useRouter()
 	const { toast } = useToast()
 	const [showOfferModal, setShowOfferModal] = useState(false)
