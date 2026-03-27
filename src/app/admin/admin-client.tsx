@@ -1,22 +1,21 @@
 'use client'
 
+import { AdminDataTables } from '@/app/admin/components/admin-data-tables'
+import { AdminNavigation } from '@/app/admin/components/admin-navigation'
+import { AdminStatsTab } from '@/app/admin/components/admin-stats-tab'
+import { AdminTableToolbar } from '@/app/admin/components/admin-table-toolbar'
 import {
-	EmptyTableRow,
 	filterOptionLabel,
-	KpiSkeleton,
-	safeText,
-	SectionHeading,
-	SortableTh,
-	tableHeading,
 	TableSkeleton,
+	type AdminTab,
 } from '@/app/admin/components/admin-ui'
-import { Avatar, CategoryBadge, StatusBadge } from '@/components/shell'
+import {
+	useAdminTableState,
+	type SortDirection,
+} from '@/app/admin/hooks/use-admin-table-state'
 import { useToast } from '@/components/ui/toaster'
-import { cn, formatDate, formatRelativeTime } from '@/lib/utils'
 import {
 	Activity,
-	AlertTriangle,
-	ArrowRight,
 	BarChart3,
 	Bell,
 	CheckCircle2,
@@ -27,34 +26,16 @@ import {
 	FileText,
 	Gift,
 	Handshake,
-	Hourglass,
-	Loader2,
 	LockOpen,
-	Menu,
-	Search,
-	SlidersHorizontal,
 	Star,
-	Trash2,
 	User,
 	UserCog,
 	UserPlus,
 	Users,
-	X,
-	XCircle,
 	type LucideIcon,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
-
-type Tab =
-	| 'stats'
-	| 'pending'
-	| 'helpers'
-	| 'requests'
-	| 'seniors'
-	| 'redemptions'
-
-type SortDirection = 'asc' | 'desc'
+import { useEffect, useState } from 'react'
 
 interface Props {
 	stats: {
@@ -121,7 +102,7 @@ interface Props {
 		user: { name: string | null; email: string | null }
 		reward: { title: string; pointsCost: number }
 	}>
-	initialTab?: Tab
+	initialTab?: AdminTab
 }
 
 const PAGE_SIZE = 8
@@ -138,7 +119,7 @@ export default function AdminClient({
 	const router = useRouter()
 	const { toast } = useToast()
 
-	const [activeTab, setActiveTab] = useState<Tab>(initialTab)
+	const [activeTab, setActiveTab] = useState<AdminTab>(initialTab)
 	const [loadingId, setLoadingId] = useState<string | null>(null)
 	const [banLoadingId, setBanLoadingId] = useState<string | null>(null)
 	const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null)
@@ -189,25 +170,29 @@ export default function AdminClient({
 	const seniorList = allSeniors
 	const pendingRedemptions = redemptionList.filter(r => r.status === 'pending')
 
-	const tabs: { key: Tab; icon: LucideIcon; label: string; count?: number }[] =
-		[
-			{ key: 'stats', icon: BarChart3, label: 'Statistik' },
-			{
-				key: 'pending',
-				icon: Bell,
-				label: 'Offene Helfer',
-				count: stats.pendingHelpers,
-			},
-			{ key: 'helpers', icon: Users, label: 'Helfer' },
-			{ key: 'seniors', icon: User, label: 'Senioren' },
-			{ key: 'requests', icon: ClipboardList, label: 'Anfragen' },
-			{
-				key: 'redemptions',
-				icon: Gift,
-				label: 'Einloesungen',
-				count: pendingRedemptions.length,
-			},
-		]
+	const tabs: {
+		key: AdminTab
+		icon: LucideIcon
+		label: string
+		count?: number
+	}[] = [
+		{ key: 'stats', icon: BarChart3, label: 'Statistik' },
+		{
+			key: 'pending',
+			icon: Bell,
+			label: 'Offene Helfer',
+			count: stats.pendingHelpers,
+		},
+		{ key: 'helpers', icon: Users, label: 'Helfer' },
+		{ key: 'seniors', icon: User, label: 'Senioren' },
+		{ key: 'requests', icon: ClipboardList, label: 'Anfragen' },
+		{
+			key: 'redemptions',
+			icon: Gift,
+			label: 'Einloesungen',
+			count: pendingRedemptions.length,
+		},
+	]
 
 	async function handleHelperAction(id: string, action: 'APPROVE' | 'REJECT') {
 		setLoadingId(id)
@@ -364,7 +349,7 @@ export default function AdminClient({
 		id: string
 		message: string
 		cta: string
-		tab: Tab
+		tab: AdminTab
 		high: boolean
 	}[] = []
 
@@ -461,7 +446,7 @@ export default function AdminClient({
 				]
 
 	const quickActions: {
-		tab: Tab
+		tab: AdminTab
 		title: string
 		description: string
 		meta: string
@@ -532,204 +517,34 @@ export default function AdminClient({
 		REJECTED: 'Abgelehnt',
 	}
 
-	const pendingStatusOptions = ['ALL', 'PENDING_REVIEW']
-	const helperStatusOptions = [
-		'ALL',
-		...new Set(helperList.map(h => h.helperStatus)),
-	]
-	const requestStatusOptions = [
-		'ALL',
-		...new Set(allRequests.map(r => r.status)),
-	]
-	const seniorStatusOptions = ['ALL', 'ACTIVE', 'BANNED']
-	const redemptionStatusOptions = [
-		'ALL',
-		...new Set(redemptionList.map(r => r.status)),
-	]
-
-	const pendingRows = useMemo(() => {
-		const term = query.toLowerCase().trim()
-		const filtered = pendingHelpers.filter(h => {
-			const matchesQuery =
-				term.length === 0 ||
-				`${h.name ?? ''} ${h.email ?? ''} ${h.institution ?? ''} ${h.phone ?? ''} ${h.languages.join(' ')}`
-					.toLowerCase()
-					.includes(term)
-			const matchesStatus =
-				statusFilter === 'ALL' || statusFilter === 'PENDING_REVIEW'
-			return matchesQuery && matchesStatus
-		})
-
-		const sorted = [...filtered].sort((a, b) => {
-			if (sortBy === 'name') {
-				return safeText(a.name).localeCompare(safeText(b.name))
-			}
-			if (sortBy === 'createdAt') {
-				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-			}
-			return 0
-		})
-
-		if (sortDir === 'desc') sorted.reverse()
-		return sorted
-	}, [pendingHelpers, query, sortBy, sortDir, statusFilter])
-
-	const helperRows = useMemo(() => {
-		const term = query.toLowerCase().trim()
-		const filtered = helperList.filter(h => {
-			const matchesQuery =
-				term.length === 0 ||
-				`${h.name ?? ''} ${h.email ?? ''} ${h.languages.join(' ')}`
-					.toLowerCase()
-					.includes(term)
-			const matchesStatus =
-				statusFilter === 'ALL' || h.helperStatus === statusFilter
-			return matchesQuery && matchesStatus
-		})
-
-		const sorted = [...filtered].sort((a, b) => {
-			if (sortBy === 'name')
-				return safeText(a.name).localeCompare(safeText(b.name))
-			if (sortBy === 'email')
-				return safeText(a.email).localeCompare(safeText(b.email))
-			if (sortBy === 'ratingAvg') return a.ratingAvg - b.ratingAvg
-			if (sortBy === 'helpCount') return a.helpCount - b.helpCount
-			if (sortBy === 'points') return a.points - b.points
-			if (sortBy === 'isBanned') return Number(a.isBanned) - Number(b.isBanned)
-			if (sortBy === 'createdAt')
-				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-			return 0
-		})
-		if (sortDir === 'desc') sorted.reverse()
-		return sorted
-	}, [helperList, query, statusFilter, sortBy, sortDir])
-
-	const seniorRows = useMemo(() => {
-		const term = query.toLowerCase().trim()
-		const filtered = seniorList.filter(u => {
-			const matchesQuery =
-				term.length === 0 ||
-				`${u.name ?? ''} ${u.email ?? ''} ${u.phone ?? ''} ${u.plz ?? ''}`
-					.toLowerCase()
-					.includes(term)
-			const derivedStatus = u.isBanned ? 'BANNED' : 'ACTIVE'
-			const matchesStatus =
-				statusFilter === 'ALL' || derivedStatus === statusFilter
-			return matchesQuery && matchesStatus
-		})
-
-		const sorted = [...filtered].sort((a, b) => {
-			if (sortBy === 'name')
-				return safeText(a.name).localeCompare(safeText(b.name))
-			if (sortBy === 'email')
-				return safeText(a.email).localeCompare(safeText(b.email))
-			if (sortBy === 'ratingAvg') return a.ratingAvg - b.ratingAvg
-			if (sortBy === 'requests')
-				return a._count.sentRequests - b._count.sentRequests
-			if (sortBy === 'createdAt')
-				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-			return 0
-		})
-		if (sortDir === 'desc') sorted.reverse()
-		return sorted
-	}, [seniorList, query, statusFilter, sortBy, sortDir])
-
-	const requestRows = useMemo(() => {
-		const term = query.toLowerCase().trim()
-		const filtered = allRequests.filter(r => {
-			const matchesQuery =
-				term.length === 0 ||
-				`${r.title} ${r.category} ${r.senior.name ?? ''} ${r.address ?? ''}`
-					.toLowerCase()
-					.includes(term)
-			const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter
-			return matchesQuery && matchesStatus
-		})
-
-		const sorted = [...filtered].sort((a, b) => {
-			if (sortBy === 'title')
-				return safeText(a.title).localeCompare(safeText(b.title))
-			if (sortBy === 'status')
-				return safeText(a.status).localeCompare(safeText(b.status))
-			if (sortBy === 'offers') return a._count.offers - b._count.offers
-			if (sortBy === 'createdAt')
-				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-			return 0
-		})
-		if (sortDir === 'desc') sorted.reverse()
-		return sorted
-	}, [allRequests, query, statusFilter, sortBy, sortDir])
-
-	const redemptionRows = useMemo(() => {
-		const term = query.toLowerCase().trim()
-		const filtered = redemptionList.filter(r => {
-			const matchesQuery =
-				term.length === 0 ||
-				`${r.user.name ?? ''} ${r.user.email ?? ''} ${r.reward.title}`
-					.toLowerCase()
-					.includes(term)
-			const matchesStatus = statusFilter === 'ALL' || r.status === statusFilter
-			return matchesQuery && matchesStatus
-		})
-
-		const sorted = [...filtered].sort((a, b) => {
-			if (sortBy === 'user') {
-				return safeText(a.user.name ?? a.user.email).localeCompare(
-					safeText(b.user.name ?? b.user.email),
-				)
-			}
-			if (sortBy === 'reward')
-				return a.reward.title.localeCompare(b.reward.title)
-			if (sortBy === 'points') return a.reward.pointsCost - b.reward.pointsCost
-			if (sortBy === 'status') return a.status.localeCompare(b.status)
-			if (sortBy === 'createdAt')
-				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-			return 0
-		})
-		if (sortDir === 'desc') sorted.reverse()
-		return sorted
-	}, [redemptionList, query, statusFilter, sortBy, sortDir])
-
-	const currentRows =
-		activeTab === 'pending'
-			? pendingRows
-			: activeTab === 'helpers'
-				? helperRows
-				: activeTab === 'seniors'
-					? seniorRows
-					: activeTab === 'requests'
-						? requestRows
-						: activeTab === 'redemptions'
-							? redemptionRows
-							: []
-
-	const totalPages = Math.max(1, Math.ceil(currentRows.length / PAGE_SIZE))
-	const pageStart = (page - 1) * PAGE_SIZE
-	const pendingPageRows = pendingRows.slice(pageStart, pageStart + PAGE_SIZE)
-	const helperPageRows = helperRows.slice(pageStart, pageStart + PAGE_SIZE)
-	const seniorPageRows = seniorRows.slice(pageStart, pageStart + PAGE_SIZE)
-	const requestPageRows = requestRows.slice(pageStart, pageStart + PAGE_SIZE)
-	const redemptionPageRows = redemptionRows.slice(
+	const {
+		activeStatusOptions,
+		currentRows,
+		totalPages,
 		pageStart,
-		pageStart + PAGE_SIZE,
-	)
+		pendingPageRows,
+		helperPageRows,
+		seniorPageRows,
+		requestPageRows,
+		redemptionPageRows,
+	} = useAdminTableState({
+		activeTab,
+		pendingHelpers,
+		helperList,
+		seniorList,
+		allRequests,
+		redemptionList,
+		query,
+		statusFilter,
+		sortBy,
+		sortDir,
+		page,
+		pageSize: PAGE_SIZE,
+	})
 
 	useEffect(() => {
 		if (page > totalPages) setPage(totalPages)
 	}, [page, totalPages])
-
-	const activeStatusOptions =
-		activeTab === 'pending'
-			? pendingStatusOptions
-			: activeTab === 'helpers'
-				? helperStatusOptions
-				: activeTab === 'seniors'
-					? seniorStatusOptions
-					: activeTab === 'requests'
-						? requestStatusOptions
-						: activeTab === 'redemptions'
-							? redemptionStatusOptions
-							: ['ALL']
 
 	function toggleSort(field: string) {
 		if (sortBy === field) {
@@ -740,1121 +555,98 @@ export default function AdminClient({
 		setSortDir('asc')
 	}
 
+	async function handleFulfillRedemption(id: string) {
+		setFulfilling(id)
+		try {
+			const res = await fetch(`/api/rewards/${id}`, { method: 'PATCH' })
+			if (res.ok) {
+				setRedemptionList(prev =>
+					prev.map(x => (x.id === id ? { ...x, status: 'fulfilled' } : x)),
+				)
+				toast({
+					title: 'Als erledigt markiert',
+					variant: 'success',
+				})
+			} else {
+				toast({ title: 'Fehler', variant: 'error' })
+			}
+		} finally {
+			setFulfilling(null)
+		}
+	}
+
 	return (
 		<div className='relative'>
 			<div className='absolute inset-0 -z-10 bg-[radial-gradient(circle_at_0%_0%,rgba(139,94,60,0.10),transparent_45%),radial-gradient(circle_at_100%_20%,rgba(200,149,108,0.10),transparent_38%)]' />
 
-			<div className='mb-4 flex items-center justify-between gap-3 lg:hidden'>
-				<div>
-					<p className='text-xs uppercase tracking-[0.22em] text-[#b09880] font-semibold'>
-						Adminbereich
-					</p>
-					<h1 className='text-xl font-semibold text-[#3d2b1f]'>
-						Betriebs-Dashboard
-					</h1>
-				</div>
-				<button
-					onClick={() => setIsDrawerOpen(true)}
-					className='h-10 w-10 rounded-xl border border-[#ddd0be] bg-white text-[#7a6050] flex items-center justify-center shadow-sm'
-					aria-label='Admin-Navigation oeffnen'
-				>
-					<Menu className='w-5 h-5' />
-				</button>
-			</div>
-
-			{isDrawerOpen && (
-				<div className='fixed inset-0 z-40 lg:hidden'>
-					<button
-						onClick={() => setIsDrawerOpen(false)}
-						className='absolute inset-0 bg-black/35'
-						aria-label='Admin-Navigation schliessen'
-					/>
-					<div className='absolute right-0 top-0 h-full w-[85%] max-w-sm bg-[#fdf8f2] border-l border-[#ddd0be] p-4 shadow-2xl'>
-						<div className='flex items-center justify-between mb-4'>
-							<h2 className='font-semibold text-[#3d2b1f]'>Navigation</h2>
-							<button
-								onClick={() => setIsDrawerOpen(false)}
-								className='h-9 w-9 rounded-lg border border-[#ddd0be] flex items-center justify-center text-[#7a6050]'
-							>
-								<X className='w-4 h-4' />
-							</button>
-						</div>
-						<div className='space-y-1.5'>
-							{tabs.map(tab => {
-								const TabIcon = tab.icon
-								return (
-									<button
-										key={`drawer-${tab.key}`}
-										onClick={() => {
-											setActiveTab(tab.key)
-											setIsDrawerOpen(false)
-										}}
-										className={cn(
-											'w-full flex items-center justify-between rounded-xl border px-3 py-2.5 text-sm transition-colors',
-											activeTab === tab.key
-												? 'bg-[#8b5e3c] text-white border-[#8b5e3c]'
-												: 'bg-white text-[#7a6050] border-[#e8d5be] hover:bg-[#f5ede0]',
-										)}
-									>
-										<span className='flex items-center gap-2'>
-											<TabIcon className='w-4 h-4' />
-											{tab.label}
-										</span>
-										{tab.count && tab.count > 0 ? (
-											<span
-												className={cn(
-													'text-xs px-2 py-0.5 rounded-full border',
-													activeTab === tab.key
-														? 'border-white/30 bg-white/20'
-														: 'bg-amber-50 text-amber-700 border-amber-200',
-												)}
-											>
-												{tab.count}
-											</span>
-										) : null}
-									</button>
-								)
-							})}
-						</div>
-					</div>
-				</div>
-			)}
+			<AdminNavigation
+				tabs={tabs}
+				activeTab={activeTab}
+				isDrawerOpen={isDrawerOpen}
+				onOpenDrawer={() => setIsDrawerOpen(true)}
+				onCloseDrawer={() => setIsDrawerOpen(false)}
+				onTabChange={tab => setActiveTab(tab as AdminTab)}
+			/>
 
 			<div className='space-y-6'>
-				<div className='hidden lg:block rounded-2xl border border-[#ddd0be] bg-white/90 backdrop-blur p-2 shadow-sm'>
-					<div className='flex items-center gap-1.5 overflow-x-auto'>
-						{tabs.map(tab => {
-							const TabIcon = tab.icon
-							return (
-								<button
-									key={`top-${tab.key}`}
-									onClick={() => setActiveTab(tab.key)}
-									className={cn(
-										'relative flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all border',
-										activeTab === tab.key
-											? 'bg-[#8b5e3c] text-white border-[#8b5e3c] shadow-sm'
-											: 'bg-white text-[#7a6050] border-transparent hover:text-[#3d2b1f] hover:bg-[#f5ede0] hover:border-[#e8d5be]',
-									)}
-								>
-									<TabIcon className='w-4 h-4 shrink-0' />
-									{tab.label}
-									{tab.count !== undefined && tab.count > 0 && (
-										<span
-											className={cn(
-												'text-xs font-bold px-1.5 py-0.5 rounded-full',
-												activeTab === tab.key
-													? 'bg-white/30 text-white'
-													: 'bg-amber-100 text-amber-700',
-											)}
-										>
-											{tab.count}
-										</span>
-									)}
-								</button>
-							)
-						})}
-					</div>
-				</div>
-
 				<div className='space-y-6'>
 					{activeTab === 'stats' && (
-						<div className='space-y-6'>
-							<section className='rounded-2xl border border-[#eadbcc] bg-linear-to-r from-[#fffaf4] to-white p-4 sm:p-5 shadow-sm'>
-								<SectionHeading
-									icon={AlertTriangle}
-									title='Prioritaeten'
-									description='Aufgaben, die jetzt direkte Admin-Aufmerksamkeit brauchen.'
-								/>
-								<div className='mt-3 space-y-2.5'>
-									{priorityItems.length > 0 ? (
-										priorityItems.map(item => (
-											<div
-												key={item.id}
-												className={cn(
-													'flex items-center gap-3 rounded-2xl border p-3.5',
-													item.high
-														? 'bg-amber-50 border-amber-200 text-amber-900'
-														: 'bg-[#fdf9f4] border-[#ddd0be] text-[#7a6050]',
-												)}
-											>
-												<AlertTriangle className='w-4 h-4 shrink-0' />
-												<p className='text-sm font-medium flex-1'>
-													{item.message}
-												</p>
-												<button
-													onClick={() => setActiveTab(item.tab)}
-													className={cn(
-														'text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors',
-														item.high
-															? 'bg-[#8b5e3c] text-white border-[#6b4226] hover:bg-[#6b4226]'
-															: 'bg-white text-[#6b4226] border-[#c9b29b] hover:bg-[#f5ede0]',
-													)}
-												>
-													{item.cta}
-												</button>
-											</div>
-										))
-									) : (
-										<div className='rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-emerald-800 text-sm font-medium'>
-											Aktuell keine dringenden Aufgaben. Alles laeuft stabil.
-										</div>
-									)}
-								</div>
-							</section>
-
-							<section className='rounded-2xl border border-[#eadbcc] bg-white p-4 sm:p-5 shadow-sm'>
-								<SectionHeading
-									icon={BarChart3}
-									title='KPI-Ueberblick'
-									description='Kernmetriken fuer den taeglichen Betrieb.'
-								/>
-								{isBootLoading ? (
-									<KpiSkeleton />
-								) : (
-									<div className='mt-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5'>
-										{kpiCards.map(kpi => {
-											const KpiIcon = kpi.icon
-											return (
-												<div
-													key={kpi.label}
-													className={cn(
-														'rounded-2xl border border-[#e8d5be] p-4 bg-linear-to-br shadow-sm hover:shadow-md transition-shadow',
-														kpi.tone,
-													)}
-												>
-													<div className='flex items-start justify-between gap-3'>
-														<div>
-															<p className='text-[11px] uppercase tracking-wide font-semibold text-[#b09880]'>
-																{kpi.label}
-															</p>
-															<p className='text-3xl font-bold text-[#3d2b1f] leading-tight mt-1'>
-																{kpi.value}
-															</p>
-														</div>
-														<div className='w-10 h-10 rounded-xl bg-white border border-[#e8d5be] flex items-center justify-center text-[#8b5e3c] shrink-0'>
-															<KpiIcon className='w-5 h-5' />
-														</div>
-													</div>
-													<p className='text-xs text-[#7a6050] mt-2'>
-														{kpi.subtext}
-													</p>
-													<p className='text-xs text-[#8b5e3c] font-medium mt-1'>
-														{kpi.context}
-													</p>
-												</div>
-											)
-										})}
-									</div>
-								)}
-							</section>
-
-							<section className='rounded-2xl border border-[#eadbcc] bg-linear-to-br from-white to-[#fcf7f0] p-4 sm:p-5 shadow-sm'>
-								<SectionHeading
-									icon={SlidersHorizontal}
-									title='Schnellaktionen'
-									description='Direkte Einstiege fuer wichtige Admin-Workflows.'
-								/>
-								<div className='mt-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3'>
-									{quickActions.map(action => {
-										const ActionIcon = action.icon
-										return (
-											<button
-												key={action.title}
-												onClick={() => setActiveTab(action.tab)}
-												className={cn(
-													'group text-left rounded-2xl border p-3.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md',
-													action.priority
-														? 'bg-amber-50 border-amber-200 hover:bg-amber-100'
-														: 'bg-white border-[#ddd0be] hover:bg-[#f5ede0]',
-												)}
-											>
-												<div className='flex items-start justify-between gap-2'>
-													<div className='w-9 h-9 rounded-xl bg-white border border-[#e8d5be] text-[#8b5e3c] flex items-center justify-center'>
-														<ActionIcon className='w-4.5 h-4.5' />
-													</div>
-													<span className='text-[11px] font-semibold px-2 py-0.5 rounded-full bg-[#f5ede0] text-[#7a6050] border border-[#e8d5be]'>
-														{action.meta}
-													</span>
-												</div>
-												<p className='text-sm font-semibold text-[#3d2b1f] mt-2'>
-													{action.title}
-												</p>
-												<p className='text-xs text-[#7a6050] mt-1'>
-													{action.description}
-												</p>
-												<div className='mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#8b5e3c]'>
-													Oeffnen{' '}
-													<ArrowRight className='w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5' />
-												</div>
-											</button>
-										)
-									})}
-								</div>
-							</section>
-
-							<div className='grid grid-cols-1 xl:grid-cols-12 gap-3.5'>
-								<section className='rounded-2xl border border-[#eadbcc] bg-white overflow-hidden xl:col-span-8 shadow-sm'>
-									<div className='flex items-center justify-between gap-2 p-4 border-b border-[#f0e8dc]'>
-										<SectionHeading
-											icon={FileText}
-											title='Neueste Anfragen'
-											description='Tabellarische Uebersicht der neuesten Anfragen.'
-											compact
-										/>
-										<button
-											onClick={() => setActiveTab('requests')}
-											className='text-xs px-2.5 py-1.5 rounded-lg border border-[#ddd0be] text-[#7a6050] hover:bg-[#f5ede0] hover:text-[#3d2b1f] transition-colors whitespace-nowrap'
-										>
-											Alle oeffnen
-										</button>
-									</div>
-									<div className='overflow-x-auto'>
-										<table className='min-w-210 w-full text-sm'>
-											<thead className='bg-[#fcf8f2] border-b border-[#f0e8dc] text-xs text-[#7a6050] uppercase tracking-wide'>
-												<tr>
-													<th className='px-4 py-2.5 text-left'>Titel</th>
-													<th className='px-4 py-2.5 text-left'>Senior</th>
-													<th className='px-4 py-2.5 text-left'>Kategorie</th>
-													<th className='px-4 py-2.5 text-left'>Status</th>
-													<th className='px-4 py-2.5 text-left'>Angebote</th>
-													<th className='px-4 py-2.5 text-left'>Erstellt</th>
-												</tr>
-											</thead>
-											<tbody className='divide-y divide-[#f5ede0]'>
-												{latestRequests.map(r => (
-													<tr
-														key={r.id}
-														onClick={() => setActiveTab('requests')}
-														className='hover:bg-[#fcf8f2] cursor-pointer'
-													>
-														<td className='px-4 py-3 font-medium text-[#3d2b1f]'>
-															{r.title}
-														</td>
-														<td className='px-4 py-3 text-[#7a6050]'>
-															{r.senior.name ?? 'Unbekannt'}
-														</td>
-														<td className='px-4 py-3'>
-															<CategoryBadge category={r.category} />
-														</td>
-														<td className='px-4 py-3'>
-															<StatusBadge
-																status={
-																	r.status as
-																		| 'OPEN'
-																		| 'IN_PROGRESS'
-																		| 'DONE'
-																		| 'CANCELLED'
-																}
-															/>
-														</td>
-														<td className='px-4 py-3 text-[#7a6050]'>
-															{r._count.offers}
-														</td>
-														<td className='px-4 py-3 text-[#7a6050]'>
-															{formatDate(r.createdAt)}
-														</td>
-													</tr>
-												))}
-											</tbody>
-										</table>
-									</div>
-								</section>
-
-								<section className='rounded-2xl border border-[#eadbcc] bg-white overflow-hidden xl:col-span-4 shadow-sm'>
-									<div className='p-4 border-b border-[#f0e8dc]'>
-										<SectionHeading
-											icon={Bell}
-											title='Aktivitaets-Feed'
-											description='Aktuelle Ereignisse mit klarer Zeitleiste.'
-											compact
-										/>
-									</div>
-									<div className='divide-y divide-[#f5ede0]'>
-										{activityFeed.map(item => {
-											const { icon: ActivityIcon, tone } =
-												activityTypeConfig[item.type]
-											return (
-												<div
-													key={item.id}
-													className='p-3.5 hover:bg-[#fcf8f2] transition-colors'
-												>
-													<div className='flex items-start gap-2.5'>
-														<div
-															className={cn(
-																'w-8 h-8 rounded-lg flex items-center justify-center shrink-0',
-																tone,
-															)}
-														>
-															<ActivityIcon className='w-4 h-4' />
-														</div>
-														<div className='min-w-0 flex-1'>
-															<div className='flex items-center justify-between gap-2'>
-																<p className='text-base font-semibold text-[#3d2b1f] truncate'>
-																	{item.title}
-																</p>
-																<span className='text-[9px] px-1.5 py-0.5 rounded-full bg-[#f5ede0] text-[#7a6050] border border-[#e8d5be] shrink-0'>
-																	{item.badge}
-																</span>
-															</div>
-															<p className='text-xs text-[#7a6050] mt-0.5'>
-																{item.subtitle}
-															</p>
-															<p className='text-xs text-[#b09880] mt-1 inline-flex items-center gap-1'>
-																<Hourglass className='w-3 h-3' />
-																{formatRelativeTime(item.createdAt)}
-															</p>
-														</div>
-													</div>
-												</div>
-											)
-										})}
-									</div>
-								</section>
-							</div>
-						</div>
+						<AdminStatsTab
+							priorityItems={priorityItems}
+							kpiCards={kpiCards}
+							quickActions={quickActions}
+							latestRequests={latestRequests}
+							activityFeed={activityFeed}
+							activityTypeConfig={activityTypeConfig}
+							isBootLoading={isBootLoading}
+							onTabChange={tab => setActiveTab(tab as AdminTab)}
+						/>
 					)}
 
 					{activeTab !== 'stats' && (
 						<section className='rounded-2xl border border-[#eadbcc] bg-white shadow-sm overflow-hidden'>
-							<div className='p-4 border-b border-[#f0e8dc]'>
-								<div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
-									<div>
-										<h3 className='text-base font-semibold text-[#3d2b1f]'>
-											{tableHeading(activeTab)}
-										</h3>
-										<p className='text-sm text-[#7a6050]'>
-											Suche, Statusfilter, sortierbare Spalten und
-											Seitennavigation fuer schnellere Admin-Workflows.
-										</p>
-									</div>
-									<div className='text-xs px-2.5 py-1.5 rounded-lg bg-[#f5ede0] border border-[#e8d5be] text-[#7a6050] font-medium w-max'>
-										{currentRows.length} Ergebnisse
-									</div>
-								</div>
-
-								<div className='mt-3 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-2.5'>
-									<label className='relative'>
-										<Search className='w-4 h-4 text-[#b09880] absolute left-3 top-1/2 -translate-y-1/2' />
-										<input
-											value={query}
-											onChange={e => {
-												setQuery(e.target.value)
-												setPage(1)
-											}}
-											placeholder='Suche nach Name, E-Mail, Titel oder Ort'
-											className='w-full h-10 rounded-xl border border-[#ddd0be] bg-white pl-9 pr-3 text-sm text-[#3d2b1f] outline-none focus:border-[#8b5e3c]'
-										/>
-									</label>
-									<div className='flex items-center gap-2'>
-										<label className='relative'>
-											<SlidersHorizontal className='w-4 h-4 text-[#b09880] absolute left-3 top-1/2 -translate-y-1/2' />
-											<select
-												value={statusFilter}
-												onChange={e => {
-													setStatusFilter(e.target.value)
-													setPage(1)
-												}}
-												className='h-10 rounded-xl border border-[#ddd0be] bg-white pl-9 pr-9 text-sm text-[#3d2b1f] outline-none focus:border-[#8b5e3c]'
-											>
-												{activeStatusOptions.map(option => (
-													<option key={option} value={option}>
-														{filterOptionLabel(option, activeTab)}
-													</option>
-												))}
-											</select>
-										</label>
-									</div>
-								</div>
-							</div>
+							<AdminTableToolbar
+								activeTab={activeTab}
+								resultCount={currentRows.length}
+								query={query}
+								statusFilter={statusFilter}
+								activeStatusOptions={activeStatusOptions}
+								onQueryChange={value => {
+									setQuery(value)
+									setPage(1)
+								}}
+								onStatusFilterChange={value => {
+									setStatusFilter(value)
+									setPage(1)
+								}}
+								getFilterLabel={filterOptionLabel}
+							/>
 
 							{isBootLoading ? (
 								<TableSkeleton />
 							) : (
 								<>
-									<div className='overflow-x-auto'>
-										{activeTab === 'pending' && (
-											<table className='min-w-240 w-full text-sm'>
-												<thead className='bg-[#fcf8f2] border-y border-[#f0e8dc] text-xs text-[#7a6050] uppercase tracking-wide'>
-													<tr>
-														<SortableTh
-															label='Name'
-															field='name'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<th className='px-4 py-2.5 text-left'>E-Mail</th>
-														<th className='px-4 py-2.5 text-left'>
-															Institution
-														</th>
-														<th className='px-4 py-2.5 text-left'>Sprachen</th>
-														<SortableTh
-															label='Beworben am'
-															field='createdAt'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<th className='px-4 py-2.5 text-left'>Aktionen</th>
-													</tr>
-												</thead>
-												<tbody className='divide-y divide-[#f5ede0]'>
-													{pendingPageRows.map(h => (
-														<tr key={h.id} className='hover:bg-[#fcf8f2]'>
-															<td className='px-4 py-3'>
-																<div className='flex items-center gap-2.5'>
-																	<Avatar
-																		name={h.name || h.email || '?'}
-																		size='sm'
-																	/>
-																	<div>
-																		<p className='font-medium text-[#3d2b1f]'>
-																			{h.name || '-'}
-																		</p>
-																		<p className='text-xs text-[#b09880]'>
-																			{h.phone || '-'}
-																		</p>
-																	</div>
-																</div>
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{h.email || '-'}
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{h.institution || '-'}
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{h.languages.length > 0
-																	? h.languages.join(', ')
-																	: '-'}
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{formatDate(h.createdAt)}
-															</td>
-															<td className='px-4 py-3'>
-																<div className='flex items-center gap-1.5'>
-																	<button
-																		onClick={() =>
-																			handleHelperAction(h.id, 'REJECT')
-																		}
-																		disabled={loadingId === h.id}
-																		className='px-2.5 py-1.5 rounded-lg text-xs font-medium bg-red-50 text-red-600 border border-red-200 hover:bg-red-100 disabled:opacity-50 inline-flex items-center gap-1'
-																	>
-																		{loadingId === h.id ? (
-																			<Loader2
-																				size={12}
-																				className='animate-spin'
-																			/>
-																		) : (
-																			<XCircle size={12} />
-																		)}
-																		Ablehnen
-																	</button>
-																	<button
-																		onClick={() =>
-																			handleHelperAction(h.id, 'APPROVE')
-																		}
-																		disabled={loadingId === h.id}
-																		className='px-2.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 disabled:opacity-50 inline-flex items-center gap-1'
-																	>
-																		{loadingId === h.id ? (
-																			<Loader2
-																				size={12}
-																				className='animate-spin'
-																			/>
-																		) : (
-																			<CheckCircle2 size={12} />
-																		)}
-																		Freigeben
-																	</button>
-																</div>
-															</td>
-														</tr>
-													))}
-													{pendingPageRows.length === 0 && (
-														<EmptyTableRow
-															colSpan={6}
-															label='Keine offenen Helfer gefunden.'
-														/>
-													)}
-												</tbody>
-											</table>
-										)}
-
-										{activeTab === 'helpers' && (
-											<table className='min-w-270 w-full text-sm'>
-												<thead className='bg-[#fcf8f2] border-y border-[#f0e8dc] text-xs text-[#7a6050] uppercase tracking-wide'>
-													<tr>
-														<SortableTh
-															label='Helper'
-															field='name'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<SortableTh
-															label='E-Mail'
-															field='email'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<th className='px-4 py-2.5 text-left'>Status</th>
-														<SortableTh
-															label='Bewertung'
-															field='ratingAvg'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<SortableTh
-															label='Hilfen'
-															field='helpCount'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<SortableTh
-															label='Punkte'
-															field='points'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<SortableTh
-															label='Gesperrt'
-															field='isBanned'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<SortableTh
-															label='Seit'
-															field='createdAt'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<th className='px-4 py-2.5 text-left'>Aktionen</th>
-													</tr>
-												</thead>
-												<tbody className='divide-y divide-[#f5ede0]'>
-													{helperPageRows.map(h => (
-														<tr key={h.id} className='hover:bg-[#fcf8f2]'>
-															<td className='px-4 py-3'>
-																<div className='flex items-center gap-2.5'>
-																	<Avatar
-																		name={h.name || h.email || '?'}
-																		size='sm'
-																	/>
-																	<div>
-																		<p className='font-medium text-[#3d2b1f]'>
-																			{h.name || '-'}
-																		</p>
-																		<p className='text-xs text-[#7a6050]'>
-																			{h.languages.length > 0
-																				? h.languages.join(' - ')
-																				: '-'}
-																		</p>
-																	</div>
-																</div>
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{h.email || '-'}
-															</td>
-															<td className='px-4 py-3'>
-																<span
-																	className={cn(
-																		'text-xs px-2 py-0.5 rounded-full font-medium',
-																		helperStatusColor[h.helperStatus] ??
-																			'bg-slate-50 text-slate-700 border border-slate-200',
-																	)}
-																>
-																	{helperStatusLabel[h.helperStatus] ??
-																		h.helperStatus}
-																</span>
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{h.ratingAvg > 0 ? h.ratingAvg.toFixed(1) : '-'}
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{h.helpCount}
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{h.points}
-															</td>
-															<td className='px-4 py-3'>
-																<span
-																	className={cn(
-																		'text-xs px-2 py-0.5 rounded-full border font-medium',
-																		h.isBanned
-																			? 'bg-red-50 text-red-600 border-red-200'
-																			: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-																	)}
-																>
-																	{h.isBanned ? 'Ja' : 'Nein'}
-																</span>
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{formatDate(h.createdAt)}
-															</td>
-															<td className='px-4 py-3'>
-																<div className='flex items-center gap-1.5'>
-																	<button
-																		onClick={() =>
-																			handleBanToggle(
-																				h.id,
-																				h.isBanned,
-																				h.name || 'Nutzer',
-																			)
-																		}
-																		disabled={
-																			banLoadingId === h.id ||
-																			deleteLoadingId === h.id
-																		}
-																		className={cn(
-																			'text-xs px-2.5 py-1 rounded-full border font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-1',
-																			h.isBanned
-																				? 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100'
-																				: 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100',
-																		)}
-																	>
-																		{banLoadingId === h.id ? (
-																			<Loader2
-																				size={11}
-																				className='animate-spin'
-																			/>
-																		) : h.isBanned ? (
-																			<CheckCircle2 size={11} />
-																		) : (
-																			<XCircle size={11} />
-																		)}
-																		{h.isBanned ? 'Entsperren' : 'Sperren'}
-																	</button>
-																	<button
-																		onClick={() =>
-																			handleDeleteUser(
-																				h.id,
-																				h.name || h.email || 'Nutzer',
-																			)
-																		}
-																		disabled={
-																			deleteLoadingId === h.id ||
-																			banLoadingId === h.id
-																		}
-																		className='text-xs px-2.5 py-1 rounded-full border font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-1 bg-red-600 text-white border-red-700 hover:bg-red-700'
-																	>
-																		{deleteLoadingId === h.id ? (
-																			<Loader2
-																				size={11}
-																				className='animate-spin'
-																			/>
-																		) : (
-																			<Trash2 size={11} />
-																		)}
-																		Loeschen
-																	</button>
-																</div>
-															</td>
-														</tr>
-													))}
-													{helperPageRows.length === 0 && (
-														<EmptyTableRow
-															colSpan={9}
-															label='Keine Helfer gefunden.'
-														/>
-													)}
-												</tbody>
-											</table>
-										)}
-
-										{activeTab === 'seniors' && (
-											<table className='min-w-255 w-full text-sm'>
-												<thead className='bg-[#fcf8f2] border-y border-[#f0e8dc] text-xs text-[#7a6050] uppercase tracking-wide'>
-													<tr>
-														<SortableTh
-															label='Nutzer'
-															field='name'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<SortableTh
-															label='E-Mail'
-															field='email'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<th className='px-4 py-2.5 text-left'>Rolle</th>
-														<SortableTh
-															label='Anfragen'
-															field='requests'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<SortableTh
-															label='Bewertung'
-															field='ratingAvg'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<th className='px-4 py-2.5 text-left'>Status</th>
-														<SortableTh
-															label='Seit'
-															field='createdAt'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<th className='px-4 py-2.5 text-left'>Aktionen</th>
-													</tr>
-												</thead>
-												<tbody className='divide-y divide-[#f5ede0]'>
-													{seniorPageRows.map(u => (
-														<tr key={u.id} className='hover:bg-[#fcf8f2]'>
-															<td className='px-4 py-3'>
-																<div className='flex items-center gap-2.5'>
-																	<Avatar
-																		name={u.name || u.email || '?'}
-																		size='sm'
-																	/>
-																	<div>
-																		<p className='font-medium text-[#3d2b1f]'>
-																			{u.name || '-'}
-																		</p>
-																		<p className='text-xs text-[#7a6050]'>
-																			{u.phone || u.plz || '-'}
-																		</p>
-																	</div>
-																</div>
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{u.email || '-'}
-															</td>
-															<td className='px-4 py-3'>
-																<span
-																	className={cn(
-																		'text-xs px-2 py-0.5 rounded-full border font-medium',
-																		u.role === 'RELATIVE'
-																			? 'bg-blue-50 text-blue-700 border-blue-200'
-																			: 'bg-[#f5ede0] text-[#8b5e3c] border-[#e8d5be]',
-																	)}
-																>
-																	{u.role}
-																</span>
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{u._count.sentRequests}
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{u.ratingAvg > 0 ? u.ratingAvg.toFixed(1) : '-'}
-															</td>
-															<td className='px-4 py-3'>
-																<span
-																	className={cn(
-																		'text-xs px-2 py-0.5 rounded-full border font-medium',
-																		u.isBanned
-																			? 'bg-red-50 text-red-600 border-red-200'
-																			: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-																	)}
-																>
-																	{u.isBanned ? 'Gesperrt' : 'Aktiv'}
-																</span>
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{formatDate(u.createdAt)}
-															</td>
-															<td className='px-4 py-3'>
-																<div className='flex items-center gap-1.5'>
-																	<button
-																		onClick={() =>
-																			handleBanToggle(
-																				u.id,
-																				u.isBanned,
-																				u.name || 'Nutzer',
-																			)
-																		}
-																		disabled={
-																			banLoadingId === u.id ||
-																			deleteLoadingId === u.id
-																		}
-																		className={cn(
-																			'text-xs px-2.5 py-1 rounded-full border font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-1',
-																			u.isBanned
-																				? 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100'
-																				: 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100',
-																		)}
-																	>
-																		{banLoadingId === u.id ? (
-																			<Loader2
-																				size={11}
-																				className='animate-spin'
-																			/>
-																		) : u.isBanned ? (
-																			<CheckCircle2 size={11} />
-																		) : (
-																			<XCircle size={11} />
-																		)}
-																		{u.isBanned ? 'Entsperren' : 'Sperren'}
-																	</button>
-																	<button
-																		onClick={() =>
-																			handleDeleteUser(
-																				u.id,
-																				u.name || u.email || 'Nutzer',
-																			)
-																		}
-																		disabled={
-																			deleteLoadingId === u.id ||
-																			banLoadingId === u.id
-																		}
-																		className='text-xs px-2.5 py-1 rounded-full border font-medium transition-colors disabled:opacity-50 inline-flex items-center gap-1 bg-red-600 text-white border-red-700 hover:bg-red-700'
-																	>
-																		{deleteLoadingId === u.id ? (
-																			<Loader2
-																				size={11}
-																				className='animate-spin'
-																			/>
-																		) : (
-																			<Trash2 size={11} />
-																		)}
-																		Loeschen
-																	</button>
-																</div>
-															</td>
-														</tr>
-													))}
-													{seniorPageRows.length === 0 && (
-														<EmptyTableRow
-															colSpan={8}
-															label='Keine Senioren oder Angehoerigen gefunden.'
-														/>
-													)}
-												</tbody>
-											</table>
-										)}
-
-										{activeTab === 'requests' && (
-											<table className='min-w-245 w-full text-sm'>
-												<thead className='bg-[#fcf8f2] border-y border-[#f0e8dc] text-xs text-[#7a6050] uppercase tracking-wide'>
-													<tr>
-														<SortableTh
-															label='Titel'
-															field='title'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<th className='px-4 py-2.5 text-left'>Kategorie</th>
-														<SortableTh
-															label='Status'
-															field='status'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<th className='px-4 py-2.5 text-left'>Senior</th>
-														<th className='px-4 py-2.5 text-left'>Adresse</th>
-														<SortableTh
-															label='Angebote'
-															field='offers'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<SortableTh
-															label='Erstellt'
-															field='createdAt'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-													</tr>
-												</thead>
-												<tbody className='divide-y divide-[#f5ede0]'>
-													{requestPageRows.map(r => (
-														<tr key={r.id} className='hover:bg-[#fcf8f2]'>
-															<td className='px-4 py-3 font-medium text-[#3d2b1f]'>
-																{r.title}
-															</td>
-															<td className='px-4 py-3'>
-																<CategoryBadge category={r.category} />
-															</td>
-															<td className='px-4 py-3'>
-																<StatusBadge
-																	status={
-																		r.status as
-																			| 'OPEN'
-																			| 'IN_PROGRESS'
-																			| 'DONE'
-																			| 'CANCELLED'
-																	}
-																/>
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{r.senior.name || '-'}
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{r.address || '-'}
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{r._count.offers}
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{formatDate(r.createdAt)}
-															</td>
-														</tr>
-													))}
-													{requestPageRows.length === 0 && (
-														<EmptyTableRow
-															colSpan={7}
-															label='Keine Anfragen gefunden.'
-														/>
-													)}
-												</tbody>
-											</table>
-										)}
-
-										{activeTab === 'redemptions' && (
-											<table className='min-w-240 w-full text-sm'>
-												<thead className='bg-[#fcf8f2] border-y border-[#f0e8dc] text-xs text-[#7a6050] uppercase tracking-wide'>
-													<tr>
-														<SortableTh
-															label='Nutzer'
-															field='user'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<SortableTh
-															label='Belohnung'
-															field='reward'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<SortableTh
-															label='Punkte'
-															field='points'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<SortableTh
-															label='Status'
-															field='status'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<SortableTh
-															label='Erstellt'
-															field='createdAt'
-															sortBy={sortBy}
-															sortDir={sortDir}
-															onSort={toggleSort}
-														/>
-														<th className='px-4 py-2.5 text-left'>Aktionen</th>
-													</tr>
-												</thead>
-												<tbody className='divide-y divide-[#f5ede0]'>
-													{redemptionPageRows.map(r => (
-														<tr key={r.id} className='hover:bg-[#fcf8f2]'>
-															<td className='px-4 py-3'>
-																<p className='font-medium text-[#3d2b1f]'>
-																	{r.user.name ?? '-'}
-																</p>
-																<p className='text-xs text-[#7a6050]'>
-																	{r.user.email ?? '-'}
-																</p>
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{r.reward.title}
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{r.reward.pointsCost}
-															</td>
-															<td className='px-4 py-3'>
-																<span
-																	className={cn(
-																		'text-xs px-2 py-0.5 rounded-full border font-medium',
-																		r.status === 'fulfilled'
-																			? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-																			: 'bg-amber-50 text-amber-700 border-amber-200',
-																	)}
-																>
-																	{r.status}
-																</span>
-															</td>
-															<td className='px-4 py-3 text-[#7a6050]'>
-																{formatDate(r.createdAt)}
-															</td>
-															<td className='px-4 py-3'>
-																{r.status === 'fulfilled' ? (
-																	<span className='text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium'>
-																		Erledigt
-																	</span>
-																) : (
-																	<button
-																		disabled={fulfilling === r.id}
-																		onClick={async () => {
-																			setFulfilling(r.id)
-																			try {
-																				const res = await fetch(
-																					`/api/rewards/${r.id}`,
-																					{ method: 'PATCH' },
-																				)
-																				if (res.ok) {
-																					setRedemptionList(prev =>
-																						prev.map(x =>
-																							x.id === r.id
-																								? { ...x, status: 'fulfilled' }
-																								: x,
-																						),
-																					)
-																					toast({
-																						title: 'Als erledigt markiert',
-																						variant: 'success',
-																					})
-																				} else {
-																					toast({
-																						title: 'Fehler',
-																						variant: 'error',
-																					})
-																				}
-																			} finally {
-																				setFulfilling(null)
-																			}
-																		}}
-																		className='text-xs px-2.5 py-1 rounded-full bg-[#8b5e3c] text-white border border-[#6b4226] font-medium hover:bg-[#6b4226] transition-colors disabled:opacity-50 inline-flex items-center gap-1'
-																	>
-																		{fulfilling === r.id ? (
-																			<Loader2
-																				size={11}
-																				className='animate-spin'
-																			/>
-																		) : (
-																			<CheckCircle2 size={11} />
-																		)}
-																		Erledigen
-																	</button>
-																)}
-															</td>
-														</tr>
-													))}
-													{redemptionPageRows.length === 0 && (
-														<EmptyTableRow
-															colSpan={6}
-															label='Keine Einloesungen gefunden.'
-														/>
-													)}
-												</tbody>
-											</table>
-										)}
-									</div>
+									<AdminDataTables
+										activeTab={activeTab}
+										sortBy={sortBy}
+										sortDir={sortDir}
+										onSort={toggleSort}
+										pendingPageRows={pendingPageRows}
+										helperPageRows={helperPageRows}
+										seniorPageRows={seniorPageRows}
+										requestPageRows={requestPageRows}
+										redemptionPageRows={redemptionPageRows}
+										helperStatusColor={helperStatusColor}
+										helperStatusLabel={helperStatusLabel}
+										loadingId={loadingId}
+										banLoadingId={banLoadingId}
+										deleteLoadingId={deleteLoadingId}
+										fulfilling={fulfilling}
+										onHelperAction={handleHelperAction}
+										onBanToggle={handleBanToggle}
+										onDeleteUser={handleDeleteUser}
+										onFulfillRedemption={handleFulfillRedemption}
+									/>
 
 									<div className='p-4 border-t border-[#f0e8dc] flex flex-col sm:flex-row gap-2.5 sm:items-center sm:justify-between'>
 										<p className='text-xs text-[#7a6050]'>
