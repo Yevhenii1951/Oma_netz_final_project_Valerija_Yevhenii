@@ -8,7 +8,7 @@ export function HelpersSection() {
 	return (
 		<section
 			id='helpers'
-			className='max-w-5xl mx-auto px-3 sm:px-4 py-12 sm:py-16 md:py-20'
+			className='max-w-5xl mx-auto px-3 sm:px-4 py-12 sm:py-16 md:py-20 scroll-mt-24'
 		>
 			<div className='grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-10 md:gap-12 items-center'>
 				<FadeUp>

@@ -33,7 +33,7 @@ export function JourneySection() {
 	return (
 		<section
 			id='journey'
-			className='max-w-6xl mx-auto px-3 sm:px-4 py-12 sm:py-16 md:py-20'
+			className='max-w-6xl mx-auto px-3 sm:px-4 py-12 sm:py-16 md:py-20 scroll-mt-24'
 		>
 			<FadeUp className='text-center mb-8 sm:mb-10 md:mb-12'>
 				<h2 className='heading-serif text-2xl sm:text-3xl md:text-4xl font-bold text-[#3d2b1f] mb-2 sm:mb-3'>
@@ -52,7 +52,7 @@ export function CategoriesSection() {
 	return (
 		<section
 			id='categories'
-			className='bg-[#ffffff] border-y border-[#ddd0be] py-12 sm:py-16 md:py-20'
+			className='bg-[#ffffff] border-y border-[#ddd0be] py-12 sm:py-16 md:py-20 scroll-mt-24'
 		>
 			<div className='max-w-5xl mx-auto px-3 sm:px-4'>
 				<FadeUp className='text-center mb-8 sm:mb-10 md:mb-12'>

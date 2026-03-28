@@ -7,7 +7,7 @@ export function TrustSection() {
 	return (
 		<section
 			id='trust'
-			className='relative overflow-hidden bg-linear-to-br from-[#8b5e3c] via-[#7a5035] to-[#6b4226] py-12 sm:py-16 md:py-20 text-center text-[#ffffff]'
+			className='relative overflow-hidden bg-linear-to-br from-[#8b5e3c] via-[#7a5035] to-[#6b4226] py-12 sm:py-16 md:py-20 text-center text-[#ffffff] scroll-mt-24'
 		>
 			<div className='absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.3)_0%,transparent_70%)]' />
 			<div className='relative z-10 max-w-2xl mx-auto px-3 sm:px-4'>

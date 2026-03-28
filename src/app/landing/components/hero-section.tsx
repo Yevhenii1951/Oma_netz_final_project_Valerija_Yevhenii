@@ -8,7 +8,7 @@ export function HeroSection() {
 		<>
 			<div id='hero' />
 			<BackgroundPaths>
-				<section className='max-w-6xl mx-auto px-3 sm:px-4 pt-12 sm:pt-16 md:pt-24 pb-12 sm:pb-16 md:pb-20 text-center relative z-10 min-h-screen flex flex-col justify-center'>
+				<section className='max-w-6xl mx-auto px-3 sm:px-4 pt-7 sm:pt-10 md:pt-14 pb-7 sm:pb-10 md:pb-14 text-center relative z-10 min-h-[70vh] md:min-h-[82vh] flex flex-col justify-center'>
 					<motion.h1
 						initial={{ opacity: 0, y: 32 }}
 						animate={{ opacity: 1, y: 0 }}

@@ -27,7 +27,7 @@ export function BottomNav() {
 
 	return (
 		<>
-			<nav className='lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#ffffff]/95 backdrop-blur-lg border-t border-[#ddd0be] px-2 pb-safe'>
+			<nav className='lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#ffffff]/95 backdrop-blur-lg border-t border-[#ddd0be] px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]'>
 				<div className='flex items-center justify-around max-w-md mx-auto'>
 					{mobileItems
 						.filter(item => {

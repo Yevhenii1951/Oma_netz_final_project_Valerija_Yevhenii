@@ -3,7 +3,8 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
 import {
 	CategoriesSection,
 	FinalCtaSection,
@@ -18,7 +19,49 @@ import {
 import { NAV_LINKS } from './landing-data'
 
 export default function LandingClient() {
+	const pathname = usePathname()
+	const router = useRouter()
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+	const scrollToSectionById = useCallback((id: string) => {
+		const el = document.getElementById(id)
+		if (!el) return false
+
+		const stickyNav = document.querySelector('nav.sticky') as HTMLElement | null
+		const offset = stickyNav?.offsetHeight ?? 88
+		const y = el.getBoundingClientRect().top + window.scrollY - offset - 8
+		window.scrollTo({ top: y, behavior: 'smooth' })
+		return true
+	}, [])
+
+	function scrollToSection(href: string) {
+		const id = href.replace('#', '')
+
+		if (pathname !== '/landing') {
+			router.push(`/landing${href}`)
+			setMobileMenuOpen(false)
+			return
+		}
+
+		setMobileMenuOpen(false)
+		window.history.replaceState(null, '', href)
+		requestAnimationFrame(() => {
+			scrollToSectionById(id)
+		})
+	}
+
+	useEffect(() => {
+		if (pathname !== '/landing') return
+
+		const id = window.location.hash.replace('#', '')
+		if (!id) return
+
+		const timer = window.setTimeout(() => {
+			scrollToSectionById(id)
+		}, 60)
+
+		return () => window.clearTimeout(timer)
+	}, [pathname, scrollToSectionById])
 
 	return (
 		<div className='min-h-screen bg-[#f5ede0]'>
@@ -60,7 +103,7 @@ export default function LandingClient() {
 							<a
 								key={href}
 								href={href}
-								className='relative px-3 py-2.5 text-sm font-medium text-[#7a6050] hover:text-[#3d2b1f] transition-colors rounded-lg hover:bg-[#f5ede0] group min-h-11 flex items-center'
+								className='relative px-1.5 py-2.5 text-sm md:text-[10.5px] lg:text-sm font-medium text-[#7a6050] hover:text-[#3d2b1f] transition-colors rounded-lg hover:bg-[#f5ede0] group min-h-11 flex items-center'
 							>
 								{label}
 								<span className='absolute bottom-0.5 left-3 right-3 h-px bg-[#8b5e3c] scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
@@ -77,13 +120,13 @@ export default function LandingClient() {
 					>
 						<Link
 							href='/login'
-							className='text-[#7a6050] font-medium text-sm hover:text-[#3d2b1f] transition-colors px-3 py-2.5 rounded min-h-11 flex items-center'
+							className='text-[#7a6050] font-medium text-sm md:text-[10.5px] lg:text-sm hover:text-[#3d2b1f] transition-colors px-1.5 py-2.5 rounded min-h-11 flex items-center'
 						>
 							Anmelden
 						</Link>
 						<Link
 							href='/register'
-							className='btn-primary text-sm py-2.5 px-5 min-h-11 flex items-center'
+							className='btn-primary text-sm md:text-[10.5px] lg:text-sm py-2.5 px-2.5 min-h-11 flex items-center'
 						>
 							Registrieren
 						</Link>
@@ -115,14 +158,14 @@ export default function LandingClient() {
 						>
 							<div className='px-3 py-4 space-y-1'>
 								{NAV_LINKS.map(({ href, label }) => (
-									<a
+									<button
 										key={href}
-										href={href}
-										onClick={() => setMobileMenuOpen(false)}
-										className='px-4 py-3 text-[#3d2b1f] font-medium hover:bg-[#e8d5be] rounded-lg transition-colors min-h-11 flex items-center'
+										type='button'
+										onClick={() => scrollToSection(href)}
+										className='w-full text-left px-4 py-3 text-[#3d2b1f] font-medium hover:bg-[#e8d5be] rounded-lg transition-colors min-h-11 flex items-center'
 									>
 										{label}
-									</a>
+									</button>
 								))}
 								<div className='flex flex-col gap-2 pt-2 border-t border-[#ddd0be]'>
 									<Link

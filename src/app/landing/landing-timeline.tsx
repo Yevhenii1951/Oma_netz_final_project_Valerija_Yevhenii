@@ -2,6 +2,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import {
 	Bell,
+	ChevronLeft,
+	ChevronRight,
 	ClipboardList,
 	Coins,
 	FilePlus,
@@ -184,23 +186,31 @@ export function JourneyTimeline() {
 		<button
 			key={i}
 			onClick={() => setActive(i)}
-			className={`w-2.5 h-2.5 rounded-full transition-all duration-300 min-h-11 min-w-11 flex items-center justify-center -m-2.5 ${
+			className={`h-2.5 rounded-full transition-all duration-300 min-h-11 min-w-11 flex items-center justify-center -m-2.5 ${
 				i === active
 					? 'bg-[#8b5e3c] scale-125 w-4'
 					: i < active
-						? 'bg-[#8b5e3c]/40'
-						: 'bg-[#e8d5be] hover:bg-[#b09880]'
+						? 'bg-[#8b5e3c]/40 w-2.5'
+						: 'bg-[#e8d5be] hover:bg-[#b09880] w-2.5'
 			}`}
-			aria-label={`Перейти к шагу ${i + 1}`}
+			aria-label={`Zu Schritt ${i + 1} wechseln`}
 		/>
 	))
+
+	function goPrev() {
+		setActive(prev => (prev - 1 + STEPS.length) % STEPS.length)
+	}
+
+	function goNext() {
+		setActive(prev => (prev + 1) % STEPS.length)
+	}
 
 	return (
 		<div
 			ref={carouselRef}
 			className='flex flex-col items-center gap-4 sm:gap-6 md:gap-8 py-8 w-full'
 		>
-			<div className='hidden md:flex items-center justify-center gap-2 w-full max-w-5xl px-4'>
+			<div className='hidden xl:flex items-center justify-center gap-2 w-full max-w-5xl px-4'>
 				{STEPS.map((step, i) => {
 					const isActive = i === active
 					const isPast = i < active
@@ -233,8 +243,28 @@ export function JourneyTimeline() {
 				})}
 			</div>
 
-			<div className='md:hidden flex justify-center gap-3 mb-2 flex-wrap px-2'>
-				{progressIndicators}
+			<div className='xl:hidden flex items-center justify-center gap-2 mb-2 w-full max-w-xl px-2'>
+				<button
+					type='button'
+					onClick={goPrev}
+					className='h-10 w-10 rounded-full border border-[#ddd0be] bg-white text-[#7a6050] hover:bg-[#f5ede0] hover:text-[#3d2b1f] transition-colors flex items-center justify-center shrink-0'
+					aria-label='Vorheriger Schritt'
+				>
+					<ChevronLeft size={16} />
+				</button>
+
+				<div className='hidden lg:flex items-center justify-center gap-3 flex-wrap'>
+					{progressIndicators}
+				</div>
+
+				<button
+					type='button'
+					onClick={goNext}
+					className='h-10 w-10 rounded-full border border-[#ddd0be] bg-white text-[#7a6050] hover:bg-[#f5ede0] hover:text-[#3d2b1f] transition-colors flex items-center justify-center shrink-0'
+					aria-label='Naechster Schritt'
+				>
+					<ChevronRight size={16} />
+				</button>
 			</div>
 
 			<div

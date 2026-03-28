@@ -13,7 +13,7 @@ export const ToastViewport = React.forwardRef<
 	<ToastPrimitives.Viewport
 		ref={ref}
 		className={cn(
-			'fixed bottom-0 right-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-4 sm:right-4 sm:max-w-sm',
+			'fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] right-0 z-100 flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-4 sm:right-4 sm:max-w-sm',
 			className,
 		)}
 		{...props}
@@ -41,7 +41,7 @@ export const Toast = React.forwardRef<
 			ref={ref}
 			className={cn(
 				'group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-2xl border p-4 shadow-lg',
-				'data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)]',
+				'data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-(--radix-toast-swipe-end-x) data-[swipe=move]:translate-x-(--radix-toast-swipe-move-x)',
 				'data-[state=open]:animate-slide-up data-[state=closed]:opacity-0',
 				variantClasses[variant],
 				className,
