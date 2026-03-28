@@ -7,24 +7,22 @@ export const metadata: Metadata = {
 
 export default function ImpressumPage() {
 	return (
-		<div className='min-h-screen bg-[#f5ede0] py-12 px-4 sm:px-6 lg:px-8'>
+		<div className='min-h-screen bg-[#f5ede0] py-12 px-4 sm:px-6 lg:px-8 font-body'>
 			<div className='max-w-3xl mx-auto'>
 				{/* Header */}
 				<div className='text-center mb-12'>
-					<h1 className='text-4xl font-playfair font-bold text-[#3d2b1f] mb-4'>
-						Impressum
-					</h1>
-					<p className='text-emerald-800'>Angaben gemäß § 5 TMG</p>
+					<h1 className='text-4xl font-bold text-[#3d2b1f] mb-4'>Impressum</h1>
+					<p className='text-[#7a6050]'>Angaben gemäß § 5 TMG</p>
 				</div>
 
 				{/* Content Card */}
 				<div className='bg-white rounded-2xl shadow-xl p-8 mb-8'>
 					{/* Projektverantwortliche */}
 					<section className='mb-8'>
-						<h2 className='text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
+						<h2 className='text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
 							Projektverantwortliche
 						</h2>
-						<div className='space-y-2 text-gray-700'>
+						<div className='space-y-2 text-[#3d2b1f]'>
 							<p>
 								<strong>Valeriia Kovalenko &amp; Yevhenii Riabokon</strong>
 							</p>
@@ -35,10 +33,10 @@ export default function ImpressumPage() {
 
 					{/* Kontakt */}
 					<section className='mb-8'>
-						<h2 className='text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
+						<h2 className='text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
 							Kontakt
 						</h2>
-						<div className='space-y-2 text-gray-700'>
+						<div className='space-y-2 text-[#3d2b1f]'>
 							<p>
 								E-Mail:{' '}
 								<a
@@ -48,7 +46,7 @@ export default function ImpressumPage() {
 									kontakt@oma-netz-kassel.de
 								</a>
 							</p>
-							<p className='text-sm text-gray-500 italic'>
+							<p className='text-sm text-[#7a6050] italic'>
 								Hinweis: Dies ist ein Studentenprojekt. Für Anfragen nutzen Sie
 								bitte ausschließlich die E-Mail-Adresse.
 							</p>
@@ -57,10 +55,10 @@ export default function ImpressumPage() {
 
 					{/* Projektbeschreibung */}
 					<section className='mb-8'>
-						<h2 className='text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
+						<h2 className='text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
 							Projektbeschreibung
 						</h2>
-						<p className='text-gray-700'>
+						<p className='text-[#3d2b1f]'>
 							OMA-NETZ Kassel ist ein Studentenprojekt zur digitalen
 							Unterstützung von Nachbarschaftshilfe für ältere Menschen in
 							Kassel. Die Plattform verbindet freiwillige Helfer mit Senioren,
@@ -70,12 +68,12 @@ export default function ImpressumPage() {
 
 					{/* Haftungsausschluss */}
 					<section className='mb-8'>
-						<h2 className='text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
+						<h2 className='text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
 							Haftungsausschluss
 						</h2>
-						<div className='space-y-4 text-gray-700'>
+						<div className='space-y-4 text-[#3d2b1f]'>
 							<div>
-								<h3 className='font-semibold text-gray-800 mb-2'>
+								<h3 className='font-semibold text-[#3d2b1f] mb-2'>
 									Haftung für Inhalte
 								</h3>
 								<p className='text-sm'>
@@ -87,7 +85,7 @@ export default function ImpressumPage() {
 								</p>
 							</div>
 							<div>
-								<h3 className='font-semibold text-gray-800 mb-2'>
+								<h3 className='font-semibold text-[#3d2b1f] mb-2'>
 									Haftung für Links
 								</h3>
 								<p className='text-sm'>
@@ -102,10 +100,10 @@ export default function ImpressumPage() {
 
 					{/* Urheberrecht */}
 					<section>
-						<h2 className='text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
+						<h2 className='text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
 							Urheberrecht
 						</h2>
-						<p className='text-gray-700 text-sm'>
+						<p className='text-[#3d2b1f] text-sm'>
 							Die durch die Seitenbetreiber erstellten Inhalte und Werke auf
 							diesen Seiten unterliegen dem deutschen Urheberrecht. Die
 							Vervielfältigung, Bearbeitung, Verbreitung und jede Art der

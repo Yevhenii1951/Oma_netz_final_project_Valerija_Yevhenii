@@ -82,7 +82,7 @@ function FlyToUser({ pos }: { pos: UserPos | null }) {
 	return (
 		<button
 			onClick={() => map.flyTo([pos.lat, pos.lng], 15, { duration: 1.2 })}
-			className='absolute bottom-4 right-4 z-[999] bg-white rounded-xl shadow-md px-3 py-2 text-sm font-medium text-[#3d2b1f] flex items-center gap-2 hover:bg-[#f5ede0] transition-colors border border-[#ddd0be]'
+			className='absolute bottom-4 right-4 z-999 bg-white rounded-xl shadow-md px-3 py-2 text-sm font-medium text-[#3d2b1f] flex items-center gap-2 hover:bg-[#f5ede0] transition-colors border border-[#ddd0be]'
 		>
 			📍 Mein Standort
 		</button>
@@ -200,7 +200,7 @@ export default function MapView() {
 							icon={categoryIcon(req.category)}
 						>
 							<Popup>
-								<div className='text-sm min-w-[190px] space-y-1.5'>
+								<div className='text-sm min-w-47.5 space-y-1.5'>
 									<p className='font-bold text-[#3d2b1f] leading-tight'>
 										{CATEGORY_MAP[req.category]?.emoji ?? '📌'} {req.title}
 									</p>

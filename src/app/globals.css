@@ -311,15 +311,16 @@ body {
 	animation: slideUp 0.4s ease both;
 }
 
-
 /* ─── BOTTOM NAV (mobile) ────────────────────────────────────────────────── */
 
 .bottom-nav-item {
 	display: flex;
 	flex-direction: column;
+	justify-content: center;
 	align-items: center;
 	gap: 0.25rem;
 	padding: 0.5rem 0.75rem;
+	min-height: 3.25rem;
 	border-radius: var(--radius-lg);
 	color: var(--text-muted);
 	font-size: 0.625rem;
@@ -335,6 +336,18 @@ body {
 .bottom-nav-item:hover {
 	color: var(--primary);
 	background: rgba(139, 94, 60, 0.09);
+}
+
+.bottom-nav-label {
+	font-size: 0.625rem;
+	line-height: 1;
+	text-align: center;
+}
+
+@media (max-width: 639px) {
+	html.role-mobile-compact-sm {
+		font-size: 70%;
+	}
 }
 
 /* ─── CHAT BUBBLES ───────────────────────────────────────────────────────── */
@@ -380,8 +393,6 @@ body {
 		background-position: -200% 0;
 	}
 }
-
-
 
 /* ─── NEW ANIMATIONS ─────────────────────────────────────────────────────── */
 
@@ -433,7 +444,6 @@ body {
 	-webkit-text-fill-color: transparent;
 	animation: shimmer-sweep 3s linear infinite;
 }
-
 
 /* Glow ring on focus/hover */
 .btn-glow:hover {

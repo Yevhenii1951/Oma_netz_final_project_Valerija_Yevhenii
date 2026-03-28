@@ -135,7 +135,7 @@ export default function NewRequestPage() {
 						/>
 					</div>
 
-					<div className='grid grid-cols-[1fr_auto] gap-3'>
+					<div className='grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3'>
 						<div>
 							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
 								<MapPin className='inline w-4 h-4 mr-1 text-[#b09880]' />
@@ -155,7 +155,7 @@ export default function NewRequestPage() {
 							</label>
 							<input
 								type='text'
-								className='input-field w-24'
+								className='input-field sm:w-24'
 								placeholder='34117'
 								value={form.plz}
 								onChange={e => set('plz', e.target.value)}
