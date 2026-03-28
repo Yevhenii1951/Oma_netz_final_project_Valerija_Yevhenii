@@ -69,7 +69,7 @@ export function BottomNav() {
 											)}
 										>
 											{primary ? (
-												<div className='-mt-5 w-13 h-13 bg-[#b09880] rounded-2xl flex items-center justify-center shadow-lg opacity-60'>
+												<div className='w-11 h-11 md:w-12 md:h-12 bg-[#b09880] rounded-2xl flex items-center justify-center shadow-lg opacity-60'>
 													<Lock
 														size={20}
 														className='text-[#ffffff]'
@@ -83,7 +83,7 @@ export function BottomNav() {
 														strokeWidth={2}
 														className='opacity-40'
 													/>
-													<span className='text-[10px] font-medium opacity-40'>
+													<span className='bottom-nav-label leading-none font-medium opacity-40 text-center'>
 														{label}
 													</span>
 												</>
@@ -102,7 +102,7 @@ export function BottomNav() {
 										)}
 									>
 										{primary ? (
-											<div className='-mt-5 w-13 h-13 bg-[#8b5e3c] rounded-2xl flex items-center justify-center shadow-lg shadow-[#e8d5be] active:scale-[0.92] transition-transform'>
+											<div className='w-11 h-11 md:w-12 md:h-12 bg-[#8b5e3c] rounded-2xl flex items-center justify-center shadow-lg shadow-[#e8d5be] active:scale-[0.92] transition-transform'>
 												<Icon
 													size={22}
 													className='text-[#ffffff] transition-transform duration-200 group-hover:scale-125 group-hover:rotate-6'
@@ -117,7 +117,9 @@ export function BottomNav() {
 											/>
 										)}
 										{!primary && (
-											<span className='text-[10px] font-medium'>{label}</span>
+											<span className='bottom-nav-label leading-none font-medium text-center'>
+												{label}
+											</span>
 										)}
 									</div>
 								</Link>

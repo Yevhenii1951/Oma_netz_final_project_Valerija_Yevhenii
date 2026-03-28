@@ -2,6 +2,7 @@
 
 import { AiAssistantButton } from '@/components/ai-assistant'
 import { useSession } from 'next-auth/react'
+import { useEffect } from 'react'
 import { BottomNav } from './bottom-nav'
 import { MobileHeader } from './mobile-header'
 import { Sidebar } from './sidebar'
@@ -16,7 +17,17 @@ export function PageShell({
 	hideSidebar?: boolean
 }) {
 	const { data: session } = useSession()
+	const role = session?.user.role
 	const showAiAssistant = session?.user.role === 'SENIOR'
+
+	useEffect(() => {
+		const compact = role === 'SENIOR' || role === 'HELPER'
+		document.documentElement.classList.toggle('role-mobile-compact-sm', compact)
+
+		return () => {
+			document.documentElement.classList.remove('role-mobile-compact-sm')
+		}
+	}, [role])
 
 	return (
 		<>
