@@ -182,6 +182,18 @@ export function JourneyTimeline() {
 		}
 	}, [active, isInView])
 
+	useEffect(() => {
+		function handleJourneyReset() {
+			setActive(0)
+			setIsPaused(false)
+		}
+
+		window.addEventListener('landing:journey-reset', handleJourneyReset)
+		return () => {
+			window.removeEventListener('landing:journey-reset', handleJourneyReset)
+		}
+	}, [])
+
 	const progressIndicators = STEPS.map((_, i) => (
 		<button
 			key={i}

@@ -23,6 +23,11 @@ export default function LandingClient() {
 	const router = useRouter()
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+	function resetJourneyCarouselIfNeeded(id: string) {
+		if (id !== 'journey') return
+		window.dispatchEvent(new Event('landing:journey-reset'))
+	}
+
 	const scrollToSectionById = useCallback((id: string) => {
 		const el = document.getElementById(id)
 		if (!el) return false
@@ -47,6 +52,7 @@ export default function LandingClient() {
 		window.history.replaceState(null, '', href)
 		requestAnimationFrame(() => {
 			scrollToSectionById(id)
+			resetJourneyCarouselIfNeeded(id)
 		})
 	}
 
@@ -58,6 +64,7 @@ export default function LandingClient() {
 
 		const timer = window.setTimeout(() => {
 			scrollToSectionById(id)
+			resetJourneyCarouselIfNeeded(id)
 		}, 60)
 
 		return () => window.clearTimeout(timer)
@@ -100,14 +107,15 @@ export default function LandingClient() {
 						className='hidden md:flex items-center gap-1'
 					>
 						{NAV_LINKS.map(({ href, label }) => (
-							<a
+							<button
 								key={href}
-								href={href}
+								type='button'
+								onClick={() => scrollToSection(href)}
 								className='relative px-1.5 py-2.5 text-sm md:text-[10.5px] lg:text-sm font-medium text-[#7a6050] hover:text-[#3d2b1f] transition-colors rounded-lg hover:bg-[#f5ede0] group min-h-11 flex items-center'
 							>
 								{label}
 								<span className='absolute bottom-0.5 left-3 right-3 h-px bg-[#8b5e3c] scale-x-0 group-hover:scale-x-100 transition-transform origin-left rounded-full' />
-							</a>
+							</button>
 						))}
 					</motion.div>
 
