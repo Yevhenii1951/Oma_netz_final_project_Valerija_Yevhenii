@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 
 export const metadata: Metadata = {
 	title: 'Impressum',
@@ -9,17 +10,36 @@ export default function ImpressumPage() {
 	return (
 		<div className='min-h-screen bg-[#f5ede0] py-12 px-4 sm:px-6 lg:px-8 font-body'>
 			<div className='max-w-3xl mx-auto'>
+				<div className='mb-6'>
+					<Link
+						href='/landing'
+						aria-label='Zurück zur Landing Page'
+						className='inline-flex items-center gap-1.5 text-xs font-semibold text-[#3d2b1f] transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3d2b1f] focus-visible:ring-offset-2 rounded'
+					>
+						<span
+							aria-hidden='true'
+							className='inline-flex items-center justify-center text-base leading-none'
+						>
+							⟵
+						</span>
+						<span>Zurück</span>
+					</Link>
+				</div>
 				{/* Header */}
 				<div className='text-center mb-12'>
-					<h1 className='text-4xl font-bold text-[#3d2b1f] mb-4'>Impressum</h1>
-					<p className='text-[#7a6050]'>Angaben gemäß § 5 TMG</p>
+					<h1 className='text-3xl sm:text-4xl font-bold text-[#3d2b1f] mb-4'>
+						Impressum
+					</h1>
+					<p className='text-sm sm:text-base text-[#7a6050]'>
+						Angaben gemäß § 5 TMG
+					</p>
 				</div>
 
 				{/* Content Card */}
-				<div className='bg-white rounded-2xl shadow-xl p-8 mb-8'>
+				<div className='bg-white rounded-2xl shadow-xl p-5 sm:p-8 mb-8 text-justify'>
 					{/* Projektverantwortliche */}
 					<section className='mb-8'>
-						<h2 className='text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
+						<h2 className='text-xl sm:text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
 							Projektverantwortliche
 						</h2>
 						<div className='space-y-2 text-[#3d2b1f]'>
@@ -33,7 +53,7 @@ export default function ImpressumPage() {
 
 					{/* Kontakt */}
 					<section className='mb-8'>
-						<h2 className='text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
+						<h2 className='text-xl sm:text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
 							Kontakt
 						</h2>
 						<div className='space-y-2 text-[#3d2b1f]'>
@@ -55,7 +75,7 @@ export default function ImpressumPage() {
 
 					{/* Projektbeschreibung */}
 					<section className='mb-8'>
-						<h2 className='text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
+						<h2 className='text-xl sm:text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
 							Projektbeschreibung
 						</h2>
 						<p className='text-[#3d2b1f]'>
@@ -68,7 +88,7 @@ export default function ImpressumPage() {
 
 					{/* Haftungsausschluss */}
 					<section className='mb-8'>
-						<h2 className='text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
+						<h2 className='text-xl sm:text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
 							Haftungsausschluss
 						</h2>
 						<div className='space-y-4 text-[#3d2b1f]'>
@@ -100,7 +120,7 @@ export default function ImpressumPage() {
 
 					{/* Urheberrecht */}
 					<section>
-						<h2 className='text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
+						<h2 className='text-xl sm:text-2xl font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-[#8b5e3c]'>
 							Urheberrecht
 						</h2>
 						<p className='text-[#3d2b1f] text-sm'>
@@ -114,7 +134,7 @@ export default function ImpressumPage() {
 				</div>
 
 				{/* Footer Note */}
-				<div className='text-center text-sm text-[#8b5e3c]'>
+				<div className='text-center text-xs sm:text-sm text-[#8b5e3c]'>
 					<p>
 						Stand:{' '}
 						{new Date().toLocaleDateString('de-DE', {

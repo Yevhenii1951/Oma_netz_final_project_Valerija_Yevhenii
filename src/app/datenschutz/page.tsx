@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { SERVER_LOG_ITEMS, USER_RIGHTS } from './constants'
 
 export const metadata: Metadata = {
@@ -10,21 +11,36 @@ export default function DatenschutzPage() {
 	return (
 		<div className='min-h-screen bg-[#f5ede0] py-12 px-4 sm:px-6 lg:px-8'>
 			<div className='max-w-4xl mx-auto'>
+				<div className='mb-6'>
+					<Link
+						href='/landing'
+						aria-label='Zurück zur Landing Page'
+						className='inline-flex items-center gap-1.5 text-xs font-semibold text-[#3d2b1f] transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3d2b1f] focus-visible:ring-offset-2 rounded'
+					>
+						<span
+							aria-hidden='true'
+							className='inline-flex items-center justify-center text-base leading-none'
+						>
+							⟵
+						</span>
+						<span>Zurück</span>
+					</Link>
+				</div>
 				{/* Header */}
 				<div className='text-center mb-12'>
-					<h1 className='text-4xl font-playfair font-bold text-[#3d2b1f] mb-4'>
+					<h1 className='text-3xl sm:text-4xl font-playfair font-bold text-[#3d2b1f] mb-4 wrap-break-word'>
 						Datenschutzerklärung
 					</h1>
-					<p className='text-emerald-800'>
+					<p className='text-sm sm:text-base text-emerald-800'>
 						Informationspflicht gemäß Datenschutz-Grundverordnung (DSGVO)
 					</p>
 				</div>
 
 				{/* Content Card */}
-				<div className='bg-white rounded-2xl shadow-xl p-8 mb-8'>
+				<div className='bg-white rounded-2xl shadow-xl p-5 sm:p-8 mb-8 text-justify'>
 					{/* 1. Überblick */}
 					<section className='mb-10'>
-						<h2 className='text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
+						<h2 className='text-xl sm:text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
 							1. Datenschutz auf einen Blick
 						</h2>
 						<div className='space-y-4 text-gray-700'>
@@ -54,7 +70,7 @@ export default function DatenschutzPage() {
 
 					{/* 2. Hosting */}
 					<section className='mb-10'>
-						<h2 className='text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
+						<h2 className='text-xl sm:text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
 							2. Hosting
 						</h2>
 						<div className='space-y-4 text-gray-700'>
@@ -88,7 +104,7 @@ export default function DatenschutzPage() {
 
 					{/* 3. Allgemeine Hinweise */}
 					<section className='mb-10'>
-						<h2 className='text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
+						<h2 className='text-xl sm:text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
 							3. Allgemeine Hinweise und Pflichtinformationen
 						</h2>
 						<div className='space-y-4 text-gray-700'>
@@ -151,7 +167,7 @@ export default function DatenschutzPage() {
 
 					{/* 4. Datenerfassung */}
 					<section className='mb-10'>
-						<h2 className='text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
+						<h2 className='text-xl sm:text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
 							4. Datenerfassung auf dieser Website
 						</h2>
 						<div className='space-y-4 text-gray-700'>
@@ -223,7 +239,7 @@ export default function DatenschutzPage() {
 
 					{/* 5. Analyse-Tools */}
 					<section className='mb-10'>
-						<h2 className='text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
+						<h2 className='text-xl sm:text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
 							5. Analyse-Tools und Tools von Drittanbietern
 						</h2>
 						<div className='space-y-4 text-gray-700'>
@@ -258,7 +274,7 @@ export default function DatenschutzPage() {
 
 					{/* 6. Ihre Rechte */}
 					<section className='mb-10'>
-						<h2 className='text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
+						<h2 className='text-xl sm:text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
 							6. Ihre Rechte
 						</h2>
 						<div className='space-y-3 text-gray-700'>
@@ -283,7 +299,7 @@ export default function DatenschutzPage() {
 
 					{/* 7. Speicherdauer */}
 					<section>
-						<h2 className='text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
+						<h2 className='text-xl sm:text-2xl font-playfair font-semibold text-[#3d2b1f] mb-4 pb-2 border-b-2 border-emerald-600'>
 							7. Speicherdauer
 						</h2>
 						<p className='text-gray-700 text-sm'>
