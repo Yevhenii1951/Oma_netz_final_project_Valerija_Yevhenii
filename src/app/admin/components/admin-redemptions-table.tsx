@@ -109,7 +109,7 @@ export function AdminRedemptionsTable({
 					</tr>
 				))}
 				{redemptionPageRows.length === 0 && (
-					<EmptyTableRow colSpan={6} label='Keine Einloesungen gefunden.' />
+					<EmptyTableRow colSpan={6} label='Keine Einlösungen gefunden.' />
 				)}
 			</tbody>
 		</table>

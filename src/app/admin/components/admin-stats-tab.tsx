@@ -92,7 +92,7 @@ export function AdminStatsTab({
 			<section className='rounded-2xl border border-[#eadbcc] bg-linear-to-r from-[#fffaf4] to-white p-4 sm:p-5 shadow-sm'>
 				<SectionHeading
 					icon={AlertTriangle}
-					title='Prioritaeten'
+					title='Prioritäten'
 					description='Aufgaben, die jetzt direkte Admin-Aufmerksamkeit brauchen.'
 				/>
 				<div className='mt-3 space-y-2.5'>
@@ -124,7 +124,7 @@ export function AdminStatsTab({
 						))
 					) : (
 						<div className='rounded-2xl border border-emerald-200 bg-emerald-50 p-3.5 text-emerald-800 text-sm font-medium'>
-							Aktuell keine dringenden Aufgaben. Alles laeuft stabil.
+							Aktuell keine dringenden Aufgaben. Alles läuft stabil.
 						</div>
 					)}
 				</div>
@@ -133,8 +133,8 @@ export function AdminStatsTab({
 			<section className='rounded-2xl border border-[#eadbcc] bg-white p-4 sm:p-5 shadow-sm'>
 				<SectionHeading
 					icon={BarChart3}
-					title='KPI-Ueberblick'
-					description='Kernmetriken fuer den taeglichen Betrieb.'
+					title='KPI-Überblick'
+					description='Kernmetriken für den täglichen Betrieb.'
 				/>
 				{isBootLoading ? (
 					<KpiSkeleton />
@@ -178,7 +178,7 @@ export function AdminStatsTab({
 				<SectionHeading
 					icon={SlidersHorizontal}
 					title='Schnellaktionen'
-					description='Direkte Einstiege fuer wichtige Admin-Workflows.'
+					description='Direkte Einstiege für wichtige Admin-Workflows.'
 				/>
 				<div className='mt-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3'>
 					{quickActions.map(action => {
@@ -224,14 +224,14 @@ export function AdminStatsTab({
 						<SectionHeading
 							icon={FileText}
 							title='Neueste Anfragen'
-							description='Tabellarische Uebersicht der neuesten Anfragen.'
+							description='Tabellarische Übersicht der neuesten Anfragen.'
 							compact
 						/>
 						<button
 							onClick={() => onTabChange('requests')}
 							className='text-xs px-2.5 py-1.5 rounded-lg border border-[#ddd0be] text-[#7a6050] hover:bg-[#f5ede0] hover:text-[#3d2b1f] transition-colors whitespace-nowrap'
 						>
-							Alle oeffnen
+							Alle öffnen
 						</button>
 					</div>
 					<div className='overflow-x-auto'>

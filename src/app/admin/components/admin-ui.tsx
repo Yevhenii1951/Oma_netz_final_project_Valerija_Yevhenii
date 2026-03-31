@@ -143,9 +143,9 @@ export function safeText(value: string | null | undefined) {
 export function tableHeading(tab: AdminTab) {
 	if (tab === 'pending') return 'Offene Helfer-Bewerbungen'
 	if (tab === 'helpers') return 'Helfer-Verzeichnis'
-	if (tab === 'seniors') return 'Senioren und Angehoerige'
-	if (tab === 'requests') return 'Anfragen-Uebersicht'
-	if (tab === 'redemptions') return 'Belohnungs-Einloesungen'
+	if (tab === 'seniors') return 'Senioren und Angehörige'
+	if (tab === 'requests') return 'Anfragen-Übersicht'
+	if (tab === 'redemptions') return 'Belohnungs-Einlösungen'
 	return 'Admin-Tabelle'
 }
 
@@ -153,7 +153,7 @@ export function filterOptionLabel(option: string, tab: AdminTab) {
 	if (option === 'ALL') return 'Alle'
 	if (option === 'ACTIVE') return 'Aktiv'
 	if (option === 'BANNED') return 'Gesperrt'
-	if (option === 'PENDING_REVIEW') return 'In Pruefung'
+	if (option === 'PENDING_REVIEW') return 'In Prüfung'
 	if (option === 'APPROVED') return 'Freigegeben'
 	if (option === 'REJECTED') return 'Abgelehnt'
 	if (tab === 'redemptions' && option === 'pending') return 'Offen'

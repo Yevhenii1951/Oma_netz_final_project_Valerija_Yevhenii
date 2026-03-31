@@ -156,7 +156,7 @@ export function AdminSeniorsTable({
 									) : (
 										<Trash2 size={11} />
 									)}
-									Loeschen
+									Löschen
 								</button>
 							</div>
 						</td>
@@ -165,7 +165,7 @@ export function AdminSeniorsTable({
 				{seniorPageRows.length === 0 && (
 					<EmptyTableRow
 						colSpan={8}
-						label='Keine Senioren oder Angehoerigen gefunden.'
+						label='Keine Senioren oder Angehörigen gefunden.'
 					/>
 				)}
 			</tbody>
