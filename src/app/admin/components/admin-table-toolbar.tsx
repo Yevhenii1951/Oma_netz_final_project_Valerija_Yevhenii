@@ -32,13 +32,13 @@ export function AdminTableToolbar({
 							: activeTab === 'helpers'
 								? 'Helfer-Verzeichnis'
 								: activeTab === 'seniors'
-									? 'Senioren und Angehoerige'
+									? 'Senioren und Angehörige'
 									: activeTab === 'requests'
-										? 'Anfragen-Uebersicht'
-										: 'Belohnungs-Einloesungen'}
+										? 'Anfragen-Übersicht'
+										: 'Belohnungs-Einlösungen'}
 					</h3>
 					<p className='text-sm text-[#7a6050]'>
-						Suche, Statusfilter, sortierbare Spalten und Seitennavigation fuer
+						Suche, Statusfilter, sortierbare Spalten und Seitennavigation für
 						schnellere Admin-Workflows.
 					</p>
 				</div>

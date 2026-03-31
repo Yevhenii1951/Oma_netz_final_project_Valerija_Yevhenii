@@ -84,7 +84,7 @@ export function buildTabs(
 		{
 			key: 'redemptions',
 			icon: Gift,
-			label: 'Einloesungen',
+			label: 'Einlösungen',
 			count: pendingRedemptionsCount,
 		},
 	]
@@ -175,8 +175,8 @@ export function buildPriorityItems(
 	if (pendingHelpersCount > 0) {
 		items.push({
 			id: 'pending-helpers',
-			message: `${pendingHelpersCount} Helfer-${pendingHelpersCount === 1 ? 'Bewerbung wartet' : 'Bewerbungen warten'} auf Pruefung`,
-			cta: 'Jetzt pruefen',
+			message: `${pendingHelpersCount} Helfer-${pendingHelpersCount === 1 ? 'Bewerbung wartet' : 'Bewerbungen warten'} auf Prüfung`,
+			cta: 'Jetzt prüfen',
 			tab: 'pending',
 			high: true,
 		})
@@ -185,8 +185,8 @@ export function buildPriorityItems(
 	if (pendingRedemptionsCount > 0) {
 		items.push({
 			id: 'pending-redemptions',
-			message: `${pendingRedemptionsCount} ${pendingRedemptionsCount === 1 ? 'Einloesung ist' : 'Einloesungen sind'} noch offen`,
-			cta: 'Einloesungen oeffnen',
+			message: `${pendingRedemptionsCount} ${pendingRedemptionsCount === 1 ? 'Einlösung ist' : 'Einlösungen sind'} noch offen`,
+			cta: 'Einlösungen öffnen',
 			tab: 'redemptions',
 			high: false,
 		})
@@ -236,7 +236,7 @@ export function buildActivityFeed({
 			id: `helper-${h.id}`,
 			createdAt: h.createdAt,
 			title: 'Neue Helfer-Bewerbung',
-			subtitle: `${h.name ?? h.email ?? 'Unbekannt'} wartet auf Pruefung`,
+			subtitle: `${h.name ?? h.email ?? 'Unbekannt'} wartet auf Prüfung`,
 			badge: 'Helfer',
 			type: 'helper' as const,
 		})),
@@ -245,8 +245,8 @@ export function buildActivityFeed({
 			createdAt: r.createdAt,
 			title:
 				r.status === 'fulfilled'
-					? 'Einloesung abgeschlossen'
-					: 'Belohnung eingeloest',
+					? 'Einlösung abgeschlossen'
+					: 'Belohnung eingelöst',
 			subtitle: `${r.user.name ?? r.user.email} - ${r.reward.title}`,
 			badge: 'Belohnung',
 			type: 'redemption' as const,
@@ -273,7 +273,7 @@ export function buildActivityFeed({
 					id: 'demo-activity',
 					createdAt: new Date().toISOString(),
 					title: 'Willkommen im Adminbereich',
-					subtitle: 'Aktuelle Systemaktivitaeten erscheinen hier.',
+					subtitle: 'Aktuelle Systemaktivitäten erscheinen hier.',
 					badge: 'System',
 					type: 'system' as const,
 				},
@@ -295,8 +295,8 @@ export function buildQuickActions({
 	return [
 		{
 			tab: 'pending',
-			title: 'Helfer-Bewerbungen pruefen',
-			description: 'Freigaben bearbeiten, um Rueckstau zu vermeiden',
+			title: 'Helfer-Bewerbungen prüfen',
+			description: 'Freigaben bearbeiten, um Rückstau zu vermeiden',
 			meta: `${stats.pendingHelpers} offen`,
 			icon: UserPlus,
 			priority: true,
@@ -304,7 +304,7 @@ export function buildQuickActions({
 		{
 			tab: 'requests',
 			title: 'Anfragen moderieren',
-			description: 'Offene Faelle pruefen und Dringendes priorisieren',
+			description: 'Offene Fälle prüfen und Dringendes priorisieren',
 			meta: `${stats.openRequests} offen`,
 			icon: ClipboardCheck,
 		},
@@ -318,7 +318,7 @@ export function buildQuickActions({
 		{
 			tab: 'redemptions',
 			title: 'Belohnungen bearbeiten',
-			description: 'Offene Einloesungen bestaetigen und erledigen',
+			description: 'Offene Einlösungen bestätigen und erledigen',
 			meta: `${pendingRedemptionsCount} offen`,
 			icon: Gift,
 		},
@@ -354,7 +354,7 @@ export const helperStatusColor: Record<string, string> = {
 }
 
 export const helperStatusLabel: Record<string, string> = {
-	PENDING_REVIEW: 'In Pruefung',
+	PENDING_REVIEW: 'In Prüfung',
 	APPROVED: 'Freigegeben',
 	REJECTED: 'Abgelehnt',
 }
