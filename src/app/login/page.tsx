@@ -23,6 +23,28 @@ function LoginForm() {
 		setLoading(true)
 		setError('')
 
+		const preCheck = await fetch('/api/auth/login-check', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ email, password }),
+		})
+
+		if (preCheck.status === 403) {
+			setLoading(false)
+			router.push('/banned')
+			router.refresh()
+			return
+		}
+
+		if (!preCheck.ok) {
+			const payload = (await preCheck.json().catch(() => null)) as {
+				error?: string
+			} | null
+			setLoading(false)
+			setError(payload?.error ?? 'Anmeldung derzeit nicht verfugbar.')
+			return
+		}
+
 		const result = await signIn('credentials', {
 			email,
 			password,
