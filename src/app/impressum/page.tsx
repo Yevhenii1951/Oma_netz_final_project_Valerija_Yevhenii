@@ -44,7 +44,7 @@ export default function ImpressumPage() {
 						</h2>
 						<div className='space-y-2 text-[#3d2b1f]'>
 							<p>
-								<strong>Valeriia Kovalenko &amp; Yevhenii Riabokon</strong>
+								<strong>Yevhenii Riabokon &amp; Valeriia Kovalenko</strong>
 							</p>
 							<p>Studentenprojekt im Rahmen der Full-Stack-Entwicklung (DCI)</p>
 							<p>Standort: Kassel, Deutschland</p>
