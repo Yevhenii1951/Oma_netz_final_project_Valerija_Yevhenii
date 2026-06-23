@@ -7,6 +7,7 @@
 
   [![CI](https://github.com/Yevhenii1951/Oma_netz_final_project_Valerija_Yevhenii/actions/workflows/ci.yml/badge.svg)](https://github.com/Yevhenii1951/Oma_netz_final_project_Valerija_Yevhenii/actions/workflows/ci.yml)
   [![Live Demo](https://img.shields.io/badge/demo-oma--netz-8b5e3c?logo=vercel)](https://oma-netz-final-project-valerija-yev.vercel.app/landing)
+  [![Presentation](https://img.shields.io/badge/presentation-oma--netz-8b5e3c?logo=slides)](https://oma-netz-presentation.onrender.com)
   [![GitHub](https://img.shields.io/badge/github-repo-181717?logo=github)](https://github.com/Yevhenii1951/Oma_netz_final_project_Valerija_Yevhenii)
 
   ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
