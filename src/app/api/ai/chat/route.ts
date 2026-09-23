@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
 
 		const groq = createGroq({ apiKey })
 		const result = streamText({
-			model: groq('llama-3.3-70b-versatile'),
+			model: groq('openai/gpt-oss-120b'),
 			system: `${SYSTEM_PROMPT}\n\nDu sprichst gerade mit: ${userName}.`,
 			messages,
 			maxOutputTokens: 512,
