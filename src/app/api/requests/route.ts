@@ -1,5 +1,10 @@
 import { logAndError, requireAuth } from '@/lib/api-helpers'
 import { prisma } from '@/lib/prisma'
+import {
+	browseForbidden,
+	isApprovedHelper,
+	redactRequest,
+} from '@/lib/request-access'
 import { geocodeAddress } from '@/lib/utils'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
@@ -25,23 +30,31 @@ const createRequestSchema = z.object({
 
 export async function GET(req: NextRequest) {
 	try {
-		// The list exposed every request with seniorId, name, ratingAvg and
-		// home address to anonymous callers. src/proxy.ts does not cover /api.
+		// This list exposes the title, description, author and home address of
+		// residents looking for help. src/proxy.ts does not cover /api, so the
+		// endpoint had no gate at all, and `?status=ALL` let any caller read
+		// requests that were already finished or cancelled.
 		const session = await requireAuth()
 		if (session instanceof NextResponse) return session
+		if (!isApprovedHelper(session.user)) {
+			return NextResponse.json(
+				{ error: browseForbidden(session.user) },
+				{ status: 403 },
+			)
+		}
 
 		const { searchParams } = new URL(req.url)
 		const category = searchParams.get('category') as string | null
-		const status = searchParams.get('status') ?? 'OPEN'
 		const page = Math.max(1, parseInt(searchParams.get('page') ?? '1'))
 		const limit = Math.min(50, parseInt(searchParams.get('limit') ?? '20'))
 		const skip = (page - 1) * limit
 
-		const where: Record<string, unknown> = {}
-		if (status !== 'ALL') where.status = status
+		// The status is fixed rather than read from the query string: this is a
+		// job board for open requests, and closed ones are not anyone's business.
+		const where: Record<string, unknown> = { status: 'OPEN' }
 		if (category) where.category = category
 
-		const [items, total] = await Promise.all([
+		const [rows, total] = await Promise.all([
 			prisma.request.findMany({
 				where,
 				orderBy: { createdAt: 'desc' },
@@ -56,6 +69,9 @@ export async function GET(req: NextRequest) {
 			}),
 			prisma.request.count({ where }),
 		])
+
+		// Browsing is a summary view: no address, no postcode, no coordinates.
+		const items = rows.map(redactRequest)
 
 		return NextResponse.json({
 			data: { items, total, page, limit, hasMore: skip + items.length < total },

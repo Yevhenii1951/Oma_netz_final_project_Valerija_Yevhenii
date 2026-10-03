@@ -1,5 +1,6 @@
 import { logAndError, requireAuth } from '@/lib/api-helpers'
 import { prisma } from '@/lib/prisma'
+import { redactRequest, requestVisibility } from '@/lib/request-access'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -29,7 +30,13 @@ export async function GET(
 					},
 				},
 				offers: {
-					include: {
+					select: {
+						id: true,
+						requestId: true,
+						helperId: true,
+						message: true,
+						status: true,
+						createdAt: true,
 						helper: {
 							select: {
 								id: true,
@@ -55,17 +62,31 @@ export async function GET(
 			)
 		}
 
-		if (
-			(session.user.role === 'SENIOR' || session.user.role === 'RELATIVE') &&
-			request.seniorId !== session.user.id
-		) {
+		// The old check only refused a SENIOR or RELATIVE reading someone
+		// else's request. Any HELPER — approved, pending or not — read every
+		// request in the system, including the resident's home address and
+		// phone number, and including requests that were already cancelled.
+		// See src/lib/request-access.ts for the rule.
+		const acceptedHelperId = request.offers.find(o => o.status === 'ACCEPTED')
+			?.helper.id
+		const visibility = requestVisibility(session.user, request, acceptedHelperId)
+
+		if (!visibility) {
 			return NextResponse.json(
 				{ error: 'Keine Berechtigung.' },
 				{ status: 403 },
 			)
 		}
 
-		return NextResponse.json({ data: request })
+		if (visibility === 'full') {
+			return NextResponse.json({ data: request })
+		}
+
+		// Browsing view: the job, its author and the offers, but neither the
+		// location nor the resident's phone number.
+		return NextResponse.json({
+			data: redactRequest({ ...request, senior: { ...request.senior, phone: null } }),
+		})
 	} catch (err) {
 		return logAndError('[GET /api/requests/[id]]', err)
 	}

@@ -23,6 +23,29 @@ export async function PATCH(
 
 		const newStatus = action === 'APPROVE' ? 'APPROVED' : 'REJECTED'
 
+		// The endpoint took any user id and wrote helperStatus to it, so an
+		// admin POSTing a senior's or another admin's id silently set a field
+		// that has no meaning for them. Only actual helper profiles have one.
+		const target = await prisma.user.findUnique({
+			where: { id },
+			select: { id: true, name: true, email: true, role: true, helperStatus: true },
+		})
+		if (!target) {
+			return NextResponse.json({ error: 'Nutzer nicht gefunden.' }, { status: 404 })
+		}
+		if (target.role !== 'HELPER') {
+			return NextResponse.json(
+				{ error: 'Dieser Nutzer hat kein Helfer-Profil.' },
+				{ status: 400 },
+			)
+		}
+		if (target.helperStatus === newStatus) {
+			return NextResponse.json({
+				data: target,
+				message: `Helfer ${action === 'APPROVE' ? 'freigegeben' : 'abgelehnt'}.`,
+			})
+		}
+
 		const user = await prisma.user.update({
 			where: { id },
 			data: { helperStatus: newStatus },
