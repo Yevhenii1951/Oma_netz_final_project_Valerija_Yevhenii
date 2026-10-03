@@ -287,7 +287,32 @@ const REWARDS = [
 	},
 ]
 
+/**
+ * Wipes every table. Needed because a plain seed can only add demo rows: a
+ * demo request a tester set to DONE, or a rating they left behind, survives
+ * and makes the demo data inconsistent between machines.
+ */
+async function reset() {
+	console.log('🗑️  Leere alle Tabellen…')
+	// Child tables first — these FKs are declared without onDelete: Cascade.
+	await prisma.message.deleteMany()
+	await prisma.chat.deleteMany()
+	await prisma.rating.deleteMany()
+	await prisma.notification.deleteMany()
+	await prisma.redemption.deleteMany()
+	await prisma.offer.deleteMany()
+	await prisma.request.deleteMany()
+	await prisma.reward.deleteMany()
+	await prisma.session.deleteMany()
+	await prisma.account.deleteMany()
+	await prisma.user.deleteMany()
+}
+
 async function main() {
+	if (process.argv.includes('--reset')) {
+		await reset()
+	}
+
 	console.log('🌱 Seeding database…')
 
 	const password = await hash(seedPassword, 12)
@@ -320,6 +345,7 @@ async function main() {
 					...s,
 					role: 'SENIOR',
 					isBanned: false,
+					password,
 				},
 				create: {
 					...s,
@@ -344,6 +370,7 @@ async function main() {
 					helpCount: 8 + index,
 					points: 40 + index * 10,
 					ratingAvg: 4.2 + index * 0.1,
+					password,
 				},
 				create: {
 					...h,
@@ -419,6 +446,12 @@ async function main() {
 	console.log(`  Admin:  ${adminEmail}`)
 	console.log('  Senior: hildegard@example.com')
 	console.log('  Helfer: lena@example.com')
+
+	if (process.env.NODE_ENV === 'production') {
+		console.warn(
+			'\n⚠️  Seed läuft gegen eine Produktions-Datenbank. Zum Zurücksetzen: db:reset',
+		)
+	}
 }
 
 main()
