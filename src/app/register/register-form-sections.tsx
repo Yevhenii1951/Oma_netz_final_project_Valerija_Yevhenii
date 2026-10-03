@@ -173,10 +173,11 @@ export function BaseInfoStep({
 
 			<form className='space-y-4' onSubmit={onSubmit}>
 				<div>
-					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="vollstandiger-name">
 						Vollständiger Name
 					</label>
 					<input
+						id="vollstandiger-name"
 						type='text'
 						value={name}
 						onChange={e => onNameChange(e.target.value)}
@@ -187,10 +188,11 @@ export function BaseInfoStep({
 					/>
 				</div>
 				<div>
-					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="e-mail-adresse">
 						E-Mail-Adresse
 					</label>
 					<input
+						id="e-mail-adresse"
 						type='email'
 						value={email}
 						onChange={e => onEmailChange(e.target.value)}
@@ -200,11 +202,12 @@ export function BaseInfoStep({
 					/>
 				</div>
 				<div>
-					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="passwort">
 						Passwort
 					</label>
 					<div className='relative'>
 						<input
+							id="passwort"
 							type={showPw ? 'text' : 'password'}
 							value={password}
 							onChange={e => onPasswordChange(e.target.value)}
@@ -224,11 +227,12 @@ export function BaseInfoStep({
 				</div>
 				<div className='grid grid-cols-2 gap-3'>
 					<div>
-						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="telefon">
 							Telefon{' '}
 							<span className='font-normal text-[#b09880]'>(optional)</span>
 						</label>
 						<input
+							id="telefon"
 							type='tel'
 							value={phone}
 							onChange={e => onPhoneChange(e.target.value)}
@@ -237,10 +241,11 @@ export function BaseInfoStep({
 						/>
 					</div>
 					<div>
-						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="plz">
 							PLZ
 						</label>
 						<input
+							id="plz"
 							type='text'
 							value={plz}
 							onChange={e => onPlzChange(e.target.value)}
@@ -335,10 +340,11 @@ export function HelperProfileStep({
 
 			<form onSubmit={onSubmit} className='space-y-4'>
 				<div>
-					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="status">
 						Status <span className='font-normal text-[#b09880]'>(Pflicht)</span>
 					</label>
 					<select
+						id="status"
 						value={employmentType}
 						onChange={e => onEmploymentTypeChange(e.target.value)}
 						className='input-field'
@@ -354,7 +360,7 @@ export function HelperProfileStep({
 				</div>
 
 				<div>
-					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="employmenttype-student-uni-hochschule-employmenttype-jobcenter-jobcenter-stelle-einrichtung">
 						{employmentType === 'Student'
 							? 'Uni / Hochschule'
 							: employmentType === 'Jobcenter'
@@ -363,6 +369,7 @@ export function HelperProfileStep({
 						<span className='font-normal text-[#b09880]'>(optional)</span>
 					</label>
 					<input
+						id="employmenttype-student-uni-hochschule-employmenttype-jobcenter-jobcenter-stelle-einrichtung"
 						type='text'
 						value={institution}
 						onChange={e => onInstitutionChange(e.target.value)}
@@ -372,7 +379,7 @@ export function HelperProfileStep({
 				</div>
 
 				<div>
-					<label className='block text-sm font-semibold text-[#3d2b1f] mb-2'>
+					<label className='block text-sm font-semibold text-[#3d2b1f] mb-2' htmlFor="sprachen">
 						Sprachen
 					</label>
 					<div className='flex flex-wrap gap-2 mb-2'>
@@ -389,6 +396,7 @@ export function HelperProfileStep({
 					</div>
 					<div className='flex gap-2'>
 						<input
+							id="sprachen"
 							type='text'
 							value={customLang}
 							onChange={e => onCustomLangChange(e.target.value)}
@@ -428,11 +436,12 @@ export function HelperProfileStep({
 				</div>
 
 				<div>
-					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="ausweis-studienausweisnummer">
 						Ausweis- / Studienausweisnummer{' '}
 						<span className='font-normal text-[#b09880]'>(optional)</span>
 					</label>
 					<input
+						id="ausweis-studienausweisnummer"
 						type='text'
 						value={documentNumber}
 						onChange={e => onDocumentNumberChange(e.target.value)}
@@ -442,11 +451,12 @@ export function HelperProfileStep({
 				</div>
 
 				<div>
-					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+					<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="anmeldeadresse">
 						Anmeldeadresse (Wohnsitz){' '}
 						<span className='font-normal text-[#b09880]'>(optional)</span>
 					</label>
 					<input
+						id="anmeldeadresse"
 						type='text'
 						value={registrationAddress}
 						onChange={e => onRegistrationAddressChange(e.target.value)}

@@ -474,3 +474,22 @@ body {
 		background-position: 200% center;
 	}
 }
+
+/*
+ * WCAG 2.3.3: a visitor who asks their system for less motion has to get it.
+ * Several of the animations above run forever (skeleton shimmer, the floating
+ * logo, the green pulse on the "erledigt" button), which is exactly what that
+ * setting is for. Durations go to zero rather than the animations being
+ * removed, so anything that depends on an animationend or transitionend still
+ * fires and nothing is left half-styled.
+ */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}

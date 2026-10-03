@@ -191,6 +191,7 @@ export default function ChatRoomClient({
 				<input
 					ref={inputRef}
 					type='text'
+					aria-label='Nachricht'
 					value={input}
 					onChange={e => setInput(e.target.value)}
 					onKeyDown={handleKey}

@@ -243,6 +243,7 @@ export function OwnerRatingSection({
 						))}
 					</div>
 					<textarea
+						aria-label='Kommentar zur Bewertung'
 						className='input-field resize-none text-sm'
 						rows={2}
 						placeholder='Kommentar (optional)'

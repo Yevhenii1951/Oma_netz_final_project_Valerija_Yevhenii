@@ -77,11 +77,15 @@ export default function RatePage() {
 				</div>
 
 				<div className='mb-2'>
-					<p className='text-sm font-semibold text-[#7a6050] mb-1.5 text-left'>
+					<label
+						htmlFor='bewertung-kommentar'
+						className='text-sm font-semibold text-[#7a6050] mb-1.5 text-left block'
+					>
 						Kommentar{' '}
 						<span className='font-normal text-[#b09880]'>(optional)</span>
-					</p>
+					</label>
 					<textarea
+						id='bewertung-kommentar'
 						className='input-field resize-none text-left'
 						rows={3}
 						placeholder='Erzählen Sie, wie die Hilfe war…'

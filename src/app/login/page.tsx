@@ -99,10 +99,11 @@ function LoginForm() {
 
 						{/* Email */}
 						<div>
-							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="e-mail-adresse">
 								E-Mail-Adresse
 							</label>
 							<input
+								id="e-mail-adresse"
 								type='email'
 								value={email}
 								onChange={e => setEmail(e.target.value)}
@@ -116,7 +117,7 @@ function LoginForm() {
 						{/* Password */}
 						<div>
 							<div className='flex items-center justify-between mb-1.5'>
-								<label className='block text-sm font-semibold text-[#3d2b1f]'>
+								<label className='block text-sm font-semibold text-[#3d2b1f]' htmlFor="passwort">
 									Passwort
 								</label>
 								<Link
@@ -129,6 +130,7 @@ function LoginForm() {
 							</div>
 							<div className='relative'>
 								<input
+									id="passwort"
 									type={showPw ? 'text' : 'password'}
 									value={password}
 									onChange={e => setPassword(e.target.value)}
