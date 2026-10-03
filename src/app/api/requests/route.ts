@@ -25,6 +25,11 @@ const createRequestSchema = z.object({
 
 export async function GET(req: NextRequest) {
 	try {
+		// The list exposed every request with seniorId, name, ratingAvg and
+		// home address to anonymous callers. src/proxy.ts does not cover /api.
+		const session = await requireAuth()
+		if (session instanceof NextResponse) return session
+
 		const { searchParams } = new URL(req.url)
 		const category = searchParams.get('category') as string | null
 		const status = searchParams.get('status') ?? 'OPEN'

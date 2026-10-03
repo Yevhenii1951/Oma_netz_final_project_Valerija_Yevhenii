@@ -1,3 +1,4 @@
+import { clientIp, rateLimit } from '@/lib/rate-limit'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { NextRequest, NextResponse } from 'next/server'
@@ -8,8 +9,28 @@ const loginCheckSchema = z.object({
 	password: z.string().min(1),
 })
 
+/** Each call costs a bcrypt comparison at cost 12 (~250 ms of CPU). */
+const ATTEMPTS_PER_MINUTE = 10
+
 export async function POST(req: NextRequest) {
 	try {
+		// Unauthenticated endpoint doing full bcrypt work on every request:
+		// without a limit it is both a brute-force oracle and a cheap way to
+		// saturate the server's CPU.
+		const limit = rateLimit(
+			`login-check:${clientIp(req.headers)}`,
+			ATTEMPTS_PER_MINUTE,
+			60_000,
+		)
+		if (!limit.ok) {
+			return NextResponse.json(
+				{
+					error: `Zu viele Versuche. Bitte in ${limit.retryAfterSeconds} Sekunden erneut versuchen.`,
+				},
+				{ status: 429 },
+			)
+		}
+
 		const body = await req.json()
 		const { email, password } = loginCheckSchema.parse(body)
 

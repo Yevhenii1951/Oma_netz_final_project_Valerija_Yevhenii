@@ -5,6 +5,9 @@ import { NextResponse } from 'next/server'
 // GET /api/rewards — list all active rewards
 export async function GET() {
 	try {
+		const session = await requireAuth()
+		if (session instanceof NextResponse) return session
+
 		const rewards = await prisma.reward.findMany({
 			where: { isActive: true },
 			orderBy: { pointsCost: 'asc' },

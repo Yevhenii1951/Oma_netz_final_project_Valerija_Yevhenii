@@ -1,11 +1,28 @@
+import { logAndError, requireAuth } from '@/lib/api-helpers'
 import { prisma } from '@/lib/prisma'
-import { logAndError } from '@/lib/api-helpers'
 import { NextResponse } from 'next/server'
 
 // GET /api/map — returns all open requests with coordinates for the map
 
 export async function GET() {
 	try {
+		// Addresses and names of elderly residents are personal data. The
+		// /map page is already behind the auth gate in src/proxy.ts, but the
+		// API was reachable anonymously and returned home addresses, names and
+		// exact coordinates to anyone who asked.
+		const session = await requireAuth()
+		if (session instanceof NextResponse) return session
+
+		if (
+			session.user.role === 'HELPER' &&
+			session.user.helperStatus !== 'APPROVED'
+		) {
+			return NextResponse.json(
+				{ error: 'Dein Helfer-Profil wird noch geprüft.' },
+				{ status: 403 },
+			)
+		}
+
 		const requests = await prisma.request.findMany({
 			where: {
 				status: 'OPEN',
