@@ -12,6 +12,10 @@ import {
 	helperStatusLabel,
 } from '@/app/admin/admin-client-data'
 import { AdminDataTables } from '@/app/admin/components/admin-data-tables'
+import type {
+	AdminTableData,
+	SortDirection,
+} from '@/app/admin/components/admin-data-table-types'
 import { AdminNavigation } from '@/app/admin/components/admin-navigation'
 import { AdminPagination } from '@/app/admin/components/admin-pagination'
 import { AdminStatsTab } from '@/app/admin/components/admin-stats-tab'
@@ -22,16 +26,12 @@ import {
 	type AdminTab,
 } from '@/app/admin/components/admin-ui'
 import { useAdminClientActions } from '@/app/admin/hooks/use-admin-client-actions'
-import {
-	useAdminTableState,
-	type SortDirection,
-} from '@/app/admin/hooks/use-admin-table-state'
 import { useToast } from '@/components/ui/toaster'
 import { type LucideIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 
-interface Props {
+type Overview = {
 	stats: {
 		userCount: number
 		requestCount: number
@@ -41,92 +41,70 @@ interface Props {
 		doneRequests: number
 		pendingHelpers: number
 	}
-	pendingHelpers: Array<{
-		id: string
-		name: string | null
-		email: string | null
-		employmentType: string | null
-		institution: string | null
-		languages: string[]
-		documentNumber: string | null
-		registrationAddress: string | null
-		phone: string | null
-		plz: string | null
-		createdAt: string
-	}>
-	allHelpers: Array<{
-		id: string
-		name: string | null
-		email: string | null
-		isBanned: boolean
-		helperStatus: string
-		ratingAvg: number
-		helpCount: number
-		points: number
-		employmentType: string | null
-		languages: string[]
-		createdAt: string
-	}>
-	allRequests: Array<{
-		id: string
-		title: string
-		category: string
-		status: string
-		address: string | null
-		createdAt: string
-		senior: { name: string | null }
-		_count: { offers: number }
-	}>
-	allSeniors: Array<{
-		id: string
-		name: string | null
-		email: string | null
-		isBanned: boolean
-		role: string
-		phone: string | null
-		plz: string | null
-		ratingAvg: number
-		createdAt: string
-		_count: { sentRequests: number }
-	}>
-	redemptions: Array<{
-		id: string
-		createdAt: string
-		status: string
-		user: { name: string | null; email: string | null }
-		reward: { title: string; pointsCost: number }
-	}>
-	initialTab?: AdminTab
+	helperCount: number
+	pendingRedemptions: number
+	latestRequests: Parameters<typeof buildLatestRequests>[0]
+	activityHelpers: Parameters<typeof buildActivityFeed>[0]['pendingHelpers']
+	activityRedemptions: Parameters<
+		typeof buildActivityFeed
+	>[0]['redemptionList']
 }
 
-const PAGE_SIZE = 8
+interface Props {
+	overview: Overview
+	table: AdminTableData
+	filters: {
+		q: string
+		status: string
+		sort: string
+		dir: SortDirection
+		size: number
+	}
+}
 
-export default function AdminClient({
-	stats,
-	pendingHelpers,
-	allHelpers,
-	allRequests,
-	allSeniors,
-	redemptions,
-	initialTab = 'stats',
-}: Props) {
+/** Per-tab default sort, matching what the tab used to reset to on change. */
+const DEFAULT_SORT: Record<AdminTab, { sort: string; dir: SortDirection }> = {
+	stats: { sort: 'createdAt', dir: 'desc' },
+	pending: { sort: 'createdAt', dir: 'asc' },
+	helpers: { sort: 'createdAt', dir: 'desc' },
+	seniors: { sort: 'createdAt', dir: 'desc' },
+	requests: { sort: 'createdAt', dir: 'desc' },
+	redemptions: { sort: 'createdAt', dir: 'desc' },
+}
+
+export default function AdminClient({ overview, table, filters }: Props) {
 	const router = useRouter()
 	const { toast } = useToast()
+	const [isPending, startTransition] = useTransition()
 
-	const [activeTab, setActiveTab] = useState<AdminTab>(initialTab)
 	const [loadingId, setLoadingId] = useState<string | null>(null)
 	const [banLoadingId, setBanLoadingId] = useState<string | null>(null)
 	const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null)
 	const [fulfilling, setFulfilling] = useState<string | null>(null)
-	const [redemptionList, setRedemptionList] = useState(redemptions)
-
-	const [query, setQuery] = useState('')
-	const [statusFilter, setStatusFilter] = useState('ALL')
-	const [sortBy, setSortBy] = useState('createdAt')
-	const [sortDir, setSortDir] = useState<SortDirection>('desc')
-	const [page, setPage] = useState(1)
 	const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-	const [isBootLoading, setIsBootLoading] = useState(true)
+	// The search box stays local and is debounced: filtering happens on the
+	// server now, so one request per keystroke would hit the database.
+	const [queryInput, setQueryInput] = useState(filters.q)
+	const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+	useEffect(() => {
+		setQueryInput(filters.q)
+	}, [filters.q])
+
+	useEffect(
+		() => () => {
+			if (debounceRef.current) clearTimeout(debounceRef.current)
+		},
+		[],
+	)
+
+	function changeQuery(value: string) {
+		setQueryInput(value)
+		if (debounceRef.current) clearTimeout(debounceRef.current)
+		debounceRef.current = setTimeout(() => {
+			applyParams({ q: value.trim(), page: '1' })
+		}, 300)
+	}
 	const { handleHelperAction, handleBanToggle, handleDeleteUser } =
 		useAdminClientActions({
 			router,
@@ -135,101 +113,51 @@ export default function AdminClient({
 			setDeleteLoadingId,
 		})
 
-	useEffect(() => {
-		const timer = window.setTimeout(() => setIsBootLoading(false), 650)
-		return () => window.clearTimeout(timer)
-	}, [])
+	const activeTab = table.tab
+	const { stats, pendingRedemptions } = overview
 
-	useEffect(() => {
-		setQuery('')
-		setStatusFilter('ALL')
-		setPage(1)
-
-		if (activeTab === 'helpers') {
-			setSortBy('createdAt')
-			setSortDir('desc')
+	// Filtering, sorting and paging are the server's job now, so the URL is
+	// the single source of truth. Anything that changes them rewrites the
+	// query string and the server component re-runs with the new slice.
+	function applyParams(changes: Record<string, string | undefined>) {
+		const next = new URLSearchParams()
+		const keep: Record<string, string> = {
+			tab: activeTab,
+			q: filters.q,
+			status: filters.status,
+			sort: filters.sort,
+			dir: filters.dir,
+			size: String(filters.size),
 		}
-		if (activeTab === 'pending') {
-			setSortBy('createdAt')
-			setSortDir('asc')
+		for (const [key, value] of Object.entries({ ...keep, ...changes })) {
+			if (value) next.set(key, value)
 		}
-		if (activeTab === 'seniors') {
-			setSortBy('createdAt')
-			setSortDir('desc')
-		}
-		if (activeTab === 'requests') {
-			setSortBy('createdAt')
-			setSortDir('desc')
-		}
-		if (activeTab === 'redemptions') {
-			setSortBy('createdAt')
-			setSortDir('desc')
-		}
-	}, [activeTab])
+		startTransition(() => {
+			router.replace(`/admin?${next.toString()}`, { scroll: false })
+		})
+	}
 
-	const helperList = allHelpers
-	const seniorList = allSeniors
-	const pendingRedemptions = redemptionList.filter(r => r.status === 'pending')
-
-	const tabs: {
-		key: AdminTab
-		icon: LucideIcon
-		label: string
-		count?: number
-	}[] = buildTabs(stats.pendingHelpers, pendingRedemptions.length)
-	const kpiCards = buildKpiCards(stats)
-	const priorityItems = buildPriorityItems(
-		stats.pendingHelpers,
-		pendingRedemptions.length,
-	)
-	const latestRequests = buildLatestRequests(allRequests)
-	const activityFeed = buildActivityFeed({
-		pendingHelpers,
-		redemptionList,
-		allRequests,
-	})
-	const quickActions = buildQuickActions({
-		stats,
-		helperCount: helperList.length,
-		pendingRedemptionsCount: pendingRedemptions.length,
-	})
-
-	const {
-		activeStatusOptions,
-		currentRows,
-		totalPages,
-		pageStart,
-		pendingPageRows,
-		helperPageRows,
-		seniorPageRows,
-		requestPageRows,
-		redemptionPageRows,
-	} = useAdminTableState({
-		activeTab,
-		pendingHelpers,
-		helperList,
-		seniorList,
-		allRequests,
-		redemptionList,
-		query,
-		statusFilter,
-		sortBy,
-		sortDir,
-		page,
-		pageSize: PAGE_SIZE,
-	})
-
-	useEffect(() => {
-		if (page > totalPages) setPage(totalPages)
-	}, [page, totalPages])
+	function changeTab(tab: string) {
+		const next = tab as AdminTab
+		const defaults = DEFAULT_SORT[next]
+		startTransition(() => {
+			router.replace(
+				`/admin?${new URLSearchParams({
+					tab: next,
+					sort: defaults.sort,
+					dir: defaults.dir,
+				}).toString()}`,
+				{ scroll: false },
+			)
+		})
+	}
 
 	function toggleSort(field: string) {
-		if (sortBy === field) {
-			setSortDir(prev => (prev === 'asc' ? 'desc' : 'asc'))
+		if (filters.sort === field) {
+			applyParams({ dir: filters.dir === 'asc' ? 'desc' : 'asc', page: '1' })
 			return
 		}
-		setSortBy(field)
-		setSortDir('asc')
+		applyParams({ sort: field, dir: 'asc', page: '1' })
 	}
 
 	async function handleFulfillRedemption(id: string) {
@@ -237,13 +165,10 @@ export default function AdminClient({
 		try {
 			const res = await fetch(`/api/rewards/${id}`, { method: 'PATCH' })
 			if (res.ok) {
-				setRedemptionList(prev =>
-					prev.map(x => (x.id === id ? { ...x, status: 'fulfilled' } : x)),
-				)
-				toast({
-					title: 'Als erledigt markiert',
-					variant: 'success',
-				})
+				// The row came from the server, so re-read instead of patching
+				// local state that no longer exists.
+				startTransition(() => router.refresh())
+				toast({ title: 'Als erledigt markiert', variant: 'success' })
 			} else {
 				toast({ title: 'Fehler', variant: 'error' })
 			}
@@ -251,6 +176,28 @@ export default function AdminClient({
 			setFulfilling(null)
 		}
 	}
+
+	const tabs: {
+		key: AdminTab
+		icon: LucideIcon
+		label: string
+		count?: number
+	}[] = buildTabs(stats.pendingHelpers, pendingRedemptions)
+	const kpiCards = buildKpiCards(stats)
+	const priorityItems = buildPriorityItems(stats.pendingHelpers, pendingRedemptions)
+	const latestRequests = buildLatestRequests(overview.latestRequests)
+	const activityFeed = buildActivityFeed({
+		pendingHelpers: overview.activityHelpers,
+		redemptionList: overview.activityRedemptions,
+		allRequests: overview.latestRequests,
+	})
+	const quickActions = buildQuickActions({
+		stats,
+		helperCount: overview.helperCount,
+		pendingRedemptionsCount: pendingRedemptions,
+	})
+
+	const { rows, total, totalPages, page, pageSize, statusOptions } = table
 
 	return (
 		<div className='relative'>
@@ -262,7 +209,7 @@ export default function AdminClient({
 				isDrawerOpen={isDrawerOpen}
 				onOpenDrawer={() => setIsDrawerOpen(true)}
 				onCloseDrawer={() => setIsDrawerOpen(false)}
-				onTabChange={tab => setActiveTab(tab as AdminTab)}
+				onTabChange={changeTab}
 			/>
 
 			<div className='space-y-6'>
@@ -274,9 +221,9 @@ export default function AdminClient({
 							quickActions={quickActions}
 							latestRequests={latestRequests}
 							activityFeed={activityFeed}
-							activityTypeConfig={activityTypeConfig}
-							isBootLoading={isBootLoading}
-							onTabChange={tab => setActiveTab(tab as AdminTab)}
+						activityTypeConfig={activityTypeConfig}
+						isBootLoading={isPending}
+						onTabChange={changeTab}
 						/>
 					)}
 
@@ -284,35 +231,26 @@ export default function AdminClient({
 						<section className='rounded-2xl border border-[#eadbcc] bg-white shadow-sm overflow-hidden'>
 							<AdminTableToolbar
 								activeTab={activeTab}
-								resultCount={currentRows.length}
-								query={query}
-								statusFilter={statusFilter}
-								activeStatusOptions={activeStatusOptions}
-								onQueryChange={value => {
-									setQuery(value)
-									setPage(1)
-								}}
-								onStatusFilterChange={value => {
-									setStatusFilter(value)
-									setPage(1)
-								}}
+								resultCount={total}
+								query={queryInput}
+								statusFilter={filters.status}
+								activeStatusOptions={statusOptions}
+								onQueryChange={changeQuery}
+								onStatusFilterChange={value =>
+									applyParams({ status: value, page: '1' })
+								}
 								getFilterLabel={filterOptionLabel}
 							/>
 
-							{isBootLoading ? (
+							{isPending ? (
 								<TableSkeleton />
 							) : (
 								<>
 									<AdminDataTables
-										activeTab={activeTab}
-										sortBy={sortBy}
-										sortDir={sortDir}
+										table={table}
+										sortBy={filters.sort}
+										sortDir={filters.dir}
 										onSort={toggleSort}
-										pendingPageRows={pendingPageRows}
-										helperPageRows={helperPageRows}
-										seniorPageRows={seniorPageRows}
-										requestPageRows={requestPageRows}
-										redemptionPageRows={redemptionPageRows}
 										helperStatusColor={helperStatusColor}
 										helperStatusLabel={helperStatusLabel}
 										loadingId={loadingId}
@@ -326,13 +264,18 @@ export default function AdminClient({
 									/>
 
 									<AdminPagination
-										currentRowsLength={currentRows.length}
-										pageStart={pageStart}
-										pageSize={PAGE_SIZE}
+										total={total}
+										pageSize={pageSize}
 										page={page}
 										totalPages={totalPages}
-										onPrev={() => setPage(p => Math.max(1, p - 1))}
-										onNext={() => setPage(p => Math.min(totalPages, p + 1))}
+										onPrev={() =>
+											applyParams({ page: String(Math.max(1, page - 1)) })
+										}
+										onNext={() =>
+											applyParams({
+												page: String(Math.min(totalPages, page + 1)),
+											})
+										}
 									/>
 								</>
 							)}
