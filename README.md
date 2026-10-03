@@ -279,9 +279,10 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ### Qualitätssicherung
 
 ```bash
-npm run check   # ESLint + TypeScript
-npm test        # Unit-Tests (Vitest)
-npm run build   # Produktions-Build
+npm run check     # ESLint + TypeScript
+npm test          # Unit-Tests (Vitest)
+npm run build     # Produktions-Build
+npm run db:reset  # Datenbank leeren und neu beenden (Demo-Daten)
 ```
 
 `npm run build` enthält **keine** Datenbankmigration mehr. Migrationen laufen
