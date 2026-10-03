@@ -1,8 +1,13 @@
 import { logAndError, requireAuth } from '@/lib/api-helpers'
 import { prisma } from '@/lib/prisma'
+import {
+	browseForbidden,
+	coarsenCoordinates,
+	isApprovedHelper,
+} from '@/lib/request-access'
 import { NextResponse } from 'next/server'
 
-// GET /api/map — returns all open requests with coordinates for the map
+// GET /api/map — open requests for the helper map view
 
 export async function GET() {
 	try {
@@ -13,12 +18,12 @@ export async function GET() {
 		const session = await requireAuth()
 		if (session instanceof NextResponse) return session
 
-		if (
-			session.user.role === 'HELPER' &&
-			session.user.helperStatus !== 'APPROVED'
-		) {
+		// The map is the helper job board. A senior or relative has no use for
+		// every open request in Kassel on a map, and it is a directory of where
+		// elderly people live, so it stays behind the helper check.
+		if (!isApprovedHelper(session.user)) {
 			return NextResponse.json(
-				{ error: 'Dein Helfer-Profil wird noch geprüft.' },
+				{ error: browseForbidden(session.user) },
 				{ status: 403 },
 			)
 		}
@@ -33,7 +38,6 @@ export async function GET() {
 				id: true,
 				title: true,
 				category: true,
-				address: true,
 				lat: true,
 				lng: true,
 				desiredTime: true,
@@ -46,7 +50,15 @@ export async function GET() {
 			take: 200,
 		})
 
-		return NextResponse.json({ data: requests })
+		// Pin positions are rounded to a ~1.1 km grid and the address is left out
+		// entirely. The accepted helper gets the real address on the request
+		// page, which is where it is needed.
+		const data = requests.map(({ lat, lng, ...rest }) => ({
+			...rest,
+			...coarsenCoordinates(lat as number, lng as number),
+		}))
+
+		return NextResponse.json({ data })
 	} catch (err) {
 		return logAndError('[GET /api/map]', err)
 	}

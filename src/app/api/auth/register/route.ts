@@ -111,6 +111,16 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (err) {
+		// Two registrations with the same address can both pass the lookup
+		// above, so the unique index on email is the real guarantee. Without
+		// this the loser got a 500 "Interner Serverfehler" for what is simply
+		// an address that is already taken.
+		if ((err as { code?: string }).code === 'P2002') {
+			return NextResponse.json(
+				{ error: 'E-Mail-Adresse bereits registriert.' },
+				{ status: 409 },
+			)
+		}
 		if (err instanceof z.ZodError) {
 			return NextResponse.json(
 				{ error: err.issues[0].message },

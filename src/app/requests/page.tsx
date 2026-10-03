@@ -154,10 +154,12 @@ export default async function RequestsPage({ searchParams }: Props) {
 												)}
 
 												<div className='flex items-center gap-4 mt-3 flex-wrap'>
-													<span className='flex items-center gap-1.5 text-xs text-[#b09880]'>
-														<MapPin size={12} className='text-[#b09880]' />
-														{req.address}
-													</span>
+{/* District only — the exact address is shown once an offer
+								    is accepted, never while browsing. */}
+												<span className='flex items-center gap-1.5 text-xs text-[#b09880]'>
+													<MapPin size={12} className='text-[#b09880]' />
+													{req.plz ? `${req.plz} Kassel` : 'Kassel'}
+												</span>
 													{req.desiredTime && (
 														<span className='flex items-center gap-1.5 text-xs text-[#b09880]'>
 															<Calendar size={12} className='text-[#b09880]' />
