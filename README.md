@@ -245,16 +245,31 @@ Umgebung verwenden** — `npm run seed` legt genau diese Zugangsdaten an.
 
 ### ✉️ E-Mail-Versand
 
-**Aktuell ist kein Mail-Provider angebunden.** Die Bestätigungsmails werden
-stattdessen in das Server-Log geschrieben (`[mail:log] to=… subject=…`) — der
-Link steht dort als Klartext. Das reicht, um den Ablauf lokal und in den
-Deployment-Logs zu verfolgen, es wird aber **nichts zugestellt**.
+**Aktuell ist kein Mail-Provider angebunden.** Die Bestätigungs- und
+Passwort-Reset-Mails werden stattdessen in das Server-Log geschrieben
+(`[mail:log] to=… subject=…`) — der Link steht dort als Klartext. Das reicht, um
+den Ablauf lokal und in den Deployment-Logs zu verfolgen, es wird aber **nichts
+zugestellt**.
 
 Für echten Versand genügt es, `MailSender` in `src/lib/email-sender.ts` zu
 implementieren und in `setSender()` zu registrieren; die Aufrufer und Routen
 brauchen keine Änderung. Der Token-Aufbau (`src/lib/auth-token.ts`) ist davon
 unabhängig: die Datenbank speichert nur den SHA-256-Hash des Tokens, der
 Klartext-Token existiert ausschließlich in der Mail.
+
+### 🔑 Passwort zurücksetzen
+
+„Passwort vergessen?" auf der Anmeldeseite führt zu `/passwort-zurucksetzen`.
+Die Antwort von `forgot-password` ist **immer dieselbe**, ob die Adresse
+registriert ist oder nicht, damit sich keine Konten aufzählen lassen. Pro
+E-Mail-Adresse und Zweck gibt es immer nur einen gültigen Link: ein neuer
+Aufruf macht den vorherigen ungültig. Ein deaktiviertes Konto (`deletedAt`)
+lässt sich nicht zurücksetzen — die Deaktivierung bleibt bestehen.
+
+Reset und E-Mail-Bestätigung nutzen dieselbe Einmal-Logik
+(`spendToken` in `src/lib/auth-token-service.ts`): gelöscht wird zuerst, und
+nur wer tatsächlich eine Zeile gelöscht hat, darf die Wirkung auslösen. Zwei
+gleichzeitige Klicks auf denselben Link kommen deshalb nur einmal durch.
 
 ### Umgebungsvariablen
 
@@ -377,6 +392,8 @@ User ──┬── Request ──── Offer ──── Rating
 | `/api/auth/[...nextauth]` | GET, POST | NextAuth-Authentifizierung |
 | `/api/auth/verify-email` | GET | E-Mail-Adresse bestätigen (Link aus der Mail) |
 | `/api/auth/resend-verification` | POST | Bestätigungsmail erneut senden |
+| `/api/auth/forgot-password` | POST | Passwort-Reset-Link anfordern (3 Anfragen/Stunde pro IP) |
+| `/api/auth/reset-password` | POST | Neues Passwort setzen, Token wird dabei verbraucht |
 | `/api/requests` | GET, POST | Hilfeanfragen (Liste / Erstellen) |
 | `/api/requests/[id]` | GET, PATCH, DELETE | Einzelne Anfrage |
 | `/api/offers` | POST | Angebot erstellen |
