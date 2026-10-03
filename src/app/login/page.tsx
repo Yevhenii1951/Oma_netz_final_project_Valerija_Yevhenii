@@ -17,11 +17,14 @@ function LoginForm() {
 	const [showPw, setShowPw] = useState(false)
 	const [loading, setLoading] = useState(false)
 	const [error, setError] = useState('')
+	const [needsVerification, setNeedsVerification] = useState(false)
+	const [resendState, setResendState] = useState<'idle' | 'sending' | 'sent'>('idle')
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault()
 		setLoading(true)
 		setError('')
+		setResendState('idle')
 
 		const preCheck = await fetch('/api/auth/login-check', {
 			method: 'POST',
@@ -30,7 +33,18 @@ function LoginForm() {
 		})
 
 		if (preCheck.status === 403) {
+			const payload = (await preCheck.json().catch(() => null)) as {
+				error?: string
+				code?: string
+			} | null
 			setLoading(false)
+			// An unconfirmed address is fixable from here, so it gets its own
+			// message and a resend button instead of a dead end.
+			if (payload?.code === 'email_unverified') {
+				setNeedsVerification(true)
+				setError(payload.error ?? 'Bitte bestätige zuerst deine E-Mail-Adresse.')
+				return
+			}
 			router.push('/banned')
 			router.refresh()
 			return
@@ -58,6 +72,30 @@ function LoginForm() {
 		} else {
 			router.push(callbackUrl)
 			router.refresh()
+		}
+	}
+
+	async function handleResend() {
+		setResendState('sending')
+		try {
+			const res = await fetch('/api/auth/resend-verification', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email }),
+			})
+			const payload = (await res.json().catch(() => null)) as {
+				message?: string
+				error?: string
+			} | null
+			setResendState(res.ok ? 'sent' : 'idle')
+			setError(
+				(res.ok
+					? payload?.message
+					: payload?.error) ?? 'Bitte später erneut versuchen.',
+			)
+		} catch {
+			setResendState('idle')
+			setError('Bitte später erneut versuchen.')
 		}
 	}
 
@@ -95,6 +133,19 @@ function LoginForm() {
 							<div className='bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm'>
 								{error}
 							</div>
+						)}
+
+						{needsVerification && resendState !== 'sent' && (
+							<button
+								type='button'
+								onClick={handleResend}
+								disabled={resendState === 'sending'}
+								className='w-full rounded-xl border border-[#8b5e3c] px-4 py-2.5 text-sm font-medium text-[#8b5e3c] hover:bg-[#f5ede0] disabled:opacity-50'
+							>
+								{resendState === 'sending'
+									? 'Wird gesendet …'
+									: 'Neue Bestätigungsmail senden'}
+							</button>
 						)}
 
 						{/* Email */}

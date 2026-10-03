@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
 
 		const user = await prisma.user.findUnique({
 			where: { email },
-			select: { password: true, isBanned: true },
+			select: { password: true, isBanned: true, emailVerified: true },
 		})
 
 		if (!user?.password) {
@@ -53,6 +53,18 @@ export async function POST(req: NextRequest) {
 				{
 					error:
 						'Ihr Konto wurde vom Administrator gesperrt. Bitte kontaktieren Sie den Support.',
+				},
+				{ status: 403 },
+			)
+		}
+
+		// Reached only with the correct password, so naming the reason does not
+		// turn this endpoint into a way to find out which addresses exist.
+		if (!user.emailVerified) {
+			return NextResponse.json(
+				{
+					error: 'Bitte bestätige zuerst deine E-Mail-Adresse.',
+					code: 'email_unverified',
 				},
 				{ status: 403 },
 			)

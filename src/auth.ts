@@ -59,6 +59,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
 				if (!user || !user.password) return null
 				if (user.isBanned) return null
+				// A confirmed address is what makes password login trustworthy:
+				// without it anyone could register somebody else's mail address
+				// and take over the account once it was proven. Re-sending the
+				// mail is available from the login page.
+				if (!user.emailVerified) return null
 				// A soft-deleted account keeps its row and its history, but it
 				// is not a usable account: refuse before the password is even
 				// compared so a deleted user cannot learn anything from timing.

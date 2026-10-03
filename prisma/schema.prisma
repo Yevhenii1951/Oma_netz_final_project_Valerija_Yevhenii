@@ -26,6 +26,29 @@ model Account {
   @@unique([provider, providerAccountId])
 }
 
+enum AuthTokenPurpose {
+  VERIFY_EMAIL
+  RESET_PASSWORD
+}
+
+/// One-shot token used for email verification and password reset.
+///
+/// The plaintext token only ever exists in the mail; the database holds its
+/// SHA-256 hash, so a leaked table cannot be turned into working links.
+model AuthToken {
+  id        String           @id @default(cuid())
+  userId    String
+  purpose   AuthTokenPurpose
+  tokenHash String           @unique
+  expiresAt DateTime
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Issue-time cleanup walks this; the lookup by hash uses the unique index.
+  @@index([userId, purpose])
+  @@map("auth_tokens")
+}
+
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -85,6 +108,7 @@ model User {
   ratingsReceived     Rating[]          @relation("RatingsReceived")
   redemptions         Redemption[]
   sentRequests        Request[]         @relation("SeniorRequests")
+  authTokens          AuthToken[]
 
   // Admin queues filter on role + helperStatus and sort by createdAt.
   @@index([role, helperStatus, createdAt])
