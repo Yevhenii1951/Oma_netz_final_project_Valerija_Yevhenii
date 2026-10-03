@@ -1,6 +1,5 @@
 import { checkToken, isWellFormedToken } from '@/lib/auth-token'
-import { appUrl, findByToken } from '@/lib/auth-token-service'
-import { prisma } from '@/lib/prisma'
+import { appUrl, findByToken, spendToken } from '@/lib/auth-token-service'
 import { NextResponse, type NextRequest } from 'next/server'
 
 /**
@@ -23,30 +22,27 @@ export async function GET(req: NextRequest) {
 	try {
 		const stored = await findByToken(token)
 
-		if (!checkToken(stored).ok) {
+		if (!stored || !checkToken(stored).ok) {
 			return NextResponse.redirect(appUrl('/email-bestaetigt?status=invalid'))
 		}
 
 		// A soft-deleted account keeps its row, so a verification link mailed
 		// before the deactivation could still arrive afterwards. Refusing here
 		// keeps that link from quietly resurrecting a closed account.
-		if (stored!.user.deletedAt) {
+		if (stored.user.deletedAt) {
 			return NextResponse.redirect(appUrl('/email-bestaetigt?status=deleted'))
 		}
 
-		// Delete and update in one transaction: two clicks racing on the same
-		// link must not both succeed.
-		await prisma.$transaction([
-			prisma.authToken.deleteMany({
-				where: { id: stored!.id, purpose: 'VERIFY_EMAIL' },
-			}),
-			prisma.user.update({
-				where: { id: stored!.userId },
+		const spent = await spendToken(stored, (tx) =>
+			tx.user.update({
+				where: { id: stored.userId },
 				data: { emailVerified: new Date() },
 			}),
-		])
+		)
 
-		return NextResponse.redirect(appUrl('/email-bestaetigt?status=ok'))
+		return NextResponse.redirect(
+			appUrl(`/email-bestaetigt?status=${spent ? 'ok' : 'invalid'}`),
+		)
 	} catch (err) {
 		console.error('[Auth/VerifyEmail]', err)
 		return NextResponse.redirect(appUrl('/email-bestaetigt?status=error'))

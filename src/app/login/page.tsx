@@ -172,9 +172,8 @@ function LoginForm() {
 									Passwort
 								</label>
 								<Link
-									href='/login'
+									href='/passwort-zurcksetzen'
 									className='text-xs text-[#8b5e3c] hover:text-[#6b4226] font-medium'
-									tabIndex={-1}
 								>
 									Passwort vergessen?
 								</Link>
