@@ -12,7 +12,7 @@ export default function ImpressumPage() {
 			<div className='max-w-3xl mx-auto'>
 				<div className='mb-6'>
 					<Link
-						href='/landing'
+						href='/'
 						aria-label='Zurück zur Landing Page'
 						className='inline-flex items-center gap-1.5 text-xs font-semibold text-[#3d2b1f] transition-opacity hover:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#3d2b1f] focus-visible:ring-offset-2 rounded'
 					>

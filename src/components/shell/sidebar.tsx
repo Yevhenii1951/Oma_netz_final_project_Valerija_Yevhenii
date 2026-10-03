@@ -33,7 +33,7 @@ export function Sidebar() {
 	return (
 		<aside className='hidden lg:flex flex-col w-64 min-h-screen bg-[#ffffff] border-r border-[#ddd0be] px-4 py-6 fixed left-0 top-0 z-40'>
 			{/* Logo */}
-			<Link href='/landing' className='flex items-center gap-2.5 px-2 mb-8'>
+			<Link href='/' className='flex items-center gap-2.5 px-2 mb-8'>
 				<div className='w-9 h-9 rounded-xl bg-[#f5ede0] flex items-center justify-center shadow-sm border border-[#ddd0be]'>
 					<span className='text-xl leading-none select-none'>👵</span>
 				</div>

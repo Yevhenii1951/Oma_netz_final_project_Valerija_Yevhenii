@@ -65,7 +65,7 @@ export function MobileHeader({
 		>
 			<div className='flex items-center gap-2'>
 				<Link
-					href='/landing'
+					href='/'
 					className='w-7 h-7 rounded-lg bg-[#f5ede0] flex items-center justify-center border border-[#ddd0be] hover:bg-[#ede3d4] transition-colors'
 				>
 					<span className='text-base leading-none select-none'>👵</span>
