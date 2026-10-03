@@ -1,4 +1,15 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
+
+/**
+ * Reached from a mail link with a token in the query. Nothing here is content
+ * worth indexing and the URL carries a one-shot secret, so it stays out of the
+ * index; the title still matters for the tab the mail link opens.
+ */
+export const metadata: Metadata = {
+	title: 'E-Mail-Bestätigung',
+	robots: { index: false, follow: false },
+}
 
 /**
  * Landing page for the verification link. It only reports what happened; it
