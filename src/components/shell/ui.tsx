@@ -1,5 +1,6 @@
 'use client'
 
+import { REQUEST_STATUS_LABELS } from '@/lib/request-status'
 import { cn } from '@/lib/utils'
 import { CATEGORIES } from '@/types'
 import { Icon } from '@iconify/react'
@@ -15,17 +16,14 @@ const statusColors = {
 	CANCELLED: 'bg-[#ede3d4] text-[#b09880]',
 }
 
-const statusLabels = {
-	OPEN: 'Offen',
-	IN_PROGRESS: 'In Bearbeitung',
-	DONE: 'Abgeschlossen',
-	CANCELLED: 'Abgebrochen',
-}
-
-export function StatusBadge({ status }: { status: keyof typeof statusColors }) {
+export function StatusBadge({
+	status,
+}: {
+	status: keyof typeof statusColors
+}) {
 	return (
 		<span className={cn('badge', statusColors[status])}>
-			{statusLabels[status]}
+			{REQUEST_STATUS_LABELS[status]}
 		</span>
 	)
 }

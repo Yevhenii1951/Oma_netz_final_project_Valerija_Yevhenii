@@ -12,6 +12,7 @@
 
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 
+import { cleanupFixtures } from './cleanup'
 import { prisma } from './client'
 
 const TAG = 'test:accept'
@@ -103,19 +104,10 @@ async function makeRequest() {
 	return { owner, helpers, request, offers }
 }
 
-async function cleanup() {
-	// Request.seniorId is RESTRICT, so the requests have to go before their
-	// owners. Deleting a request takes its offers and its chat with it.
-	await prisma.request.deleteMany({
-		where: { senior: { email: { contains: '@test.local' } } },
-	})
-	await prisma.user.deleteMany({ where: { email: { contains: '@test.local' } } })
-}
-
 describe('accepting an offer under concurrency', () => {
-	beforeEach(cleanup)
+	beforeEach(cleanupFixtures)
 	afterAll(async () => {
-		await cleanup()
+		await cleanupFixtures()
 		await prisma.$disconnect()
 	})
 
