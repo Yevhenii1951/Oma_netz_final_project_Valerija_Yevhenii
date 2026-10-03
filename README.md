@@ -279,14 +279,29 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ### Qualitätssicherung
 
 ```bash
-npm run check     # ESLint + TypeScript
-npm test          # Unit-Tests (Vitest)
-npm run build     # Produktions-Build
-npm run db:reset  # Datenbank leeren und neu beenden (Demo-Daten)
+npm run check              # ESLint + TypeScript + Unit-Tests
+npm test                   # Unit-Tests (Vitest, keine Datenbank nötig)
+npm run db:test:prepare    # Testdatenbank anlegen und migrieren (einmalig)
+npm run test:integration   # Integrationstests gegen eine echte Datenbank
+npm run build              # Produktions-Build
+npm run db:reset           # Datenbank leeren und neu beenden (Demo-Daten)
 ```
 
 `npm run build` enthält **keine** Datenbankmigration mehr. Migrationen laufen
 getrennt über `npm run db:migrate`.
+
+**Testdatenbank.** Die Integrationstests schreiben und löschen Zeilen, deshalb
+zeigen sie ausschließlich auf eine eigene Wegwerf-Datenbank:
+
+```bash
+# .env.test.local — nicht versioniert, steht in .gitignore
+TEST_DATABASE_URL="postgresql://oma_user:oma_password@localhost:5432/oma_netz_test"
+```
+
+Der Name der Datenbank **muss** auf `_test` enden. `tests/test-database.ts`
+bricht den Lauf ab, wenn dem nicht so ist, damit ein Tippfehler in der URL
+nicht die Entwicklungs- oder Produktionsdatenbank treffen kann. Auf CI legt
+`npm run db:test:prepare` die Testdatenbank neben der Migrationsdatenbank an.
 
 ---
 

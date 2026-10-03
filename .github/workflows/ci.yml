@@ -57,8 +57,21 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Unit tests
+        run: npm run test
+
       - name: Apply migrations against a real Postgres
         run: npm run db:migrate
+
+      - name: Create and migrate the test database
+        env:
+          TEST_DATABASE_URL: postgresql://oma:oma@localhost:5432/oma_netz_ci_test
+        run: npm run db:test:prepare
+
+      - name: Integration tests
+        env:
+          TEST_DATABASE_URL: postgresql://oma:oma@localhost:5432/oma_netz_ci_test
+        run: npm run test:integration
 
       - name: Build
         run: npm run build
