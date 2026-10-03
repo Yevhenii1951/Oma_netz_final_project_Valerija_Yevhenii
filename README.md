@@ -198,10 +198,11 @@
 
 ### Voraussetzungen
 
-- Node.js 18+
-- PostgreSQL (lokal oder [Neon.tech](https://neon.tech))
+- Node.js 20.9+ (Next.js 16 verlangt mindestens 20.9; CI nutzt 24)
+- PostgreSQL 15+ (lokal oder [Neon.tech](https://neon.tech))
 - [Pusher](https://pusher.com) Account (kostenloser Plan)
 - [Groq](https://groq.com) API-Key (kostenlos)
+- [Resend](https://resend.com) API-Key (kostenlos, nur für Passwort-Zurücksetzen)
 
 ### Installation
 
@@ -216,9 +217,10 @@ npm install
 # Umgebungsvariablen konfigurieren
 cp .env.example .env
 # → .env ausfüllen (siehe Tabelle unten)
+# → AUTH_SECRET erzeugen: npx auth secret
 
 # Datenbank migrieren + Demo-Daten laden
-npx prisma migrate deploy
+npm run db:migrate
 npm run seed
 
 # Entwicklungsserver starten
@@ -227,7 +229,13 @@ npm run dev
 
 Die App läuft auf [http://localhost:3000](http://localhost:3000).
 
+Pusher und Groq sind optional: ohne gültige Zugangsdaten laufen Echtzeit-Chat
+und KI-Assistent nicht, der Rest der App funktioniert normal weiter.
+
 ### Demo-Zugänge
+
+Alle Demo-Konten haben das Passwort `123123nfnf`. **Nicht in einer echten
+Umgebung verwenden** — `npm run seed` legt genau diese Zugangsdaten an.
 
 | Rolle | E-Mail | Passwort |
 |-------|--------|----------|
@@ -237,26 +245,47 @@ Die App läuft auf [http://localhost:3000](http://localhost:3000).
 
 ### Umgebungsvariablen
 
+Vollständige Liste mit Erklärungen steht in `.env.example`.
+
 ```env
-# Datenbank
-DATABASE_URL=postgresql://user:password@host:5432/oma-netz
+# Datenbank — DIRECT_URL wird von Prisma für Migrationen gebraucht
+DATABASE_URL=postgresql://user:password@host:5432/oma_netz
+DIRECT_URL=postgresql://user:password@host:5432/oma_netz
 
 # NextAuth
-AUTH_SECRET=your-secret
+AUTH_SECRET=your-secret-min-32-chars
 AUTH_URL=http://localhost:3000
 
-# Pusher (Echtzeit)
+# Pusher (Echtzeit, optional)
 PUSHER_APP_ID=xxxx
 PUSHER_SECRET=xxxx
 NEXT_PUBLIC_PUSHER_KEY=xxxx
 NEXT_PUBLIC_PUSHER_CLUSTER=eu
 
-# Groq (KI-Assistent)
+# Groq (KI-Assistent, optional)
 GROQ_API_KEY=gsk_xxxx
+
+# Resend (Passwort-Zurücksetzen, optional)
+RESEND_API_KEY=re_xxxx
+RESEND_FROM_EMAIL=noreply@oma-netz.de
+
+# Support
+SUPPORT_EMAIL=support@oma-netz.de
 
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
+
+### Qualitätssicherung
+
+```bash
+npm run check   # ESLint + TypeScript
+npm test        # Unit-Tests (Vitest)
+npm run build   # Produktions-Build
+```
+
+`npm run build` enthält **keine** Datenbankmigration mehr. Migrationen laufen
+getrennt über `npm run db:migrate`.
 
 ---
 
