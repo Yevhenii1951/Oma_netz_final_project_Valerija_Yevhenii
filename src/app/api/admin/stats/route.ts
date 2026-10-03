@@ -20,9 +20,9 @@ export async function GET() {
 			recentRequests,
 			topHelpers,
 		] = await Promise.all([
-			prisma.user.count(),
-			prisma.user.count({ where: { role: 'HELPER' } }),
-			prisma.user.count({ where: { role: 'SENIOR' } }),
+			prisma.user.count({ where: { deletedAt: null } }),
+			prisma.user.count({ where: { role: 'HELPER', deletedAt: null } }),
+			prisma.user.count({ where: { role: 'SENIOR', deletedAt: null } }),
 			prisma.request.count(),
 			prisma.request.count({ where: { status: 'OPEN' } }),
 			prisma.request.count({ where: { status: 'DONE' } }),
@@ -33,7 +33,7 @@ export async function GET() {
 				include: { senior: { select: { id: true, name: true } } },
 			}),
 			prisma.user.findMany({
-				where: { role: 'HELPER', helpCount: { gt: 0 } },
+				where: { role: 'HELPER', helpCount: { gt: 0 }, deletedAt: null },
 				orderBy: [{ helpCount: 'desc' }, { ratingAvg: 'desc' }],
 				take: 5,
 				select: {

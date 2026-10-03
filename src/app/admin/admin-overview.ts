@@ -38,14 +38,16 @@ export async function getAdminOverview(): Promise<AdminOverview> {
 		activityHelpers,
 		activityRedemptions,
 	] = await Promise.all([
-		prisma.user.count(),
+		prisma.user.count({ where: { deletedAt: null } }),
 		prisma.request.count(),
 		prisma.offer.count(),
 		prisma.rating.count(),
 		prisma.request.count({ where: { status: 'OPEN' } }),
 		prisma.request.count({ where: { status: 'DONE' } }),
-		prisma.user.count({ where: { role: 'HELPER', helperStatus: 'PENDING_REVIEW' } }),
-		prisma.user.count({ where: { role: 'HELPER' } }),
+		prisma.user.count({
+			where: { role: 'HELPER', helperStatus: 'PENDING_REVIEW', deletedAt: null },
+		}),
+		prisma.user.count({ where: { role: 'HELPER', deletedAt: null } }),
 		prisma.redemption.count({ where: { status: 'pending' } }),
 		prisma.request.findMany({
 			orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
@@ -62,7 +64,7 @@ export async function getAdminOverview(): Promise<AdminOverview> {
 			},
 		}),
 		prisma.user.findMany({
-			where: { role: 'HELPER', helperStatus: 'PENDING_REVIEW' },
+			where: { role: 'HELPER', helperStatus: 'PENDING_REVIEW', deletedAt: null },
 			orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
 			take: PER_SOURCE,
 			select: { id: true, name: true, email: true, createdAt: true },

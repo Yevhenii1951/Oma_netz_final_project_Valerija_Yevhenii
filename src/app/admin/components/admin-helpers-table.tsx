@@ -171,7 +171,7 @@ export function AdminHelpersTable({
 									) : (
 										<Trash2 size={11} />
 									)}
-									Löschen
+									Deaktivieren
 								</button>
 							</div>
 						</td>

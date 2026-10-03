@@ -129,6 +129,7 @@ export function buildPendingQuery({
 		where: {
 			role: 'HELPER',
 			helperStatus: 'PENDING_REVIEW',
+			deletedAt: null,
 			...(term.length > 0 && {
 				OR: [
 					{ name: insensitive(term) },
@@ -156,6 +157,7 @@ export function buildHelperQuery({
 	return {
 		where: {
 			role: 'HELPER',
+			deletedAt: null,
 			...(status !== 'ALL' && {
 				helperStatus: status as HelperStatus,
 			}),
@@ -183,6 +185,7 @@ export function buildSeniorQuery({
 	return {
 		where: {
 			role: { in: ['SENIOR', 'RELATIVE'] },
+			deletedAt: null,
 			...(status === 'ACTIVE' && { isBanned: false }),
 			...(status === 'BANNED' && { isBanned: true }),
 			...(term.length > 0 && {
