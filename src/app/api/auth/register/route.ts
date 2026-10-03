@@ -1,3 +1,4 @@
+import { sendVerificationMail } from '@/lib/auth-token-service'
 import { clientIp, rateLimit } from '@/lib/rate-limit'
 import { prisma } from '@/lib/prisma'
 import type { Role } from '@/types'
@@ -106,8 +107,21 @@ export async function POST(req: NextRequest) {
 			})
 		}
 
+		// The account exists but cannot sign in until the address is confirmed.
+		// A failure to send must not undo the registration — the address can be
+		// confirmed later from the login page.
+		await sendVerificationMail({ id: user.id, email: user.email, name: user.name }).catch(
+			(err: unknown) => {
+				console.error('[Register/VerificationMail]', err)
+			},
+		)
+
 		return NextResponse.json(
-			{ data: user, message: 'Registrierung erfolgreich!' },
+			{
+				data: user,
+				message:
+					'Registrierung erfolgreich! Bitte prüfe dein Postfach und bestätige deine E-Mail-Adresse.',
+			},
 			{ status: 201 },
 		)
 	} catch (err) {

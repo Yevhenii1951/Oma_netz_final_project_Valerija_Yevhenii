@@ -316,6 +316,9 @@ async function main() {
 	console.log('🌱 Seeding database…')
 
 	const password = await hash(seedPassword, 12)
+	// Demo accounts stand in for members who already confirmed their address:
+	// sign-in now requires a verified e-mail, so the seed has to say so.
+	const emailVerified = new Date()
 
 	// Admin
 	const admin = await prisma.user.upsert({
@@ -325,6 +328,7 @@ async function main() {
 			role: 'ADMIN',
 			isBanned: false,
 			password,
+			emailVerified,
 		},
 		create: {
 			email: adminEmail,
@@ -332,6 +336,7 @@ async function main() {
 			password: password,
 			role: 'ADMIN',
 			points: 0,
+			emailVerified,
 		},
 	})
 	console.log(`✓ Admin: ${admin.email}`)
@@ -346,11 +351,13 @@ async function main() {
 					role: 'SENIOR',
 					isBanned: false,
 					password,
+					emailVerified,
 				},
 				create: {
 					...s,
 					password: password,
 					role: 'SENIOR',
+					emailVerified,
 				},
 			}),
 		),
@@ -367,6 +374,7 @@ async function main() {
 					role: 'HELPER',
 					helperStatus: 'APPROVED',
 					isBanned: false,
+					emailVerified,
 					helpCount: 8 + index,
 					points: 40 + index * 10,
 					ratingAvg: 4.2 + index * 0.1,
@@ -376,6 +384,7 @@ async function main() {
 					...h,
 					password: password,
 					role: 'HELPER',
+					emailVerified,
 					helperStatus: 'APPROVED',
 					helpCount: 8 + index,
 					points: 40 + index * 10,

@@ -202,7 +202,7 @@
 - PostgreSQL 15+ (lokal oder [Neon.tech](https://neon.tech))
 - [Pusher](https://pusher.com) Account (kostenloser Plan)
 - [Groq](https://groq.com) API-Key (kostenlos)
-- [Resend](https://resend.com) API-Key (kostenlos, nur für Passwort-Zurücksetzen)
+- kein Mail-Provider nötig — siehe [E-Mail-Versand](#-e-mail-versand)
 
 ### Installation
 
@@ -243,9 +243,25 @@ Umgebung verwenden** — `npm run seed` legt genau diese Zugangsdaten an.
 | 👴 Senior | `hildegard@example.com` | `123123nfnf` |
 | 🦸 Helfer | `lena@example.com` | `123123nfnf` |
 
+### ✉️ E-Mail-Versand
+
+**Aktuell ist kein Mail-Provider angebunden.** Die Bestätigungsmails werden
+stattdessen in das Server-Log geschrieben (`[mail:log] to=… subject=…`) — der
+Link steht dort als Klartext. Das reicht, um den Ablauf lokal und in den
+Deployment-Logs zu verfolgen, es wird aber **nichts zugestellt**.
+
+Für echten Versand genügt es, `MailSender` in `src/lib/email-sender.ts` zu
+implementieren und in `setSender()` zu registrieren; die Aufrufer und Routen
+brauchen keine Änderung. Der Token-Aufbau (`src/lib/auth-token.ts`) ist davon
+unabhängig: die Datenbank speichert nur den SHA-256-Hash des Tokens, der
+Klartext-Token existiert ausschließlich in der Mail.
+
 ### Umgebungsvariablen
 
 Vollständige Liste mit Erklärungen steht in `.env.example`.
+
+`NEXT_PUBLIC_APP_URL` wird für die Links in den Mails verwendet und muss der
+öffentlich erreichbaren Adresse entsprechen.
 
 ```env
 # Datenbank — DIRECT_URL wird von Prisma für Migrationen gebraucht
@@ -265,9 +281,6 @@ NEXT_PUBLIC_PUSHER_CLUSTER=eu
 # Groq (KI-Assistent, optional)
 GROQ_API_KEY=gsk_xxxx
 
-# Resend (Passwort-Zurücksetzen, optional)
-RESEND_API_KEY=re_xxxx
-RESEND_FROM_EMAIL=noreply@oma-netz.de
 
 # Support
 SUPPORT_EMAIL=support@oma-netz.de
@@ -362,6 +375,8 @@ User ──┬── Request ──── Offer ──── Rating
 |----------|----------|-------------|
 | `/api/auth/register` | POST | Benutzerregistrierung |
 | `/api/auth/[...nextauth]` | GET, POST | NextAuth-Authentifizierung |
+| `/api/auth/verify-email` | GET | E-Mail-Adresse bestätigen (Link aus der Mail) |
+| `/api/auth/resend-verification` | POST | Bestätigungsmail erneut senden |
 | `/api/requests` | GET, POST | Hilfeanfragen (Liste / Erstellen) |
 | `/api/requests/[id]` | GET, PATCH, DELETE | Einzelne Anfrage |
 | `/api/offers` | POST | Angebot erstellen |
