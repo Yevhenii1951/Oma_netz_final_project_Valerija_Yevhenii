@@ -83,6 +83,9 @@ model User {
   redemptions         Redemption[]
   sentRequests        Request[]         @relation("SeniorRequests")
 
+  // Admin queues filter on role + helperStatus and sort by createdAt.
+  @@index([role, helperStatus, createdAt])
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -106,6 +109,9 @@ model Request {
   rating      Rating?
   senior      User            @relation("SeniorRequests", fields: [seniorId], references: [id])
 
+  // Backs the list and map queries: filter by status, newest first.
+  @@index([status, createdAt(sort: Desc)])
+  @@index([seniorId, createdAt(sort: Desc)])
   @@map("requests")
 }
 
@@ -120,6 +126,9 @@ model Offer {
   request   Request     @relation(fields: [requestId], references: [id], onDelete: Cascade)
 
   @@unique([requestId, helperId])
+  // "which offers are still open on this request" and "my offers"
+  @@index([requestId, status])
+  @@index([helperId, createdAt(sort: Desc)])
   @@map("offers")
 }
 
@@ -142,8 +151,10 @@ model Message {
   chatId    String
   senderId  String
   chat      Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  sender    User      @relation(fields: [senderId], references: [id])
+sender    User     @relation(fields: [senderId], references: [id])
 
+  // Chat history is always "one chat, oldest first".
+  @@index([chatId, createdAt])
   @@map("messages")
 }
 
@@ -159,6 +170,8 @@ model Rating {
   helper    User     @relation("RatingsReceived", fields: [helperId], references: [id])
   request   Request  @relation(fields: [requestId], references: [id])
 
+  @@index([helperId])
+  @@index([authorId])
   @@map("ratings")
 }
 
@@ -174,6 +187,7 @@ model Reward {
   imageUrl    String?
   redemptions Redemption[]
 
+  @@index([isActive])
   @@map("rewards")
 }
 
@@ -186,6 +200,10 @@ model Redemption {
   reward    Reward   @relation(fields: [rewardId], references: [id])
   user      User     @relation(fields: [userId], references: [id])
 
+  // Enforced by the database, not by a findFirst in the route: two parallel
+  // requests both pass a read check and would otherwise redeem twice.
+  @@unique([userId, rewardId])
+  @@index([userId])
   @@map("redemptions")
 }
 
@@ -199,6 +217,9 @@ model Notification {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Notification list (newest first) and the unread-count query.
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, read])
   @@map("notifications")
 }
 
