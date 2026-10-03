@@ -1,4 +1,15 @@
+import type { Metadata } from 'next'
+
 import { RequestLink, SetPassword } from './reset-forms'
+
+/**
+ * Reached from a mail link with a one-shot token in the query. Not content, and
+ * the URL carries a secret, so it stays out of the index.
+ */
+export const metadata: Metadata = {
+	title: 'Passwort zurücksetzen',
+	robots: { index: false, follow: false },
+}
 
 /**
  * Two states in one page, because the reset link brings the user back here:

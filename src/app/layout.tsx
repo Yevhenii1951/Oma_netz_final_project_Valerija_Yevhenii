@@ -17,6 +17,11 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
+	// Without this, every relative URL Next.js builds (sitemap entries, Open
+	// Graph images, canonical) resolves against localhost. Same variable the
+	// mails use, so the address in a mail and the one in a search result cannot
+	// drift apart.
+	metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
 	title: {
 		default: 'OMA-NETZ Kassel',
 		template: '%s | OMA-NETZ Kassel',
