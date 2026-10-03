@@ -105,11 +105,12 @@ export default function NewRequestPage() {
 					</div>
 
 					<div>
-						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="kurze-beschreibung">
 							<FileText className='inline w-4 h-4 mr-1 text-[#b09880]' />
 							Kurze Beschreibung <span className='text-[#8b5e3c]'>*</span>
 						</label>
 						<input
+							id="kurze-beschreibung"
 							type='text'
 							className='input-field'
 							placeholder='z.B. Begleitung zum Arzt am Dienstag'
@@ -121,11 +122,12 @@ export default function NewRequestPage() {
 					</div>
 
 					<div>
-						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="detaillierte-beschreibung">
 							<AlignLeft className='inline w-4 h-4 mr-1 text-[#b09880]' />
 							Detaillierte Beschreibung
 						</label>
 						<textarea
+							id="detaillierte-beschreibung"
 							className='input-field resize-none'
 							rows={3}
 							placeholder='Weitere Details (optional)'
@@ -137,11 +139,12 @@ export default function NewRequestPage() {
 
 					<div className='grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3'>
 						<div>
-							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="stra-e-amp-hausnummer">
 								<MapPin className='inline w-4 h-4 mr-1 text-[#b09880]' />
 								Straße &amp; Hausnummer
 							</label>
 							<input
+								id="stra-e-amp-hausnummer"
 								type='text'
 								className='input-field'
 								placeholder='Königsplatz 1'
@@ -150,10 +153,11 @@ export default function NewRequestPage() {
 							/>
 						</div>
 						<div>
-							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="plz">
 								PLZ
 							</label>
 							<input
+								id="plz"
 								type='text'
 								className='input-field sm:w-24'
 								placeholder='34117'

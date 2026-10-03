@@ -278,10 +278,14 @@ export function OfferModal({
 						<h3 className='text-lg font-semibold text-[#3d2b1f] mb-1'>
 							{isSeniorOrRelative ? 'Interesse bekunden' : 'Hilfe anbieten'}
 						</h3>
-						<p className='text-sm text-[#7a6050] mb-4'>
+						<label
+							htmlFor='angebot-nachricht'
+							className='text-sm text-[#7a6050] mb-4 block'
+						>
 							Schreiben Sie eine kurze Nachricht (optional)
-						</p>
+						</label>
 						<textarea
+							id='angebot-nachricht'
 							className='input-field resize-none mb-4'
 							rows={3}
 							placeholder={

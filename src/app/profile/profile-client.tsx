@@ -104,11 +104,12 @@ export default function ProfileClient({ user }: Props) {
 					className='card p-5 space-y-4'
 				>
 					<div>
-						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="name">
 							<User className='inline w-4 h-4 mr-1 text-[#b09880]' />
 							Name
 						</label>
 						<input
+							id="name"
 							type='text'
 							className='input-field'
 							value={form.name}
@@ -117,11 +118,12 @@ export default function ProfileClient({ user }: Props) {
 					</div>
 
 					<div>
-						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="telefon">
 							<Phone className='inline w-4 h-4 mr-1 text-[#b09880]' />
 							Telefon
 						</label>
 						<input
+							id="telefon"
 							type='tel'
 							className='input-field'
 							placeholder='+49 561 …'
@@ -131,11 +133,12 @@ export default function ProfileClient({ user }: Props) {
 					</div>
 
 					<div>
-						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+						<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="uber-mich">
 							<FileText className='inline w-4 h-4 mr-1 text-[#b09880]' />
 							Über mich
 						</label>
 						<textarea
+							id="uber-mich"
 							className='input-field resize-none'
 							rows={3}
 							placeholder='Kurze Vorstellung…'
@@ -146,11 +149,12 @@ export default function ProfileClient({ user }: Props) {
 
 					<div className='grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-3'>
 						<div>
-							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="adresse">
 								<MapPin className='inline w-4 h-4 mr-1 text-[#b09880]' />
 								Adresse
 							</label>
 							<input
+								id="adresse"
 								type='text'
 								className='input-field'
 								placeholder='Königsplatz 1'
@@ -159,10 +163,11 @@ export default function ProfileClient({ user }: Props) {
 							/>
 						</div>
 						<div>
-							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5'>
+							<label className='block text-sm font-semibold text-[#3d2b1f] mb-1.5' htmlFor="plz">
 								PLZ
 							</label>
 							<input
+								id="plz"
 								type='text'
 								className='input-field sm:w-24'
 								placeholder='34117'

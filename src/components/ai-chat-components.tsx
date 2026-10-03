@@ -230,6 +230,7 @@ export function ChatInput({
 				</button>
 			)}
 			<input
+				aria-label='Nachricht an den Assistenten'
 				value={input}
 				onChange={e => onInputChange(e.target.value)}
 				placeholder={isListening ? '🎙 Ich höre zu…' : 'Nachricht eingeben...'}

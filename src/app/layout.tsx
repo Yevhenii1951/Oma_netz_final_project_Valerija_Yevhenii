@@ -34,6 +34,18 @@ export const metadata: Metadata = {
 	authors: [{ name: 'OMA-NETZ Kassel' }],
 	creator: 'OMA-NETZ Kassel',
 	manifest: '/manifest.json',
+	appleWebApp: {
+		capable: true,
+		title: 'OMA-NETZ',
+		statusBarStyle: 'default',
+	},
+	icons: {
+		icon: [
+			{ url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+			{ url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+		],
+		apple: [{ url: '/apple-touch-icon.png', sizes: '180x180' }],
+	},
 	openGraph: {
 		type: 'website',
 		locale: 'de_DE',
@@ -48,7 +60,6 @@ export const viewport: Viewport = {
 	themeColor: '#7a9e7e',
 	width: 'device-width',
 	initialScale: 1,
-	maximumScale: 1,
 }
 
 export default function RootLayout({
