@@ -1,8 +1,11 @@
+import { clientIp, rateLimit } from '@/lib/rate-limit'
 import { prisma } from '@/lib/prisma'
 import type { Role } from '@/types'
 import bcrypt from 'bcryptjs'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+
+const REGISTRATIONS_PER_HOUR = 5
 
 const registerSchema = z.object({
 	name: z.string().min(2, 'Name ist zu kurz'),
@@ -21,6 +24,22 @@ const registerSchema = z.object({
 
 export async function POST(req: NextRequest) {
 	try {
+		// Open registration is by design, but each accepted call costs a
+		// bcrypt hash and writes a user plus admin notifications.
+		const limit = rateLimit(
+			`register:${clientIp(req.headers)}`,
+			REGISTRATIONS_PER_HOUR,
+			60 * 60 * 1000,
+		)
+		if (!limit.ok) {
+			return NextResponse.json(
+				{
+					error: `Zu viele Registrierungsversuche. Bitte in ${limit.retryAfterSeconds} Sekunden erneut versuchen.`,
+				},
+				{ status: 429 },
+			)
+		}
+
 		const body = await req.json()
 		const data = registerSchema.parse(body)
 

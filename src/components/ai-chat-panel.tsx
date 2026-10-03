@@ -8,6 +8,7 @@ import {
 	MessagesList,
 	QuickSuggestions,
 } from '@/components/ai-chat-components'
+import { AI_MAX_TURNS } from '@/lib/ai-limits'
 import { motion } from 'framer-motion'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -15,6 +16,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface AiChatPanelProps {
 	onClose: () => void
+}
+
+/** Reads the server's short error text, falling back to a generic message. */
+async function errorText(res: Response): Promise<string> {
+	try {
+		const text = await res.text()
+		return text.slice(0, 200)
+	} catch {
+		return 'Es tut mir leid, ich bin gerade nicht erreichbar. Bitte versuchen Sie es später.'
+	}
 }
 
 export function AiChatPanel({ onClose }: AiChatPanelProps) {
@@ -75,11 +86,15 @@ export function AiChatPanel({ onClose }: AiChatPanelProps) {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
-						messages: history.map(({ role, content }) => ({ role, content })),
+						// Trimmed to the server limit so a long conversation is never
+						// rejected for being too long.
+						messages: history
+							.slice(-AI_MAX_TURNS)
+							.map(({ role, content }) => ({ role, content })),
 					}),
 				})
 
-				if (!res.ok || !res.body) throw new Error('Fehler')
+				if (!res.ok || !res.body) throw new Error(await errorText(res))
 
 				const reader = res.body.getReader()
 				const decoder = new TextDecoder()
@@ -95,19 +110,20 @@ export function AiChatPanel({ onClose }: AiChatPanelProps) {
 						),
 					)
 				}
-			} catch {
-				setMessages(prev =>
-					prev.map(m =>
-						m.id === assistantId
-							? {
-									...m,
-									content:
-										'Es tut mir leid, ich bin gerade nicht erreichbar. Bitte versuchen Sie es später.',
-								}
-							: m,
-					),
-				)
-			} finally {
+} catch (err) {
+			// The server sends a short German reason (rate limit, validation,
+			// unavailable). Showing it beats a generic "not reachable" for the
+			// cases the user can actually act on.
+			const fallback =
+				err instanceof Error && err.message.trim()
+					? err.message.trim()
+					: 'Es tut mir leid, ich bin gerade nicht erreichbar. Bitte versuchen Sie es später.'
+			setMessages(prev =>
+				prev.map(m =>
+					m.id === assistantId ? { ...m, content: fallback } : m,
+				),
+			)
+		} finally {
 				setIsLoading(false)
 			}
 		},

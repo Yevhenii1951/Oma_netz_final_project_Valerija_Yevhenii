@@ -1,9 +1,13 @@
 import { prisma } from '@/lib/prisma'
+import { rateLimit } from '@/lib/rate-limit'
 import type { Role } from '@/types'
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import bcrypt from 'bcryptjs'
 import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+
+/** Sign-in attempts allowed per email and per client IP. */
+const SIGN_IN_ATTEMPTS_PER_15_MIN = 10
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
 	adapter: PrismaAdapter(prisma),
@@ -28,11 +32,29 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 				email: { label: 'Email', type: 'email' },
 				password: { label: 'Passwort', type: 'password' },
 			},
-			async authorize(credentials) {
+			async authorize(credentials, request) {
 				if (!credentials?.email || !credentials?.password) return null
 
+				// Two buckets: per account (blocks password guessing on one
+				// account) and per IP (blocks spraying many accounts from one
+				// host). Both are needed — either alone leaves a path open.
+				const email = credentials.email as string
+				const ip = request?.headers?.get('x-forwarded-for')?.split(',')[0]
+				const forEmail = rateLimit(
+					`signin:email:${email.toLowerCase()}`,
+					SIGN_IN_ATTEMPTS_PER_15_MIN,
+					15 * 60 * 1000,
+				)
+				const forIp = ip
+					? rateLimit(`signin:ip:${ip.trim()}`, SIGN_IN_ATTEMPTS_PER_15_MIN * 4, 15 * 60 * 1000)
+					: { ok: true, retryAfterSeconds: 0 }
+				if (!forEmail.ok || !forIp.ok) {
+					console.warn('[auth] sign-in rate limit hit', { email, ip })
+					return null
+				}
+
 				const user = await prisma.user.findUnique({
-					where: { email: credentials.email as string },
+					where: { email },
 				})
 
 				if (!user || !user.password) return null
