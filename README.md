@@ -349,22 +349,23 @@ nicht die Entwicklungs- oder Produktionsdatenbank treffen kann. Auf CI legt
 │   ├── app/
 │   │   ├── api/               # REST-API-Endpoints
 │   │   ├── admin/             # Admin-Dashboard
-│   │   ├── landing/           # Marketing-Landingpage
+│   │   ├── page.tsx           # Marketing-Landingpage (ausgeliefert unter `/`)
+│   │   ├── landing/           # Bausteine der Landingpage + Redirect auf `/`
+│   │   ├── login/             # Anmeldung
+│   │   ├── register/          # Registrierung
 │   │   ├── requests/          # Hilfeanfragen (CRUD)
 │   │   ├── chat/              # Echtzeit-Chat
 │   │   ├── map/               # Kartenansicht
 │   │   ├── rewards/           # Belohnungen
-│   │   ├── profile/           # Benutzerprofil
-│   │   └── (auth)             # Anmeldung/Registrierung
+│   │   └── profile/           # Benutzerprofil
 │   ├── components/            # Wiederverwendbare UI
 │   ├── lib/                   # Hilfsfunktionen (Prisma, Pusher, Utils)
 │   ├── types/                 # TypeScript-Typdefinitionen
 │   ├── auth.ts                # NextAuth-Konfiguration
-│   └── middleware.ts          # Route-Schutz
+│   └── proxy.ts               # Route-Schutz
 ├── docs/                      # Dokumentation
 ├── .github/workflows/         # CI/CD
 ├── next.config.ts
-├── tailwind.config.ts
 └── tsconfig.json
 ```
 
@@ -390,6 +391,7 @@ User ──┬── Request ──── Offer ──── Rating
 |----------|----------|-------------|
 | `/api/auth/register` | POST | Benutzerregistrierung |
 | `/api/auth/[...nextauth]` | GET, POST | NextAuth-Authentifizierung |
+| `/api/auth/login-check` | POST | Vorprüfung der Zugangsdaten für die Anmeldemaske |
 | `/api/auth/verify-email` | GET | E-Mail-Adresse bestätigen (Link aus der Mail) |
 | `/api/auth/resend-verification` | POST | Bestätigungsmail erneut senden |
 | `/api/auth/forgot-password` | POST | Passwort-Reset-Link anfordern (3 Anfragen/Stunde pro IP) |
@@ -398,15 +400,18 @@ User ──┬── Request ──── Offer ──── Rating
 | `/api/requests/[id]` | GET, PATCH, DELETE | Einzelne Anfrage |
 | `/api/offers` | POST | Angebot erstellen |
 | `/api/offers/[id]/accept` | POST | Angebot annehmen |
-| `/api/offers/[id]/reject` | POST | Angebot ablehnen |
 | `/api/chat/[requestId]/messages` | GET, POST | Chat-Nachrichten |
 | `/api/notifications` | GET, PATCH | Benachrichtigungen |
+| `/api/notifications/[id]` | PATCH | Einzelne Benachrichtigung |
 | `/api/ratings` | POST | Bewertung abgeben |
 | `/api/rewards` | GET, POST | Belohnungen verwalten |
+| `/api/rewards/[id]` | PATCH | Einzelne Belohnung |
 | `/api/profile` | GET, PATCH | Benutzerprofil |
 | `/api/map` | GET | Karten-Daten |
 | `/api/ai/chat` | POST | KI-Assistent |
-| `/api/admin/*` | GET, PATCH | Admin-Funktionen |
+| `/api/admin/stats` | GET | Kennzahlen für das Admin-Dashboard |
+| `/api/admin/users/[id]` | PATCH, DELETE | Benutzer verwalten (PATCH = Sperre, DELETE = deaktivieren) |
+| `/api/admin/helpers/[id]` | PATCH | Helfer freigeben, sperren, Rolle ändern |
 
 ---
 

@@ -23,8 +23,14 @@
 # misc
 .DS_Store
 *.pem
+
+# Markdown: stray notes and AI transcripts are noise, but the project's own
+# documentation under docs/ has to survive a clone. List the exceptions
+# explicitly — a blanket *.md with only !README.md silently drops docs/.
 *.md
 !README.md
+!docs/
+!docs/**/*.md
 
 # debug
 npm-debug.log*
