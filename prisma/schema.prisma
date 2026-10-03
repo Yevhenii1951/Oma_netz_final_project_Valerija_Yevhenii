@@ -60,6 +60,9 @@ model User {
   lat                 Float?
   lng                 Float?
   isBanned            Boolean           @default(false)
+  // Soft delete: the row and everything referencing it are retained, but the
+  // account cannot sign in and is hidden from the admin tables.
+  deletedAt           DateTime?
   ratingAvg           Float             @default(0)
   helpCount           Int               @default(0)
   points              Int               @default(0)
@@ -85,6 +88,7 @@ model User {
 
   // Admin queues filter on role + helperStatus and sort by createdAt.
   @@index([role, helperStatus, createdAt])
+  @@index([deletedAt])
   @@index([createdAt])
   @@map("users")
 }

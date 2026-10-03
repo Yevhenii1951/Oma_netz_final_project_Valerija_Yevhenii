@@ -88,7 +88,12 @@ export async function PATCH(
 	}
 }
 
-// DELETE /api/admin/users/[id] — delete a user (minimal MVP)
+// DELETE /api/admin/users/[id] — soft delete a user
+//
+// The row is kept on purpose. A deleted helper still appears in the requests
+// and ratings they took part in, and the FKs on ratings are RESTRICT, so a hard
+// delete either destroys that history or fails outright. Clearing deletedAt
+// reverses it.
 export async function DELETE(
 	_req: NextRequest,
 	{ params }: { params: Promise<{ id: string }> },
@@ -101,7 +106,7 @@ export async function DELETE(
 
 		const target = await prisma.user.findUnique({
 			where: { id },
-			select: { id: true, role: true },
+			select: { id: true, role: true, deletedAt: true },
 		})
 
 		if (!target) {
@@ -125,20 +130,35 @@ export async function DELETE(
 			)
 		}
 
-		await prisma.user.delete({ where: { id } })
-
-		return NextResponse.json({ message: 'Nutzer wurde gelöscht.' })
-	} catch (err) {
-		const code = (err as { code?: string })?.code
-		if (code === 'P2003') {
-			return NextResponse.json(
-				{
-					error:
-						'Nutzer kann nicht gelöscht werden, da verknüpfte Daten existieren.',
-				},
-				{ status: 409 },
-			)
+		if (target.deletedAt) {
+			return NextResponse.json({ message: 'Nutzer ist bereits gelöscht.' })
 		}
+
+		await prisma.$transaction([
+			prisma.user.update({
+				where: { id },
+				data: { deletedAt: new Date() },
+				select: { id: true, name: true, email: true },
+			}),
+			// A JWT session survives a database write, so the tokens are dropped
+			// explicitly. The jwt callback also rejects the next request; this
+			// makes the revocation immediate rather than eventual.
+			prisma.session.deleteMany({ where: { userId: id } }),
+		])
+
+		await prisma.notification
+			.create({
+				data: {
+					userId: id,
+					title: 'Konto gelöscht',
+					body: 'Dein Konto wurde vom Admin deaktiviert. Deine Daten wurden nicht vernichtet.',
+					link: '/login',
+				},
+			})
+			.catch(() => null)
+
+		return NextResponse.json({ message: 'Nutzer wurde deaktiviert.' })
+	} catch (err) {
 		return logAndError('[Admin/Users DELETE]', err)
 	}
 }

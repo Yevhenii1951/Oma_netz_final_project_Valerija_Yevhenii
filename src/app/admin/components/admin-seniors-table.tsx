@@ -156,7 +156,7 @@ export function AdminSeniorsTable({
 									) : (
 										<Trash2 size={11} />
 									)}
-									Löschen
+									Deaktivieren
 								</button>
 							</div>
 						</td>

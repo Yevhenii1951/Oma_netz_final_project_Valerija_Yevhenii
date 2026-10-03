@@ -76,7 +76,7 @@ export function useAdminClientActions({
 
 	async function handleDeleteUser(id: string, userLabel: string) {
 		const confirmed = window.confirm(
-			`Nutzer "${userLabel}" wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.`,
+			`Nutzer "${userLabel}" deaktivieren? Das Konto wird abgemeldet und aus den Listen ausgeblendet. Die Daten bleiben erhalten.`,
 		)
 		if (!confirmed) return
 
@@ -87,13 +87,13 @@ export function useAdminClientActions({
 
 			if (res.ok) {
 				toast({
-					title: json?.message ?? 'Nutzer wurde gelöscht.',
+					title: json?.message ?? 'Nutzer wurde deaktiviert.',
 					variant: 'success',
 				})
 				router.refresh()
 			} else {
 				toast({
-					title: json?.error ?? 'Fehler beim Löschen',
+					title: json?.error ?? 'Fehler beim Deaktivieren',
 					variant: 'error',
 				})
 			}

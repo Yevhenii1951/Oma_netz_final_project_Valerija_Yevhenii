@@ -84,7 +84,7 @@ async function distinctStatuses(
 	if (model === 'user') {
 		const groups = await prisma.user.groupBy({
 			by: ['helperStatus'],
-			where: { role: 'HELPER' },
+			where: { role: 'HELPER', deletedAt: null },
 		})
 		return ['ALL', ...groups.map(g => g.helperStatus)]
 	}

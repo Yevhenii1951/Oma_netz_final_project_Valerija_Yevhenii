@@ -59,6 +59,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
 				if (!user || !user.password) return null
 				if (user.isBanned) return null
+				// A soft-deleted account keeps its row and its history, but it
+				// is not a usable account: refuse before the password is even
+				// compared so a deleted user cannot learn anything from timing.
+				if (user.deletedAt) return null
 
 				const isValid = await bcrypt.compare(
 					credentials.password as string,
@@ -91,11 +95,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 				).helperStatus
 			}
 			// Refresh isBanned + helperStatus from DB so admin changes take effect on next request
+			// Re-read on every request: this is what makes a ban, a soft delete
+			// or a helper approval take effect without waiting for the token to
+			// expire.
 			const fresh = await prisma.user.findUnique({
 				where: { id: token.id as string },
-				select: { isBanned: true, helperStatus: true },
+				select: { isBanned: true, helperStatus: true, deletedAt: true },
 			})
-			if (!fresh) return null
+			if (!fresh || fresh.deletedAt) return null
 			token.isBanned = fresh.isBanned
 			if (token.role === 'HELPER' && token.helperStatus !== 'APPROVED') {
 				token.helperStatus = fresh.helperStatus
