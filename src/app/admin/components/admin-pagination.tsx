@@ -1,8 +1,7 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface AdminPaginationProps {
-	currentRowsLength: number
-	pageStart: number
+	total: number
 	pageSize: number
 	page: number
 	totalPages: number
@@ -11,8 +10,7 @@ interface AdminPaginationProps {
 }
 
 export function AdminPagination({
-	currentRowsLength,
-	pageStart,
+	total,
 	pageSize,
 	page,
 	totalPages,
@@ -22,9 +20,8 @@ export function AdminPagination({
 	return (
 		<div className='p-4 border-t border-[#f0e8dc] flex flex-col sm:flex-row gap-2.5 sm:items-center sm:justify-between'>
 			<p className='text-xs text-[#7a6050]'>
-				Zeige {currentRowsLength === 0 ? 0 : pageStart + 1} -{' '}
-				{Math.min(pageStart + pageSize, currentRowsLength)} von{' '}
-				{currentRowsLength}
+				Zeige {total === 0 ? 0 : (page - 1) * pageSize + 1} -{' '}
+				{Math.min(page * pageSize, total)} von {total}
 			</p>
 			<div className='flex items-center gap-1.5'>
 				<button

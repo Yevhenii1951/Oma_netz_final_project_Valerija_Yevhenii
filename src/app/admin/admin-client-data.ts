@@ -18,7 +18,7 @@ import {
 	type LucideIcon,
 } from 'lucide-react'
 
-interface AdminStats {
+export interface AdminStats {
 	userCount: number
 	requestCount: number
 	offerCount: number
@@ -28,14 +28,14 @@ interface AdminStats {
 	pendingHelpers: number
 }
 
-interface PendingHelperRow {
+export interface PendingHelperRow {
 	id: string
 	name: string | null
 	email: string | null
 	createdAt: string
 }
 
-interface RequestRow {
+export interface RequestRow {
 	id: string
 	title: string
 	category: string
@@ -46,7 +46,7 @@ interface RequestRow {
 	_count: { offers: number }
 }
 
-interface RedemptionRow {
+export interface RedemptionRow {
 	id: string
 	createdAt: string
 	status: string
