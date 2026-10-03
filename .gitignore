@@ -36,6 +36,9 @@ yarn-error.log*
 .env
 !.env.example
 
+# local test database URL
+.env.test.local
+
 # vercel
 .vercel
 
