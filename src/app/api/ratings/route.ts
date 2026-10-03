@@ -1,6 +1,5 @@
 import { logAndError, requireAuth } from '@/lib/api-helpers'
 import { prisma } from '@/lib/prisma'
-import { POINTS_PER_HELP } from '@/lib/utils'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 
@@ -57,9 +56,8 @@ export async function POST(req: NextRequest) {
 				{ status: 400 },
 			)
 
-		// Create rating and update helper stats in one transaction
+		// Create the rating and refresh the helper's average, in one transaction
 		await prisma.$transaction(async tx => {
-			// Create rating record
 			await tx.rating.create({
 				data: {
 					requestId: data.requestId,
@@ -70,23 +68,20 @@ export async function POST(req: NextRequest) {
 				},
 			})
 
-			// Recalculate helper's average rating
-			const allRatings = await tx.rating.findMany({
+			// Averaged in SQL rather than by loading every row into memory, and
+			// stored unrounded: rounding to one decimal here meant the number the
+			// residents saw was not the mean of the scores they gave.
+			const aggregate = await tx.rating.aggregate({
 				where: { helperId },
-				select: { score: true },
+				_avg: { score: true },
 			})
 
-			const avgRating =
-				allRatings.reduce((sum, r) => sum + r.score, 0) / allRatings.length
-
-			// Update helper: rating, helpCount, points
+			// helpCount and the points are awarded when the request is completed,
+			// not here, so a rating can no longer change how often a helper is
+			// counted as having helped.
 			await tx.user.update({
 				where: { id: helperId },
-				data: {
-					ratingAvg: Math.round(avgRating * 10) / 10,
-					helpCount: { increment: 1 },
-					points: { increment: POINTS_PER_HELP },
-				},
+				data: { ratingAvg: aggregate._avg.score ?? 0 },
 			})
 		})
 
@@ -97,7 +92,7 @@ export async function POST(req: NextRequest) {
 				data: {
 					userId: helperId,
 					title: `${stars} Neue Bewertung erhalten!`,
-					body: `${session.user.name ?? 'Jemand'} hat dir ${data.score} Stern${data.score !== 1 ? 'e' : ''} gegeben.${data.comment?.trim() ? ` Feedback: "${data.comment.trim()}".` : ''} Du erhältst ${POINTS_PER_HELP} Punkte! 🎉`,
+					body: `${session.user.name ?? 'Jemand'} hat dir ${data.score} Stern${data.score !== 1 ? 'e' : ''} gegeben.${data.comment?.trim() ? ` Feedback: "${data.comment.trim()}".` : ''}`,
 					link: `/requests/${data.requestId}`,
 				},
 			})

@@ -121,14 +121,23 @@ export default function RequestDetailClient({
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ status: 'DONE' }),
 			})
-			if (!res.ok) throw new Error('Fehler')
+			if (!res.ok) {
+				// The route refuses transitions the state machine forbids, and its
+				// message says which status it is actually in.
+				const body = (await res.json().catch(() => null)) as {
+					error?: string
+				} | null
+				throw new Error(body?.error ?? 'Fehler beim Abschliessen.')
+			}
 			toast({ title: '✅ Anfrage abgeschlossen', variant: 'success' })
 			setLocalRequest((prev: RequestDetails) => ({
 				...prev,
 				status: 'DONE' as const,
 			}))
 		} catch (err: unknown) {
-			setError(err instanceof Error ? err.message : String(err))
+			const msg = err instanceof Error ? err.message : String(err)
+			setError(msg)
+			toast({ title: 'Fehler', description: msg, variant: 'error' })
 		} finally {
 			setIsLoading(false)
 		}
