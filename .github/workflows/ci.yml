@@ -4,10 +4,40 @@ on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   quality-check:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: oma
+          POSTGRES_PASSWORD: oma
+          POSTGRES_DB: oma_netz_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U oma -d oma_netz_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://oma:oma@localhost:5432/oma_netz_ci
+      DIRECT_URL: postgresql://oma:oma@localhost:5432/oma_netz_ci
+      AUTH_SECRET: ci-only-secret-not-used-for-sign-in-000000
+      AUTH_URL: http://localhost:3000
+      # Placeholders: the app must boot with these and only degrade gracefully.
+      GROQ_API_KEY: your-groq-api-key
+      PUSHER_APP_ID: your-pusher-app-id
+      PUSHER_SECRET: your-pusher-secret
+      NEXT_PUBLIC_PUSHER_KEY: your-pusher-key
+      NEXT_PUBLIC_PUSHER_CLUSTER: eu
+      SUPPORT_EMAIL: support@oma-netz.de
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,12 +46,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Run ESLint
+      - name: Lint
         run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Apply migrations against a real Postgres
+        run: npm run db:migrate
 
       - name: Build
         run: npm run build
