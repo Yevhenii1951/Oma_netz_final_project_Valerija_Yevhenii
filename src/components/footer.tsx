@@ -27,7 +27,7 @@ export function Footer() {
 						<ul className='space-y-2 text-sm'>
 							<li>
 								<Link
-									href='/landing'
+									href='/'
 									className='text-emerald-200 hover:text-white transition-colors'
 								>
 									Startseite
